@@ -7,7 +7,7 @@ class Lapis:
         self.bot = bot
 
     @commands.command(pass_context=True, no_pm=True)
-    async def lapis(self, ctx, message):
+    async def lapis(self, ctx, message: str, *argv):
         image = Image.open('data/blak_template.jpg')
         draw = ImageDraw.Draw(image)
         # Dimensions for text box
@@ -16,6 +16,8 @@ class Lapis:
         # arbitrary beginning size; this will change if the message is too big
         fontSize = 100
         font = ImageFont.truetype('data/theboldfont.ttf', fontSize)
+        for word in argv:
+            message += ' ' + str(word)
         textSize = font.getsize(message)
         textWidth = textSize[0]
         textHeight = textSize[1]
@@ -59,10 +61,6 @@ class Lapis:
         numberOfLines = 0
         for line in lines:
             textWidth = font.getsize(line)[0]
-            # if numberOfLines > 0:
-            #     center = (int(image.size[0] / 2 - textWidth / 2), y + (font.getsize(message)[1]*numberOfLines) + 5)
-            # else:
-            #     center = (int(image.size[0] / 2 - textWidth / 2), y)
             center = (int(image.size[0] / 2 - textWidth / 2), y)
             draw.text(center, line, outline, font)
             font1 = ImageFont.truetype('data/theboldfont.ttf', fontSize-1)
