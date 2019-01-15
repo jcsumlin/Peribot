@@ -20,7 +20,7 @@ class Lapis:
         textWidth = textSize[0]
         textHeight = textSize[1]
         # our lines
-
+        lines = []
         if textWidth > boxWidth:
             words = message.split()
             isHeightGood = False
