@@ -1,6 +1,6 @@
 {
   "command-prefix": "!",
-  "token":"",
+  "token":"discord bot token",
   "reddit_client_id": "",
   "reddit_client_secret": "",
   "reddit_password": "",
