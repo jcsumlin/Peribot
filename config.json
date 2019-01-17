@@ -1,5 +1,5 @@
 {
-  "command-prefix": "",
+  "command-prefix": "!",
   "token":"",
   "reddit_client_id": "",
   "reddit_client_secret": "",
