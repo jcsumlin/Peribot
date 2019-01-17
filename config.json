@@ -1,8 +1,8 @@
 {
-  "command-prefix": "!",
-  "token":"discord bot token keep secret!",
-  "reddit_client_id": "for 269 command",
-  "reddit_client_secret": "for 269 command",
-  "reddit_password": "for 269 command",
-  "reddit_username": "for 269 command"
+  "command-prefix": "",
+  "token":"",
+  "reddit_client_id": "",
+  "reddit_client_secret": "",
+  "reddit_password": "",
+  "reddit_username": ""
 }
