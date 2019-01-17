@@ -5,7 +5,7 @@ from loguru import logger
 import glob, os
 import time
 import re
-#initiate logger 
+#initiate logger test
 logger.add(f"file_{str(time.strftime('%Y%m%d-%H%M%S'))}.log", rotation="500 MB")
 
 def load_cogs(folder):
