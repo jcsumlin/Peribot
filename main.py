@@ -17,12 +17,7 @@ def load_cogs(folder):
     return files
 
 
-def config():
-    with open('config.json', 'r') as f:
-        config = json.load(f)
-        return config
-bot_config = config()
-bot = commands.Bot(command_prefix=bot_config['command-prefix'])
+bot = commands.Bot(command_prefix=os.environ['commnad_prefix'])
 
 @bot.event
 async def on_ready():
@@ -70,4 +65,4 @@ if __name__ == "__main__":
         except Exception as error:
             logger.exception(f"Extension {extension} could not be loaded. [{error}]")
 
-    bot.run(bot_config['token'])
+    bot.run(os.environ['token'])
