@@ -4,6 +4,7 @@ import json
 import os
 import re
 import time
+import glob
 
 from discord.ext import commands
 from loguru import logger
@@ -24,8 +25,8 @@ def config():
     with open('config.json', 'r') as f:
         config = json.load(f)
         return config
-bot_config = config()
-bot = commands.Bot(command_prefix=os.environ['command-prefix'])
+# bot_config = config()
+bot = commands.Bot(command_prefix=str(os.environ['PREFIX']))
 
 @bot.event
 async def on_ready():
@@ -73,4 +74,4 @@ if __name__ == "__main__":
         except Exception as error:
             logger.exception(f"Extension {extension} could not be loaded. [{error}]")
 
-    bot.run(os.environ['token'])
+    bot.run(os.environ['TOKEN'])
