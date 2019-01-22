@@ -3,3 +3,5 @@ loguru
 pip
 praw
 pillow
+Zlib
+libjpeg
