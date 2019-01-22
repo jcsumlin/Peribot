@@ -1,10 +1,13 @@
-import discord
 from discord.ext import commands
 import json
-from loguru import logger
-import glob, os
-import time
+import json
+import os
 import re
+import time
+
+from discord.ext import commands
+from loguru import logger
+
 #initiate logger test
 logger.add(f"file_{str(time.strftime('%Y%m%d-%H%M%S'))}.log", rotation="500 MB")
 
@@ -22,7 +25,7 @@ def config():
         config = json.load(f)
         return config
 bot_config = config()
-bot = commands.Bot(command_prefix=bot_config['command-prefix'])
+bot = commands.Bot(command_prefix=os.environ['command-prefix'])
 
 @bot.event
 async def on_ready():
@@ -70,4 +73,4 @@ if __name__ == "__main__":
         except Exception as error:
             logger.exception(f"Extension {extension} could not be loaded. [{error}]")
 
-    bot.run(bot_config['token'])
+    bot.run(os.environ['token'])

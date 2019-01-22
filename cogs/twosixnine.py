@@ -1,18 +1,19 @@
 import discord
 from discord.ext import commands
 import praw
+import os
 from .utils.dataIO import dataIO
 
 
 class TwoSixNine:
     def __init__(self, bot):
         self.bot = bot
-        self.settings = dataIO.load_json("../config.json")
-        self.reddit = praw.Reddit(client_id=self.settings['reddit_client_id'],
-                             client_secret=self.settings['reddit_client_secret'],
-                             password=self.settings['reddit_password'],
+        # self.settings = dataIO.load_json("../config.json")
+        self.reddit = praw.Reddit(client_id=os.environ['reddit_client_id'],
+                             client_secret=os.environ['reddit_client_secret'],
+                             password=os.environ['reddit_password'],
                              user_agent='SVTFOE command bot (by u/J_C___)',
-                             username=self.settings['reddit_username'])
+                             username=os.environ['reddit_username'])
         self.twosixnine_scores = {'PhoenixVersion1':0,
                      'jeepdave':0,
                      'waspstinger106':0,
