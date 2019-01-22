@@ -2,19 +2,19 @@ from PIL import Image, ImageDraw, ImageFont
 from discord.ext import commands
 
 
-class Amethyst:
+class Lapis:
     def __init__(self, bot):
         self.bot = bot
 
     @commands.command(pass_context=True, no_pm=True)
-    async def amethyst(self, ctx, message: str, *argv):
-        image = Image.open('data/amethyst_blank.jpeg')
+    async def rogu(self, ctx, message: str, *argv):
+        image = Image.open('data/RoguBox.png')
         draw = ImageDraw.Draw(image)
         # Dimensions for text box
         boxWidth = image.size[0]
         boxHeight = image.size[1] * 1 / 4
         # arbitrary beginning size; this will change if the message is too big
-        fontSize = 100
+        fontSize = 50
         font = ImageFont.truetype('data/theboldfont.ttf', fontSize)
         for word in argv:
             message += ' ' + str(word)
@@ -68,10 +68,10 @@ class Amethyst:
             draw.text(center, line, color, font1)
             y += font.getsize(line)[1]
             numberOfLines += 1
-        image.save('data/amethyst_edit.png')
+        image.save('data/rogu_edit.png')
         area = ctx.message.channel
-        with open('data/amethyst_edit.png', 'rb') as file:
+        with open('data/rogu_edit.png', 'rb') as file:
             await self.bot.send_file(area, file)
 
 def setup(bot):
-    bot.add_cog(Amethyst(bot))
+    bot.add_cog(Lapis(bot))

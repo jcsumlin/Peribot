@@ -36,6 +36,7 @@ class Lapis:
                     while font.getsize(word)[0] > boxWidth:
                         fontSize -= 5
                         font = ImageFont.truetype('data/theboldfont.ttf', fontSize)
+                        isHeightGood = True
                     textSize = font.getsize(line + word)
                     if (textSize[0] < boxWidth):
                         line += (word + ' ')
