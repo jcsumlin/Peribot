@@ -12,7 +12,7 @@ class Management(object):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name='setcolor', aliases=['givecolor'])
+    @commands.command(name='setcolor', aliases=['givecolor'], pass_context=True)
     @commands.has_permissions(manage_roles=True)
     async def set_member_color(self, ctx, color: discord.Color, member: discord.Member = None):
 
@@ -50,7 +50,7 @@ class Management(object):
             await ctx.send(
                 ':x: Failed. \nYou may have entered the color incorrectly? \nCheck in case %s' % color)
 
-    @commands.command(name='pin')
+    @commands.command(name='pin', pass_context=True)
     @commands.has_permissions(manage_messages=True)
     async def pin_message(self, ctx, *, message):
         """Copy your message in a stylish and modern frame, and then fix it!
@@ -70,7 +70,7 @@ class Management(object):
         msg = await ctx.send(embed=embed)
         await msg.pin()
 
-    @commands.command(name='resetmute')
+    @commands.command(name='resetmute', pass_context=True)
     @commands.has_permissions(manage_roles=True)
     async def resetmute(self, ctx):
         """Reset the settings of` !mute` and remove the role of PeriMute. * When peace times have arrived, without flooding! *
@@ -228,7 +228,7 @@ class Management(object):
     #     await ctx.send(embed=embed)
 
 
-    @commands.command(name='cleanup')
+    @commands.command(name='cleanup', pass_context=True)
     @commands.has_permissions(manage_messages=True)
     async def cleanup(self, ctx, member: discord.Member, count: int):
 
@@ -251,7 +251,7 @@ class Management(object):
 
             await ctx.channel.purge(limit=count, check=is_member)
 
-    @commands.command(name='ban')
+    @commands.command(name='ban', pass_context=True)
     @commands.has_permissions(ban_members=True)
     async def ban(self, ctx, member: discord.Member, *, reason: str = 'N/A'):
 
@@ -308,7 +308,7 @@ class Management(object):
     #
     #     await ctx.send(embed=embed)
 
-    @commands.command(name='banlist', aliases=['bans'])
+    @commands.command(name='banlist', aliases=['bans'], pass_context=True)
     @commands.has_permissions(ban_members=True)
     async def banlist(self, ctx):
         """
@@ -329,7 +329,7 @@ class Management(object):
 
         await ctx.send(embed=embed)
 
-    @commands.command(name='kick')
+    @commands.command(name='kick', pass_context=True)
     @commands.has_permissions(kick_members=True)
     async def kick(self, ctx, member: discord.Member, *, reason: str = 'N/A'):
         """
