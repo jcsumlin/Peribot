@@ -8,6 +8,13 @@ class Lapis:
 
     @commands.command(pass_context=True, no_pm=True)
     async def lapis(self, ctx, message: str, *argv):
+        '''
+
+        :param ctx: Message Context (who sent the message)
+        :param message: First word of the message
+        :param argv: The rest of your message delineated by spaces
+        :return: Returns an image of a Lapis from SU and your message
+        '''
         image = Image.open('data/blak_template.jpg')
         draw = ImageDraw.Draw(image)
         # Dimensions for text box
@@ -16,6 +23,8 @@ class Lapis:
         # arbitrary beginning size; this will change if the message is too big
         fontSize = 100
         font = ImageFont.truetype('data/theboldfont.ttf', fontSize)
+        if '\"' in argv:
+            list(argv).remove("\"")
         for word in argv:
             message += ' ' + str(word)
         textSize = font.getsize(message)

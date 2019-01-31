@@ -21,7 +21,7 @@ class TwoSixNine:
                      'BlackoutAviation':0}
 
     def get_scores(self, user, score=0):
-        for submission in self.reddit.redditor(user).submissions.new():
+        for submission in self.reddit.redditor(user).submissions.new(limit=500):
             if '/269' in submission.title:
                 # print(submission.title + ':' + str(submission.score))
                 score = score + int(submission.score)
@@ -30,6 +30,10 @@ class TwoSixNine:
 
     @commands.command(name="twosixnine", pass_context=True, aliases=['269', 'scores'])
     async def twosixnine(self, ctx):
+        '''
+        :param ctx: Information on who sent the message
+        :return: Returns an embed of the 269 Reddit Karma challenge. The users are set in stone and sealed in blood.
+        '''
         for user in self.twosixnine_scores.keys():
             self.twosixnine_scores[user] = self.get_scores(user)
         embedMsg = discord.Embed(color=0xE87722, title="__269 Days of Shitposts Challenge__")

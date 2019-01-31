@@ -9,7 +9,12 @@ class Riot:
 
     @commands.command(pass_context=True, no_pm=True)
     async def riot(self, ctx, *, text: str):
-        """RIOT!"""
+        '''
+
+        :param ctx: Info about who sent the command
+        :param text: What you are rioting about
+        :return: RIOT!!
+        '''
         await self.bot.say('ヽ༼ຈل͜ຈ༽ﾉ **' + str(text) + '** ヽ༼ຈل͜ຈ༽ﾉ')
 
 
