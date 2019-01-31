@@ -4,7 +4,7 @@ import discord
 from .utils.dataIO import dataIO
 import json
 import os, os.path
-
+import giphypop
 
 class Kindness:
     def __init__(self, bot):
@@ -12,10 +12,24 @@ class Kindness:
 
 
     @commands.command(pass_context=True)
-    async def kiss(self, ctx, victim):
-        kisser = ctx.message.author.mention
-        msg = random.choice(dataIO.load_json("data/lewd/kiss.json")['kiss'])
-        await self.bot.say(msg.format(kisser=kisser,victim=victim))
+    async def kiss(self, ctx, victim:discord.Member = None):
+        g = giphypop.Giphy("KZciiXBwyJ9RabyZyUHjQ8e4ZutZQ1Go")
+        results = [x for x in g.search('kiss')]
+        kisses = ['https://media.giphy.com/media/FqBTvSNjNzeZG/giphy.gif',
+                  "https://i.imgur.com/PIyPCfZ.gif",
+                  "https://thumbs.gfycat.com/FondEvergreenIcterinewarbler-max-1mb.gif"]
+        kisser = ctx.message.author.name
+        if victim == None:
+            await self.bot.say(str(ctx.message.author.name) + " puckers their lips, but no one is there... sad.")
+        elif victim.name ==kisser:
+            await self.bot.say(f"{kisser} starts making out with their image in a mirror... strange one this {kisser} is...")
+        else:
+            msg = random.choice(dataIO.load_json("data/lewd/kiss.json")['kiss']).format(kisser=str(kisser),victim=str(victim.name))
+            embed = discord.Embed(title=msg, color=0xFF69B4)
+            embed.set_image(url=random.choice(results).raw_data['images']['fixed_height_downsampled']['url'])
+            await self.bot.say(embed=embed)
+
+        # await self.bot.say(msg)
 
     @commands.command("hug", pass_context=True)
     async def hug(self, ctx, victim: discord.Member, number=None):

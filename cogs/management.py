@@ -32,13 +32,13 @@ class Management(object):
         if not member:
             member = ctx.message.author
 
-        role_exists = f'NaomiColored - {member.name}' in [x.name for x in member.roles]
+        role_exists = f'PeriColored - {member.name}' in [x.name for x in member.roles]
 
         try:
             if role_exists:
-                role = discord.utils.get(ctx.guild.roles, name=f'NaomiColored - {member.name}')
+                role = discord.utils.get(ctx.guild.roles, name=f'PeriColored - {member.name}')
                 await role.edit(color=color)
-                await ctx.send('%s, Your color role was successfully changed (new color: %s).' % (
+                await self.bot.send_message('%s, Your color role was successfully changed (new color: %s).' % (
                 member.mention, color))
             else:
                 role = await ctx.guild.create_role(name=f'PeriColored - {member.name}',
@@ -65,7 +65,7 @@ class Management(object):
         embed = discord.Embed(color=0x71f442,
                               title='Pin it up!',
                               description=message)
-        embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url)
+        embed.set_author(name=ctx.message.author.name, icon_url=ctx.message.author.avatar_url)
         embed.set_footer(text=f'{ctx.prefix}{ctx.command}')
         msg = await ctx.send(embed=embed)
         await msg.pin()
@@ -247,7 +247,7 @@ class Management(object):
             await ctx.send(f'Число сообщений не должно превышать {count}.')
         else:
             def is_member(m):
-                return m.author == member
+                return m.message.author == member
 
             await ctx.channel.purge(limit=count, check=is_member)
 
@@ -270,7 +270,7 @@ class Management(object):
 
         embed = discord.Embed(timestamp=ctx.message.created_at, color=0x00ff00,
                               description=f'Пользователь {member.mention} забанен!\nПричина: {reason}.')
-        embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url)
+        embed.set_author(name=ctx.message.author.name, icon_url=ctx.message.author.avatar_url)
         embed.set_footer(text=f'{ctx.prefix}{ctx.command}')
 
         await ctx.send(embed=embed)
@@ -314,6 +314,7 @@ class Management(object):
         """
         List of banned members.
         """
+
         bans = await ctx.guild.bans()
 
         if len(bans) <= 0:
@@ -324,7 +325,7 @@ class Management(object):
             embed = discord.Embed(timestamp=ctx.message.created_at,
                                   color=0xff0000,
                                   description=f'Banned users:\n{", ".join([user.user.name for user in bans])}')
-        embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url)
+        embed.set_author(name=ctx.message.author.name, icon_url=ctx.message.author.avatar_url)
         embed.set_footer(text=f'{ctx.prefix}{ctx.command}')
 
         await ctx.send(embed=embed)
@@ -341,7 +342,7 @@ class Management(object):
 
         embed = discord.Embed(timestamp=ctx.message.created_at, color=0x00ff00,
                               description=f'User {member} was kicked.\nReason: {reason}.')
-        embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url)
+        embed.set_author(name=ctx.message.author.name, icon_url=ctx.message.author.avatar_url)
         embed.set_footer(text=f'{ctx.prefix}{ctx.command}')
 
         await ctx.send(embed=embed)
