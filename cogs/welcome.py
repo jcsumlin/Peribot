@@ -22,7 +22,7 @@ class Welcome():
                 f.seek(0)  # <--- should reset file position to the beginning.
                 json.dump(data, f, indent=4)
                 f.truncate()  # remove remaining part
-            await self.bot.send_message(channel ,"Welcome channel set!")
+            await self.bot.send_message(self.bot.get_channel(channel) ,"Welcome channel set!")
         except Exception as e:
             logger.error(e)
             pass
@@ -32,7 +32,7 @@ class Welcome():
             data = json.load(f)
             channel = data['channel_id']
         try:
-            await self.bot.send_message(channel ,f":balloon: Hey! Listen! {member} is here! :100:")
+            await self.bot.send_message(self.bot.get_channel(channel) ,f":balloon: Hey! Listen! {member} is here! :100:")
         except Exception as e:
             await self.bot.send_message(member.server.owner,
                                         "There is an error with a newcomer, please report this to the creator.\n {}".format(
