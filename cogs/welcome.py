@@ -1,6 +1,7 @@
 from discord.ext import commands
 import discord
 import json
+from loguru import logger
 
 class Welcome():
     def __init__(self, bot):
@@ -8,6 +9,11 @@ class Welcome():
 
     @commands.command(name="setwelcome", pass_context=True)
     async def setwelcome(self, ctx):
+        """
+        Sets the channel where welcome messages are sent
+        :param ctx:
+        :return:
+        """
         try:
             channel = ctx.message.channel.id
             with open('data/welcome/info.json', 'r+') as f:
@@ -16,8 +22,9 @@ class Welcome():
                 f.seek(0)  # <--- should reset file position to the beginning.
                 json.dump(data, f, indent=4)
                 f.truncate()  # remove remaining part
+            await self.bot.send_message(channel ,"Welcome channel set!")
         except Exception as e:
-            print(e)
+            logger.error(e)
             pass
 
     async def on_member_join(self, member):
