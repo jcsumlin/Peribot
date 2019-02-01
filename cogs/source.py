@@ -19,9 +19,10 @@ class JC:
         embed.set_footer(text="Please support Peribot on my Patreon! www.patreon.com/botboi")
         await self.bot.say(embed=embed)
 
-    async def patreon(self):
+    @commands.command()
+    async def botboi(self):
         """
-        Returns the Patreon link
+        Returns the Patreon link for J_C bot boi!
         """
         embed = discord.Embed(
             title="J_C is creating Bots (Discord, Reddit, Twitch, Life Automation?)",
