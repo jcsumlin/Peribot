@@ -37,6 +37,7 @@ async def on_ready():
     logger.debug("Bot is ready!")
 
 @bot.command(pass_context=True)
+@commands.has_permissions(administrator=True)
 async def load(ctx, extension):
     try:
         bot.load_extension('cogs.' + extension)
@@ -46,6 +47,7 @@ async def load(ctx, extension):
         logger.exception(f"Extension {extension} could not be loaded. [{error}]")
 
 @bot.command(pass_context=True)
+@commands.has_permissions(administrator=True)
 async def reload(ctx, extension):
     try:
         bot.unload_extension('cogs.' + extension)
@@ -56,6 +58,7 @@ async def reload(ctx, extension):
         logger.exception(f"Extension {extension} could not be reloaded. [{error}]")
 
 @bot.command()
+@commands.has_permissions(administrator=True)
 async def unload(extension):
     try:
         bot.unload_extension('cogs.' + extension)
