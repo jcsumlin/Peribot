@@ -14,7 +14,8 @@ class Trap:
                      'https://i.pinimg.com/originals/36/e6/71/36e671921eecfefde01cbfdd35c25997.gif',
                      'https://66.media.tumblr.com/6ebba4bdefbb672416e86145b621bef9/tumblr_ov0yh7aLHZ1td5qjgo1_400.gif',
                      'https://pa1.narvii.com/6501/0d985d7b0fbdfed6eaac2a7d0c16616301c30de7_hq.gif',
-                     'https://66.media.tumblr.com/23ec2fb29499576f465a45557b2b3a55/tumblr_omk741Am1E1qa94xto1_400.gif']
+                     'https://66.media.tumblr.com/23ec2fb29499576f465a45557b2b3a55/tumblr_omk741Am1E1qa94xto1_400.gif',
+                     'https://66.media.tumblr.com/0ea8490d87e6a33684153587a70c8359/tumblr_nkcnd3OWw41rs4yfmo1_400.gif']
 
     @commands.command(pass_context=True, no_pm=True)
     async def trap(self):
