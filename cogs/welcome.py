@@ -10,7 +10,7 @@ class Welcome():
     async def setwelcome(self, ctx):
         try:
             channel = ctx.message.channel.id
-            with open('data/welcome/config.json', 'r+') as f:
+            with open('data/welcome/info.json', 'r+') as f:
                 data = json.load(f)
                 data['channel_id'] = str(channel)  # <--- add `id` value.
                 f.seek(0)  # <--- should reset file position to the beginning.
@@ -21,7 +21,7 @@ class Welcome():
             pass
 
     async def on_member_join(self, member):
-        with open('data/welcome/config.json', 'r') as f:
+        with open('data/welcome/info.json', 'r') as f:
             data = json.load(f)
             channel = data['channel_id']
         try:
