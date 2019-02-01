@@ -321,7 +321,7 @@ class Streams:
         status = channel["status"]
         if not status:
             status = "Untitled broadcast"
-        embed = discord.Embed(title=status, url=url)
+        embed = discord.Embed(title=status, url=url, color=0x6441A4)
         embed.set_author(name=channel["display_name"])
         embed.add_field(name="Followers", value=channel["followers"])
         embed.add_field(name="Total views", value=channel["views"])
@@ -330,7 +330,6 @@ class Streams:
             embed.set_image(url=data["stream"]["preview"]["medium"] + self.rnd_attr())
         if channel["game"]:
             embed.set_footer(text="Playing: " + channel["game"])
-        embed.color = 0x6441A4
         return embed
 
     def mixer_embed(self, data):
@@ -338,7 +337,7 @@ class Streams:
                           "avatars/default.jpg")
         user = data["user"]
         url = "https://mixer.com/" + data["token"]
-        embed = discord.Embed(title=data["name"], url=url)
+        embed = discord.Embed(title=data["name"], url=url, color=0x4C90F3)
         embed.set_author(name=user["username"])
         embed.add_field(name="Followers", value=data["numFollowers"])
         embed.add_field(name="Total views", value=data["viewersTotal"])
@@ -348,7 +347,6 @@ class Streams:
             embed.set_thumbnail(url=default_avatar)
         if data["thumbnail"]:
             embed.set_image(url=data["thumbnail"]["url"] + self.rnd_attr())
-        embed.color = 0x4C90F3
         if data["type"] is not None:
             embed.set_footer(text="Playing: " + data["type"]["name"])
         return embed

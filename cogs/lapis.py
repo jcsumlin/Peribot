@@ -9,7 +9,7 @@ class Lapis:
     @commands.command(pass_context=True, no_pm=True)
     async def lapis(self, ctx, message: str, *argv):
         '''
-
+        Makes a meme from Lapis face. There is no character limit but be careful cause it will just look weird.
         :param ctx: Message Context (who sent the message)
         :param message: First word of the message
         :param argv: The rest of your message delineated by spaces

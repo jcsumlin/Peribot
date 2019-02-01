@@ -31,6 +31,7 @@ class TwoSixNine:
     @commands.command(name="twosixnine", pass_context=True, aliases=['269', 'scores'])
     async def twosixnine(self, ctx):
         '''
+        Gets karma for 269 challenge. This command is hardcoded.
         :param ctx: Information on who sent the message
         :return: Returns an embed of the 269 Reddit Karma challenge. The users are set in stone and sealed in blood.
         '''

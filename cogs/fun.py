@@ -9,15 +9,11 @@ class Fun:
         self.bot = bot
 
 
-    def fetch_joined_at(self, user, server):
-        """Just a special case for someone special :^)"""
-        if user.id == "96130341705637888" and server.id == "133049272517001216":
-            return datetime.datetime(2016, 1, 10, 6, 8, 4, 443000)
-        else:
-            return user.joined_at
-
     @commands.command()
     async def ping(self):
+        """
+        Pong!
+        """
         await self.bot.say("Pong!")
 
     @commands.command(aliases=['r'])
@@ -46,8 +42,10 @@ class Fun:
 
     @commands.command(pass_context=True)
     async def flip(self, ctx, user : discord.Member=None):
-        """Flips a coin... or a user.
-        Defaults to coin.
+        """
+        Flips a coin ... or a user. But not me.
+        :param user: the user you are flipping
+        :return: either a flipped coin or user
         """
         if user != None:
             msg = ""

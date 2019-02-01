@@ -13,11 +13,14 @@ class Kindness:
 
     @commands.command(pass_context=True)
     async def kiss(self, ctx, victim:discord.Member = None):
+        """
+        Kisses a user with a random gif from Giphy
+        :param ctx:
+        :param victim: Who are you kissing? (optional)
+        :return: The kiss you sent off :)
+        """
         g = giphypop.Giphy("KZciiXBwyJ9RabyZyUHjQ8e4ZutZQ1Go")
         results = [x for x in g.search('kiss')]
-        kisses = ['https://media.giphy.com/media/FqBTvSNjNzeZG/giphy.gif',
-                  "https://i.imgur.com/PIyPCfZ.gif",
-                  "https://thumbs.gfycat.com/FondEvergreenIcterinewarbler-max-1mb.gif"]
         kisser = ctx.message.author.name
         if victim == None:
             await self.bot.say(str(ctx.message.author.name) + " puckers their lips, but no one is there... sad.")
