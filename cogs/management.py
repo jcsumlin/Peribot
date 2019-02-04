@@ -33,21 +33,25 @@ class Management(object):
             member = ctx.message.author
 
         role_exists = f'PeriColored - {member.name}' in [x.name for x in member.roles]
-
+        server = ctx.message.server
         try:
             if role_exists:
-                role = discord.utils.get(ctx.guild.roles, name=f'PeriColored - {member.name}')
-                await role.edit(color=color)
-                await self.bot.send_message('%s, Your color role was successfully changed (new color: %s).' % (
+                role = discord.utils.get(server.roles, name=f'PeriColored - {member.name}')
+                # print(member.top_role.position)
+                await self.bot.move_role(server, role, int(member.top_role.position)+1)
+                await self.bot.edit_role(server,role ,color=color)
+                await self.bot.send_message(ctx.message.channel,
+                                            '%s, Your color role was successfully changed (new color: %s).' % (
                 member.mention, color))
             else:
-                role = await ctx.guild.create_role(name=f'PeriColored - {member.name}',
+                role = await self.bot.create_role(server=server, name=f'PeriColored - {member.name}',
                                                    color=color)
-                await member.add_roles(role)
-                await ctx.send(
+                await self.bot.move_role(server, role, int(member.top_role.position)+1)
+                await self.bot.add_roles(member, role)
+                await self.bot.send_message(ctx.message.channel,
                     '%s, You have successfully added a role with color %s' % (member.mention, color))
         except discord.errors.HTTPException:
-            await ctx.send(
+            await self.bot.send_message(ctx.message.channel,
                 ':x: Failed. \nYou may have entered the color incorrectly? \nCheck in case %s' % color)
 
     @commands.command(name='pin', pass_context=True)
