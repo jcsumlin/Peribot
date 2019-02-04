@@ -3,17 +3,21 @@ from discord.ext import commands
 import praw
 import os
 from .utils.dataIO import dataIO
+from loguru import logger
 
 
 class TwoSixNine:
     def __init__(self, bot):
         self.bot = bot
         # self.settings = dataIO.load_json("../config.json")
-        self.reddit = praw.Reddit(client_id=os.environ['REDDIT_CLIENT_ID'],
-                             client_secret=os.environ['REDDIT_CLIENT_SECRET'],
-                             password=os.environ['REDDIT_PASSWORD'],
-                             user_agent='SVTFOE command bot (by u/J_C___)',
-                             username=os.environ['REDDIT_USERNAME'])
+        try:
+            self.reddit = praw.Reddit(client_id=os.environ['REDDIT_CLIENT_ID'],
+                                 client_secret=os.environ['REDDIT_CLIENT_SECRET'],
+                                 password=os.environ['REDDIT_PASSWORD'],
+                                 user_agent='SVTFOE command bot (by u/J_C___)',
+                                 username=os.environ['REDDIT_USERNAME'])
+        except Exception as e:
+            logger.error("Cant connect to Reddit with these credentials")
         self.twosixnine_scores = {'PhoenixVersion1':0,
                      'jeepdave':0,
                      'waspstinger106':0,
@@ -21,11 +25,14 @@ class TwoSixNine:
                      'BlackoutAviation':0}
 
     def get_scores(self, user, score=0):
-        for submission in self.reddit.redditor(user).submissions.new(limit=500):
-            if '/269' in submission.title:
-                # print(submission.title + ':' + str(submission.score))
-                score = score + int(submission.score)
-                # print(score)
+        try:
+            for submission in self.reddit.redditor(user).submissions.new(limit=500):
+                if '/269' in submission.title:
+                    # print(submission.title + ':' + str(submission.score))
+                    score = score + int(submission.score)
+                    # print(score)
+        except Exception as e:
+            logger.error(f"Exception occured in get_scores() : {e}")
         return score
 
     @commands.command(name="twosixnine", pass_context=True, aliases=['269', 'scores'])
