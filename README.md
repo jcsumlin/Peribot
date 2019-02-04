@@ -28,7 +28,9 @@ giphypop
 A step by step series of examples that tell you how to get a development env running
 
 ####Docker
+
 Check the run.sh file to set your token before running!
+
 ```bash
 $ bash build.sh
 $ bash run.sh
