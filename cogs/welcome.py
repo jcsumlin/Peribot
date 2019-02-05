@@ -31,6 +31,8 @@ class Welcome():
         with open('data/welcome/info.json', 'r') as f:
             data = json.load(f)
             channel = data['channel_id']
+        if channel == "":
+            return
         try:
             await self.bot.send_message(self.bot.get_channel(channel) ,f":balloon: Hey! Listen! {member} is here! :100:")
         except Exception as e:
