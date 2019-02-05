@@ -30,7 +30,7 @@ class Welcome():
 
     async def on_member_join(self, member):
         server_id = member.server.id
-        with open('cogs/data/welcome/info.json', 'r') as f:
+        with open('data/welcome/info.json', 'r') as f:
             data = json.load(f)
             if server_id not in data.keys():
                 return

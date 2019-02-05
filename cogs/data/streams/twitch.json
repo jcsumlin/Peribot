@@ -16,7 +16,7 @@
         "NAME" : "blackoutxdd"
     },
     {
-        "ALREADY_ONLINE" : false,
+        "ALREADY_ONLINE" : true,
         "CHANNELS" : [
             "525831500269092865"
         ],
