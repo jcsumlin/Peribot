@@ -13,7 +13,6 @@ class Management(object):
         self.bot = bot
 
     @commands.command(name='setcolor', aliases=['givecolor'], pass_context=True)
-    @commands.has_permissions(manage_roles=True)
     async def set_member_color(self, ctx, color: discord.Color, member: discord.Member = None):
 
         """Color the nickname of the participant. * Let there be bright colors and colors! *
@@ -29,8 +28,7 @@ class Management(object):
         !givecolor FF0000 @Username#1234
         ```
         """
-        if not member:
-            member = ctx.message.author
+        member = ctx.message.author
 
         role_exists = f'PeriColored - {member.name}' in [x.name for x in member.roles]
         server = ctx.message.server
