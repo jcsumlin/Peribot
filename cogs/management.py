@@ -13,7 +13,7 @@ class Management(object):
         self.bot = bot
 
     @commands.command(name='setcolor', aliases=['givecolor'], pass_context=True)
-    async def set_member_color(self, ctx, color: discord.Color, member: discord.Member = None):
+    async def set_member_color(self, ctx, color: discord.Color):
 
         """Color the nickname of the participant. * Let there be bright colors and colors! *
         [!] In developing.
@@ -31,12 +31,11 @@ class Management(object):
         member = ctx.message.author
 
         role_exists = f'PeriColored - {member.name}' in [x.name for x in member.roles]
+        print(role_exists)
         server = ctx.message.server
         try:
             if role_exists:
                 role = discord.utils.get(server.roles, name=f'PeriColored - {member.name}')
-                # print(member.top_role.position)
-                await self.bot.move_role(server, role, int(member.top_role.position)+1)
                 await self.bot.edit_role(server,role ,color=color)
                 await self.bot.send_message(ctx.message.channel,
                                             '%s, Your color role was successfully changed (new color: %s).' % (
