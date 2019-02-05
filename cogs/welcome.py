@@ -16,9 +16,10 @@ class Welcome():
         """
         try:
             channel = ctx.message.channel.id
+            server_id = ctx.message.server.id
             with open('data/welcome/info.json', 'r+') as f:
                 data = json.load(f)
-                data['channel_id'] = str(channel)  # <--- add `id` value.
+                data[server_id] = str(channel)  # <--- add `id` value.
                 f.seek(0)  # <--- should reset file position to the beginning.
                 json.dump(data, f, indent=4)
                 f.truncate()  # remove remaining part
@@ -28,11 +29,12 @@ class Welcome():
             pass
 
     async def on_member_join(self, member):
-        with open('data/welcome/info.json', 'r') as f:
+        server_id = member.server.id
+        with open('cogs/data/welcome/info.json', 'r') as f:
             data = json.load(f)
-            channel = data['channel_id']
-        if channel == "":
-            return
+            if server_id not in data.keys():
+                return
+            channel = data[server_id]
         try:
             await self.bot.send_message(self.bot.get_channel(channel) ,f":balloon: Hey! Listen! {member} is here! :100:")
         except Exception as e:

@@ -3,6 +3,7 @@ import asyncio
 from discord.ext import commands
 from random import choice
 import traceback
+from loguru import logger
 
 
 class Management(object):
@@ -31,7 +32,7 @@ class Management(object):
         member = ctx.message.author
 
         role_exists = f'PeriColored - {member.name}' in [x.name for x in member.roles]
-        print(role_exists)
+        logger.debug("Role exists?: " + str(role_exists))
         server = ctx.message.server
         try:
             if role_exists:
@@ -47,9 +48,9 @@ class Management(object):
                 await self.bot.add_roles(member, role)
                 await self.bot.send_message(ctx.message.channel,
                     '%s, You have successfully added a role with color %s' % (member.mention, color))
-        except discord.errors.HTTPException:
+        except discord.errors.HTTPException as e:
             await self.bot.send_message(ctx.message.channel,
-                ':x: Failed. \nYou may have entered the color incorrectly? \nCheck in case %s' % color)
+                f':x: Failed. \nYou may have entered the color incorrectly? \nCheck in case %s {e}' % color)
 
     @commands.command(name='pin', pass_context=True)
     @commands.has_permissions(manage_messages=True)
