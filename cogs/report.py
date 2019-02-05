@@ -41,6 +41,7 @@ class reeeport:
 
         em = discord.Embed(title="Report Case", description=message)
         em.add_field(name="author", value=member)
+        em.set_footer(text=f"#{ctx.message.channel}")
         await self.bot.send_message(self.bot.get_channel(id=channel), embed=em)
         # await self.bot.send_message(self.bot.get_channel(id=channel), '@here')
         await self.bot.say(

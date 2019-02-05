@@ -4,3 +4,4 @@ pip
 praw
 pillow
 giphypop
+beautifulsoup4
