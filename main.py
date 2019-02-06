@@ -1,17 +1,17 @@
-from discord.ext import commands
-import json
+import configparser
+import glob
 import json
 import os
 import re
 import time
-import glob
 
 from discord.ext import commands
 from loguru import logger
 
 #initiate logger test
 logger.add(f"file_{str(time.strftime('%Y%m%d-%H%M%S'))}.log", rotation="500 MB")
-
+config = configparser.ConfigParser()
+config.read('auth.ini')
 def load_cogs(folder):
     os.chdir(folder)
     files = []
@@ -26,7 +26,7 @@ def config():
         config = json.load(f)
         return config
 # bot_config = config()
-bot = commands.Bot(command_prefix=str(os.environ['PREFIX']))
+bot = commands.Bot(command_prefix=config.get('discord','PREFIX'))
 
 @bot.event
 async def on_ready():
@@ -77,4 +77,4 @@ if __name__ == "__main__":
         except Exception as error:
             logger.exception(f"Extension {extension} could not be loaded. [{error}]")
 
-    bot.run(os.environ['TOKEN'])
+    bot.run(config.get('discord','TOKEN'))
