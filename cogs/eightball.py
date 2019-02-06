@@ -1,8 +1,8 @@
-from discord.ext import commands
-from .utils.dataIO import dataIO
 import random
-from loguru import logger
-import discord
+
+from discord.ext import commands
+
+from .utils.dataIO import dataIO
 
 
 class EightBall:
@@ -13,9 +13,11 @@ class EightBall:
 
     @commands.command(name='8b')
     async def eightball(self):
+        """
+        Check the fates on your question
+        :return:
+        """
         await self.bot.say(f'```{random.choice(self.choices)}```')
-
-
 
 def setup(bot):
     n = EightBall(bot)

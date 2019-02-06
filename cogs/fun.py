@@ -1,8 +1,9 @@
-import discord
-from discord.ext import commands
 import random
 from random import choice
-import datetime
+
+import discord
+from discord.ext import commands
+
 
 class Fun:
     def __init__(self, bot):
@@ -19,6 +20,11 @@ class Fun:
     @commands.command(aliases=['r'])
     async def roll(self, upper_bound=20 #type: int
                    ):
+        """
+        Roll a d20 or a d[upper_bound]
+        :param upper_bound: the highest you can roll.
+        :return: Your die roll
+        """
         msg = random.randint(1,int(upper_bound))
         if msg == upper_bound:
             msg = "***Critical Hit!*** " + str(msg)

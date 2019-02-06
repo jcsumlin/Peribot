@@ -1,4 +1,3 @@
-import discord
 from discord.ext import commands
 
 
@@ -10,8 +9,7 @@ class Riot:
     @commands.command(pass_context=True, no_pm=True)
     async def riot(self, ctx, *, text: str):
         '''
-
-        :param ctx: Info about who sent the command
+        Riot in the street!
         :param text: What you are rioting about
         :return: RIOT!!
         '''

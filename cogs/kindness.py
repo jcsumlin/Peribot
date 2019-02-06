@@ -1,10 +1,11 @@
-from discord.ext import commands
 import random
+
 import discord
-from .utils.dataIO import dataIO
-import json
-import os, os.path
 import giphypop
+from discord.ext import commands
+
+from .utils.dataIO import dataIO
+
 
 class Kindness:
     def __init__(self, bot):
@@ -36,9 +37,14 @@ class Kindness:
 
     @commands.command("hug", pass_context=True)
     async def hug(self, ctx, victim: discord.Member, number=None):
-        count = sum([len(files) for r, d, files in os.walk("cogs/data/lewd/hugs")])
+        """
+        Hug a user with a cute gif
+        :param victim: the user you are hugging
+        :param number: The specific gif you want to return. If None picks a random gif.
+        :return: The gif of your hug
+        """
         if number is None:
-            file = str(random.randint(1,30)) + '.gif'
+            file = str(random.randint(1,31)) + '.gif'
         else:
             file = str(number) + '.gif'
         area = ctx.message.channel
@@ -50,6 +56,11 @@ class Kindness:
 
     @commands.command(pass_context=True)
     async def compliment(self, ctx, target):
+        """
+        Compliment a user!
+        :param target: Who you are coplimenting
+        :return:
+        """
         msg = random.choice(dataIO.load_json("data/compliment/compliments.json")['compliments'])
         await self.bot.say(str(target) + ' ' + msg)
 

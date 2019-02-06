@@ -1,17 +1,23 @@
-import discord
 import random
+
+import discord
 from discord.ext import commands
 
+
 class Penis:
-    """Penis related commands."""
+    """
+    Penis related commands.
+    """
 
     def __init__(self, bot):
         self.bot = bot
 
     @commands.command()
     async def penis(self, *, user : discord.Member):
-        """Detects user's penis length
-        This is 100% accurate."""
+        """
+        Detects user's penis length
+        This is 100% accurate.
+        """
         state = random.getstate()
         random.seed(user.id)
         dong = f"8{'=' * random.randint(0, 30)}D"

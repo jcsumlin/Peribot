@@ -2,14 +2,17 @@ from PIL import Image, ImageDraw, ImageFont
 from discord.ext import commands
 
 
-class Lapis:
+class Rogu:
+    """
+    Another Meme template command.
+    """
     def __init__(self, bot):
         self.bot = bot
 
     @commands.command(pass_context=True, no_pm=True)
     async def rogu(self, ctx, message: str, *argv):
         '''
-
+        Creates Meme Template based on lovable Rogu!
         :param ctx: Message Context (who sent the message)
         :param message: First word of the message
         :param argv: The rest of your message delineated by spaces
@@ -83,4 +86,4 @@ class Lapis:
             await self.bot.send_file(area, file)
 
 def setup(bot):
-    bot.add_cog(Lapis(bot))
+    bot.add_cog(Rogu(bot))

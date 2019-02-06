@@ -1,7 +1,8 @@
-from discord.ext import commands
-import discord
 import json
 import urllib.request
+
+import discord
+from discord.ext import commands
 
 
 class XKCD:
@@ -12,6 +13,11 @@ class XKCD:
 
     @commands.command(pass_context=True)
     async def xkcd(self, ctx, number: int = None):
+        """
+        Get the current XKCD comic or a specific one
+        :param number: Comic number
+        :return: The comic you requested
+        """
         if number is None:
             with urllib.request.urlopen(self.current) as url:
                 data = json.loads(url.read().decode())

@@ -1,11 +1,12 @@
+import json
+
 import discord
 from discord.ext import commands
-import json
 from loguru import logger
 
 
 class reeeport:
-    """Report system for BL"""
+    """Report system for admins"""
 
     def __init__(self, bot):
         self.bot = bot
@@ -13,6 +14,9 @@ class reeeport:
     @commands.command(pass_context=True)
     @commands.has_permissions(manage_messages=True)
     async def setreport(self, ctx):
+        """
+        Sets the channel that reports come into.
+        """
         try:
             channel = ctx.message.channel.id
             server_id = ctx.message.server.id
@@ -30,6 +34,10 @@ class reeeport:
 
     @commands.command(pass_context=True)
     async def report(self, ctx, *, message: str):
+        """
+        For users to report something going wrong.
+        :param message: What you want included in the report
+        """
         server = ctx.message.server
         with open('data/report/info.json', 'r') as f:
             data = json.load(f)

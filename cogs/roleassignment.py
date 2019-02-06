@@ -1,12 +1,13 @@
+import json
+
 import discord
 from discord.ext import commands
-import json
 from loguru import logger
 
 
 class announcements:
     """
-    Assign/Design announcement role from user
+    Assign/Design announcement role from user for Announcements!
     """
 
     def __init__(self, bot):
