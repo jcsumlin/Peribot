@@ -1,4 +1,4 @@
-import configparser
+from configparser import *
 import glob
 import json
 import os
@@ -11,8 +11,8 @@ from loguru import logger
 #initiate logger test
 logger.add(f"file_{str(time.strftime('%Y%m%d-%H%M%S'))}.log", rotation="500 MB")
 
-config = configparser.ConfigParser()
-config.read('auth.ini')  # All my usernames and passwords for the api
+auth = ConfigParser()
+auth.read('auth.ini')  # All my usernames and passwords for the api
 
 def load_cogs(folder):
     os.chdir(folder)
@@ -28,7 +28,7 @@ def config():
         config = json.load(f)
         return config
 # bot_config = config()
-bot = commands.Bot(command_prefix="!")
+bot = commands.Bot(command_prefix=auth.get('discord', 'PREFIX'))
 
 @bot.event
 async def on_ready():
@@ -78,6 +78,4 @@ if __name__ == "__main__":
             logger.debug(f'Loaded {extension} cog.')
         except Exception as error:
             logger.exception(f"Extension {extension} could not be loaded. [{error}]")
-    config = configparser.ConfigParser()
-    config.read('auth.ini')  # All my usernames and passwords for the api
-    bot.run(config.get('discord', 'TOKEN'))
+    bot.run(auth.get('discord', 'TOKEN'))
