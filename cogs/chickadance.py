@@ -12,7 +12,7 @@ class Chikadance:
                       'https://cdn.discordapp.com/attachments/517546603473797141/540644284106276864/k757zzgurid21.gif']
 
     @commands.command(name='chika')
-    async def chickadance(self):
+    async def Chikadance(self):
        choice = random.choice(self.dance)
        await self.bot.say(choice)
 
