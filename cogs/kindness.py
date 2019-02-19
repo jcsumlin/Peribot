@@ -44,7 +44,7 @@ class Kindness:
         :return: The gif of your hug
         """
         if number is None:
-            file = str(random.randint(1,31)) + '.gif'
+            file = str(random.randint(1,33)) + '.gif'
         else:
             file = str(number) + '.gif'
         area = ctx.message.channel
