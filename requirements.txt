@@ -5,3 +5,4 @@ praw
 pillow
 giphypop
 beautifulsoup4
+psaw
