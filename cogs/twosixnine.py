@@ -1,23 +1,28 @@
 import discord
 from discord.ext import commands
 import praw
+from psaw import PushshiftAPI
 import os
 from .utils.dataIO import dataIO
 from loguru import logger
-
+import configparser
 
 class TwoSixNine:
     def __init__(self, bot):
         self.bot = bot
+        config = configparser.ConfigParser()
+        config.read('../auth.ini')
         # self.settings = dataIO.load_json("../config.json")
         try:
-            self.reddit = praw.Reddit(client_id=os.environ['REDDIT_CLIENT_ID'],
-                                 client_secret=os.environ['REDDIT_CLIENT_SECRET'],
-                                 password=os.environ['REDDIT_PASSWORD'],
+            reddit = praw.Reddit(client_id=config.get('reddit', 'REDDIT_CLIENT_ID'),
+                                 client_secret=config.get('reddit', 'REDDIT_CLIENT_SECRET'),
+                                 password=config.get('reddit', 'REDDIT_PASSWORD'),
                                  user_agent='SVTFOE command bot (by u/J_C___)',
-                                 username=os.environ['REDDIT_USERNAME'])
+                                 username=config.get('reddit', 'REDDIT_USERNAME'))
+            self.api = PushshiftAPI(reddit)
         except Exception as e:
-            logger.error("Cant connect to Reddit with these credentials")
+            logger.error(f"Cant connect to Reddit with these credentials {e}")
+
         self.twosixnine_scores = {'PhoenixVersion1':0,
                      'jeepdave':0,
                      'waspstinger106':0,
@@ -26,7 +31,8 @@ class TwoSixNine:
 
     def get_scores(self, user, score=0):
         try:
-            for submission in self.reddit.redditor(user).submissions.new(limit=500):
+            results = list(self.api.search_submissions(author=str(user), limit=2000, title='/269'))
+            for submission in results:
                 if '/269' in submission.title:
                     # print(submission.title + ':' + str(submission.score))
                     score = score + int(submission.score)
