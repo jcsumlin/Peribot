@@ -1,4 +1,5 @@
 from discord.ext import commands
+from loguru import logger
 
 
 class CursedPearl:
@@ -7,9 +8,11 @@ class CursedPearl:
 
 
     def serverCheck(self, ctx):
-        if ctx.message.server == '515370084538253333':
+        if ctx.message.server.id == '515370084538253333':
             return True
-        else: return False
+        else:
+            logger.debug(ctx.message.server.id)
+            return False
 
     @commands.command(pass_context=True, no_pm=True)
     async def levels(self, ctx):
