@@ -10,9 +10,7 @@ class CursedPearl:
     def serverCheck(self, ctx):
         if ctx.message.server.id == '515370084538253333':
             return True
-        else:
-            logger.debug(ctx.message.server.id)
-            return False
+        else: return False
 
     @commands.command(pass_context=True, no_pm=True)
     async def levels(self, ctx):
