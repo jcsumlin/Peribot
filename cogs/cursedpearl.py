@@ -6,19 +6,19 @@ class CursedPearl:
         self.bot = bot
 
 
-    async def serverCheck(self, ctx):
+    def serverCheck(self, ctx):
         if ctx.message.server == '515370084538253333':
             return True
         else: return False
 
     @commands.command(pass_context=True, no_pm=True)
     async def levels(self, ctx):
-        if await self.serverCheck(ctx):
+        if self.serverCheck(ctx):
             await self.bot.send_file(ctx.message.channel, "data/card.png")
 
     @commands.command(pass_context=True, no_pm=True)
     async def rank(self, ctx):
-        if await self.serverCheck(ctx):
+        if self.serverCheck(ctx):
             await self.bot.send_file(ctx.message.channel, "data/card.png")
 
 
