@@ -14,12 +14,12 @@ class CursedPearl:
     @commands.command(pass_context=True, no_pm=True)
     async def levels(self, ctx):
         if self.serverCheck(ctx):
-            await self.bot.send_file(ctx.message.channel, "../data/card.png")
+            await self.bot.send_file(ctx.message.channel, "data/card.png")
 
     @commands.command(pass_context=True, no_pm=True)
     async def rank(self, ctx):
         if self.serverCheck(ctx):
-            await self.bot.send_file(ctx.message.channel, "../data/card.png")
+            await self.bot.send_file(ctx.message.channel, "data/card.png")
 
 
 def setup(bot):
