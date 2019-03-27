@@ -22,3 +22,6 @@ class Reddit:
                 message = await self.bot.send_message(ctx.message.channel, embed=embed)
                 await self.bot.add_reaction(message, u"\u2705")
                 await self.bot.add_reaction(message, u"\u274C")
+
+def setup(bot):
+    bot.add_cog(Reddit(bot))
