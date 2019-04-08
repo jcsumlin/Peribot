@@ -49,20 +49,24 @@ class Management(object):
             await self.bot.send_message(ctx.message.channel,
                 f':x: Failed. \nYou may have entered the color incorrectly? \nCheck in case %s {e}' % color)
 
+
     @commands.command(name='gitpull', pass_context=True)
     async def git_pull(self, ctx):
-        git_dir = "./"
-        try:
-            g = git.cmd.Git(git_dir)
-            g.pull()
-            embed = discord.Embed(title="Successfully pulled from repository", color=0x00df00)
-            await self.bot.send_message(ctx.message.channel, embed=embed)
-        except Exception as e:
-            errno, strerror = e.args
-            embed = discord.Embed(title="Command Error!",
-                                  description=f"Git Pull Error: {errno} - {strerror}",
-                                  color=0xff0007)
-            await self.bot.send_message(ctx.message.channel, embed=embed)
+        if ctx.message.author.id == "204792579881959424":
+            git_dir = "./"
+            try:
+                g = git.cmd.Git(git_dir)
+                g.pull()
+                embed = discord.Embed(title="Successfully pulled from repository", color=0x00df00)
+                await self.bot.send_message(ctx.message.channel, embed=embed)
+            except Exception as e:
+                errno, strerror = e.args
+                embed = discord.Embed(title="Command Error!",
+                                      description=f"Git Pull Error: {errno} - {strerror}",
+                                      color=0xff0007)
+                await self.bot.send_message(ctx.message.channel, embed=embed)
+        else:
+            await self.bot.say("You don't have access to this command!")
 
 
     @commands.command(name='pin', pass_context=True)
