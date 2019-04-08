@@ -1,6 +1,8 @@
 import discord
 from discord.ext import commands
 from loguru import logger
+import git
+
 
 
 class Management(object):
@@ -47,25 +49,41 @@ class Management(object):
             await self.bot.send_message(ctx.message.channel,
                 f':x: Failed. \nYou may have entered the color incorrectly? \nCheck in case %s {e}' % color)
 
-#     @commands.command(name='pin', pass_context=True)
-#     @commands.has_permissions(manage_messages=True)
-#     async def pin_message(self, ctx, *, message):
-#         """Copy your message in a stylish and modern frame, and then fix it!
-#         Arguments:
-#         `: message` - message
-#         __ __
-#         For example:
-#         ```
-#         !pin This text was written by the ancient Elves in the name of Discord!
-#         ```
-#         """
-#         embed = discord.Embed(color=0x71f442,
-#                               title='Pin it up!',
-#                               description=message)
-#         embed.set_author(name=ctx.message.author.name, icon_url=ctx.message.author.avatar_url)
-#         embed.set_footer(text=f'{ctx.prefix}{ctx.command}')
-#         msg = await ctx.send(embed=embed)
-#         await msg.pin()
+    @commands.command(name='gitpull', pass_context=True)
+    async def git_pull(self, ctx):
+        git_dir = "./"
+        try:
+            g = git.cmd.Git(git_dir)
+            g.pull()
+            embed = discord.Embed(title="Successfully pulled from repository", color=0x00df00)
+            await self.bot.send_message(ctx.message.channel, embed=embed)
+        except Exception as e:
+            errno, strerror = e.args
+            embed = discord.Embed(title="Command Error!",
+                                  description=f"Git Pull Error: {errno} - {strerror}",
+                                  color=0xff0007)
+            await self.bot.send_message(ctx.message.channel, embed=embed)
+
+
+    @commands.command(name='pin', pass_context=True)
+    @commands.has_permissions(manage_messages=True)
+    async def pin_message(self, ctx, *, message):
+        """Copy your message in a stylish and modern frame, and then fix it!
+        Arguments:
+        `: message` - message
+        __ __
+        For example:
+        ```
+        !pin This text was written by the ancient Elves in the name of Discord!
+        ```
+        """
+        embed = discord.Embed(color=0x71f442,
+                              title='Pin it up!',
+                              description=message)
+        embed.set_author(name=ctx.message.author.name, icon_url=ctx.message.author.avatar_url)
+        embed.set_footer(text=f'{ctx.prefix}{ctx.command}')
+        msg = await self.bot.say(embed=embed)
+        await self.bot.pin_message(msg)
 #
 #     @commands.command(name='resetmute', pass_context=True)
 #     @commands.has_permissions(manage_roles=True)

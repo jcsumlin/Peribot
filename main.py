@@ -4,7 +4,7 @@ import os
 import re
 import time
 from configparser import *
-
+import discord
 from discord.ext import commands
 from loguru import logger
 
@@ -36,7 +36,6 @@ async def on_ready():
     When bot is ready and online it prints that its online
     :return:
     """
-    bot.remove_command('help')
     logger.debug("Bot is ready!")
 
 @bot.command(pass_context=True)
@@ -72,6 +71,7 @@ async def unload(extension):
 
 
 if __name__ == "__main__":
+    bot.remove_command('help')
     extensions = load_cogs('cogs')
     for extension in extensions:
         try:
