@@ -12,10 +12,6 @@ class Kindness:
         self.bot = bot
 
     @commands.command(pass_context=True)
-    async def test(self):
-        await self.bot.say("Hello")
-
-    @commands.command(pass_context=True)
     async def kiss(self, ctx, victim:discord.Member = None):
         """
         Kisses a user with a random gif from Giphy
