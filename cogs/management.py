@@ -87,6 +87,7 @@ class Management(object):
         embed.set_author(name=ctx.message.author.name, icon_url=ctx.message.author.avatar_url)
         embed.set_footer(text=f'{ctx.prefix}{ctx.command}')
         msg = await self.bot.say(embed=embed)
+        await self.bot.delete_message(ctx.message)
         await self.bot.pin_message(msg)
 #
 #     @commands.command(name='resetmute', pass_context=True)
