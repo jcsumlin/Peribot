@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/bash
 #   /$$$$$$$                     /$$ /$$                   /$$
 #  | $$__  $$                   |__/| $$                  | $$
 #  | $$  \ $$ /$$$$$$   /$$$$$$  /$$| $$$$$$$   /$$$$$$  /$$$$$$
@@ -8,13 +8,21 @@
 #  | $$     |  $$$$$$$| $$      | $$| $$$$$$$/|  $$$$$$/  |  $$$$/
 #  |__/      \_______/|__/      |__/|_______/  \______/    \___/
 
-docker build -t peribot .
-&& docker run
---env PREFIX=!
---env REDDIT_CLIENT_ID=
---env TOKEN=
---env REDDIT_CLIENT_SECRET=
---env REDDIT_PASSWORD=
---env REDDIT_USERNAME=
---name peribot
-peribot
+FAILS=0
+
+while true
+do
+  sleep 0.5
+  python3 main.py # your program
+  EXIT=$?
+  ((FAILS++))
+
+  if [[ $FAILS -gt 10 ]]
+  then
+    echo "[$(date)] failed to many times. aborting ..."
+    exit 1
+  fi
+
+  echo "[$(date)] bot exited with code $EXIT. restarting ..."
+
+done
