@@ -6,7 +6,7 @@ class Help:
         self.bot = bot
 
     @commands.command('help')
-    async def help(self):
+    async def help(self, ):
         embed = discord.Embed(title="Modular Discord bot made by J_C___#8947", color=0x93ff50)
         embed.set_author(name="Peribot", url="http://www.patreon.com/botboi")
         embed.set_thumbnail(url="https://pa1.narvii.com/6363/a99a0f938da2c75791c1cfd8a93173eaf6c54b6a_128.gif")
@@ -73,6 +73,14 @@ class Help:
         embed6.add_field(name="!streamalert [source] [url]", value="Example: !streamalert twitch https://www.twitch.tv/J_C___ This will alert this channel when the specified twitch user goes live.")
         embed6.add_field(name="!streamalert stop [url]", value="Example: !streamalert stop https://www.twitch.tv/J_C___ This will stop alerts in this channel.")
         embed6.add_field(name="!streamset mention [mention_type]", value="Sets mentions for stream alerts Types: everyone, here, none. Example: !streamset mention everyone")
+        embed7 = discord.Embed(title="Starboard Commands", color=0x6441a5)
+        embed7.set_thumbnail(url="https://cdn2.iconfinder.com/data/icons/gaming-platforms-logo-shapes/250/twitch_logo-256.png")
+        embed7.add_field(name="!starboard setup [channel] [emoji] [role]", value="Sets the starboard channel, emoji and role. All of the parameters are optional.")
+        embed7.add_field(name="!starboard ignore [channel]", value="This will ignore all starboard messages in this channel")
+        embed7.add_field(name="!starboard emoji [emoji]", value="Sets the emoji that the starboard tracks. Defaults to ⭐")
+        embed7.add_field(name="!starboard channel [channel]", value="Sets the channel that the starboard resides in.")
+        embed7.add_field(name="!starboard threshold [threshold]", value="Sets the threshold of 'stars' required for a post to make it to the starboard.")
+        embed7.add_field(name="!starboard clear", value="Clears the database of previous starred messages.")
 
         await self.bot.say(embed=embed)
         await self.bot.say(embed=embed2)
@@ -80,6 +88,7 @@ class Help:
         await self.bot.say(embed=embed4)
         await self.bot.say(embed=embed5)
         await self.bot.say(embed=embed6)
+        await self.bot.say(embed=embed7)
 
 def setup(bot):
     bot.add_cog(Help(bot))
