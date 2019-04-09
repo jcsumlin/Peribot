@@ -76,7 +76,7 @@ class Help:
         embed6.add_field(name="!streamalert [source] [url]", value="Example: !streamalert twitch https://www.twitch.tv/J_C___ This will alert this channel when the specified twitch user goes live.")
         embed6.add_field(name="!streamalert stop [url]", value="Example: !streamalert stop https://www.twitch.tv/J_C___ This will stop alerts in this channel.")
         embed6.add_field(name="!streamset mention [mention_type]", value="Sets mentions for stream alerts Types: everyone, here, none. Example: !streamset mention everyone")
-        embed7 = discord.Embed(title="Starboard Commands", color=0x6441a5)
+        embed7 = discord.Embed(title="Starboard Commands", color=0x93ff50)
         embed7.set_thumbnail(url="https://66.media.tumblr.com/6a26e7bb8eb024d8a8b5ee7eef1ac04f/tumblr_p0xl72aK9y1vdwh7uo2_500.gif")
         embed7.add_field(name="!starboard setup [channel] [emoji] [role]", value="Sets the starboard channel, emoji and role. All of the parameters are optional.")
         embed7.add_field(name="!starboard ignore [channel]", value="This will ignore all starboard messages in this channel")
