@@ -72,7 +72,7 @@ class Fun:
 
 
     async def on_message(self, message):
-        if message.lower() == "f":
+        if message.content.lower() == "f":
             await self.bot.add_reaction(u"\U0001F1EA")
 
 
