@@ -71,5 +71,10 @@ class Fun:
             await self.bot.say("*flips a coin and... " + choice(["HEADS!*", "TAILS!*"]))
 
 
+    async def on_message(self, message):
+        if message.lower() == "f":
+            await self.bot.add_reaction(u"\U0001F1EA")
+
+
 def setup(bot):
     bot.add_cog(Fun(bot))
