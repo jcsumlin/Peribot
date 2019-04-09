@@ -58,8 +58,11 @@ class Help:
         embed4.add_field(name="!urban [word] [definition number]",
                          value="Uses Urban Dictionary to define a word. Example: !urban hello. If there is more than one definition you can return a specific definition by secifying its number",
                          inline=False)
-        embed4.add_field(name="!remindme [quantity]  [time_unit] [text]",
+        embed4.add_field(name="!remindme [quantity] [time_unit] [text]",
                          value="Sends you <text> when the time is up. Accepts: minutes, hours, days, weeks, month. Example: !remindme 3 days Have sushi with Asu and JennJenn",
+                         inline=False)
+        embed4.add_field(name="!remindhere [quantity] [time_unit] [text]",
+                         value="Sends a channel <text> when the time is up. Accepts: minutes, hours, days, weeks, month. Example: !remindhere 3 days Have sushi with Asu and JennJenn. Will use @here! and requires role with name 'RemindHere'",
                          inline=False)
         embed4.add_field(name="!forgetme", value="Removes all your upcoming notifications", inline=False)
         embed5 = discord.Embed(title="Kindness Commands", color=0x93ff50)
