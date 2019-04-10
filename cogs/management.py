@@ -358,14 +358,16 @@ class Management(object):
         `:reason` - Reason for kick
 
         """
-        await self.bot.kick(member=member, reason=reason)
-
+        try:
+            await self.bot.kick(member=member, reason=reason)
+        except Exception as e:
+            await self.bot.send_message("error: " + e)
         embed = discord.Embed(timestamp=ctx.message.created_at, color=0x00ff00,
                               description=f'User {member} was kicked.\nReason: {reason}.')
         embed.set_author(name=ctx.message.author.name, icon_url=ctx.message.author.avatar_url)
         embed.set_footer(text=f'{ctx.prefix}{ctx.command}')
 
-        await ctx.send(embed=embed)
+        await self.bot.send_message(embed=embed)
 
 
 def setup(bot):
