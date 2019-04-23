@@ -65,16 +65,13 @@ class Wander:
                 lines.append(line)
         else:
             lines.append(message)
-        color = '#FFFFFF'  # black color
-        outline = '#FFFFFF'
+        outline = '#000000'
         y = int(image.size[1] * 3 / 4)
         numberOfLines = 0
         for line in lines:
             textWidth = font.getsize(line)[0]
             center = (int(image.size[0] / 2 - textWidth / 2), y)
             draw.text(center, line, outline, font)
-            font1 = ImageFont.truetype('data/theboldfont.ttf', fontSize-1)
-            draw.text(center, line, color, font1)
             y += font.getsize(line)[1]
             numberOfLines += 1
         image.save('data/wander-edit.png')
