@@ -65,6 +65,14 @@ class Trap:
             increment += 1
         await self.bot.say(embed=embed)
 
+    @trap.group()
+    async def remove(self, link):
+        try:
+            self.trap_gifs.remove(link)
+            dataIO.save_json('data/lewd/traps/traps.json', self.trap_gifs)
+            await self.bot.say("That trap link was successfully removed")
+        except:
+            await self.bot.say("Couldn't remove that trap.. Are you sure its in the list? Try !trap list to see")
 
 def setup(bot):
     bot.add_cog(Trap(bot))
