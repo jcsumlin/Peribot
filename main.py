@@ -1,10 +1,10 @@
-from configparser import *
 import glob
 import json
 import os
 import re
 import time
-
+from configparser import *
+import discord
 from discord.ext import commands
 from loguru import logger
 
@@ -71,6 +71,7 @@ async def unload(extension):
 
 
 if __name__ == "__main__":
+    bot.remove_command('help')
     extensions = load_cogs('cogs')
     for extension in extensions:
         try:

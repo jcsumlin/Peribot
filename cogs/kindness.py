@@ -11,7 +11,6 @@ class Kindness:
     def __init__(self, bot):
         self.bot = bot
 
-
     @commands.command(pass_context=True)
     async def kiss(self, ctx, victim:discord.Member = None):
         """

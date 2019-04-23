@@ -3,6 +3,7 @@ from random import choice
 
 import discord
 from discord.ext import commands
+from loguru import logger
 
 
 class Fun:
@@ -69,6 +70,14 @@ class Fun:
             await self.bot.say(msg + "(╯°□°）╯︵ " + name[::-1])
         else:
             await self.bot.say("*flips a coin and... " + choice(["HEADS!*", "TAILS!*"]))
+
+
+    async def on_message(self, message):
+        if message.content.lower() == "f":
+            await self.bot.add_reaction(message, u"\U0001F1EB")
+
+        if message.channel.type == "dm":
+            logger.info("dm: " + message.content)
 
 
 def setup(bot):
