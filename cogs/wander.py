@@ -76,7 +76,7 @@ class Wander:
             numberOfLines += 1
         image.save('data/wander-edit.png')
         area = ctx.message.channel
-        with open('data/wander.png', 'rb') as file:
+        with open('data/wander-edit.png', 'rb') as file:
             await self.bot.send_file(area, file)
 
 def setup(bot):
