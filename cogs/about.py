@@ -1,5 +1,6 @@
-from discord.ext import commands
 import discord
+from discord.ext import commands
+
 
 class Help:
     def __init__(self, bot):
@@ -23,6 +24,12 @@ class Help:
         embed2.add_field(name="!penis [user]", value="Detects user's penis length (This is 100% accurate.)", inline=False)
         embed2.add_field(name="!trap",
                          value="Returns either a gif of Star Wars Trap or Anime Trap... Are you a gambling man?", inline=False)
+        embed2.add_field(name="!trap add [link to gif]",
+                         value="Adds your own traps to the rotation!", inline=False)
+        embed2.add_field(name="!trap list",
+                         value="Returns a list of the current traps in the rotation", inline=False)
+        embed2.add_field(name="!trap remove [link]",
+                         value="Removes a specific trap from tbe rotation", inline=False)
         embed3 = discord.Embed(title="Custom Commands", color=0x93ff50)
         embed3.set_thumbnail(url="http://pa1.narvii.com/6520/ee53df0ba159bbebb84d3d7ed35bf89e8e978ac5_128.gif")
         embed3.add_field(name="!cc add [command-name] [result]",
