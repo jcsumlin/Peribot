@@ -57,7 +57,7 @@ class Trap:
                 await self.bot.say("Trap failed to add!")
 
     @trap.group()
-    async def list(self, ctx):
+    async def list(self):
         embed = discord.Embed(title="Current List of trap Gifs/Images")
         increment = 1
         for link in self.trap_gifs:
