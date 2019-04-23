@@ -56,5 +56,15 @@ class Trap:
             except:
                 await self.bot.say("Trap failed to add!")
 
+    @trap.group()
+    async def list(self, ctx):
+        embed = discord.Embed(title="Current List of trap Gifs/Images")
+        increment = 1
+        for link in self.trap_gifs:
+            embed.add_field(value=link, name=str(increment))
+            increment += 1
+        await self.bot.say(embed=embed)
+
+
 def setup(bot):
     bot.add_cog(Trap(bot))
