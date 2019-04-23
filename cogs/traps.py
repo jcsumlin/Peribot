@@ -37,8 +37,12 @@ class Trap:
         if ("https://" in ctx.message.content.lower() or "http://" in ctx.message.content.lower()):
             url_pattern = "http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+"
             url = re.search(url_pattern, ctx.message.content.lower()).group(0)
-            self.trap_gifs.append(url)
-            dataIO.save_json('data/lewd/traps/traps.json', self.trap_gifs)
+            try:
+                self.trap_gifs.append(url)
+                dataIO.save_json('data/lewd/traps/traps.json', self.trap_gifs)
+                await self.bot.say("Trap added successfully!")
+            except:
+                await self.bot.say("Trap failed to add!")
         else:
             try:
                 # normal submit.
@@ -48,8 +52,9 @@ class Trap:
                 url = jsondict['url']
                 self.trap_gifs.append(url)
                 dataIO.save_json('data/lewd/traps/traps.json', self.trap_gifs)
+                await self.bot.say("Trap added successfully!")
             except:
-                pass
+                await self.bot.say("Trap failed to add!")
 
 def setup(bot):
     bot.add_cog(Trap(bot))
