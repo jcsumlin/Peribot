@@ -68,7 +68,7 @@ class CursedPearl:
         logger.info(thumbnail)
         logger.info(color)
 
-        embed = discord.Embed(title=quote, description='- ' + author, color=color)
+        embed = discord.Embed(title=quote, description=author, color=color)
         embed.set_thumbnail(url=thumbnail)
         self.bot.send_message(ctx.message.channel, embed=embed)
 
