@@ -40,8 +40,8 @@ class CursedPearl:
             embed.set_footer(text="This is a random gif from Giphy using the search term 'Peridot'")
             await self.bot.say(embed=embed)
 
-    @commands.command()
-    async def quote(self):
+    @commands.command(pass_context=True)
+    async def quote(self,ctx):
         index = random.randint(0,len(self.quotes))
         quote = self.quotes[index]
         author = self.author[index]
@@ -70,7 +70,7 @@ class CursedPearl:
 
         embed = discord.Embed(title=quote, description='- ' + author, color=color)
         embed.set_thumbnail(url=thumbnail)
-        self.bot.say(embed=embed)
+        self.bot.send_message(ctx.message.channel, embed=embed)
 
 def setup(bot):
     bot.add_cog(CursedPearl(bot))
