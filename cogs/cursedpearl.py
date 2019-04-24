@@ -42,8 +42,8 @@ class CursedPearl:
     @commands.command()
     async def quote(self):
         index = random.randint(0,len(self.quotes))
-        quote = self.quotes(index)
-        author = self.author(index)
+        quote = self.quotes[index]
+        author = self.author[index]
         if 'Pearl' in author:
             thumbnail = 'https://i.lensdump.com/i/Agxrvq.png'
             color = 0xf7ceb2
