@@ -70,7 +70,7 @@ class CursedPearl:
 
         embed = discord.Embed(title=quote, description=author, color=color)
         embed.set_thumbnail(url=thumbnail)
-        self.bot.send_message(ctx.message.channel, embed=embed)
+        await self.bot.send_message(ctx.message.channel, embed=embed)
 
 def setup(bot):
     bot.add_cog(CursedPearl(bot))
