@@ -3,6 +3,7 @@ import random
 import discord
 import giphypop
 from discord.ext import commands
+from loguru import logger
 
 from .utils.dataIO import fileIO
 
@@ -62,6 +63,10 @@ class CursedPearl:
         elif 'Peridot' in author:
             thumbnail = 'https://i.lensdump.com/i/AgxC3k.png'
             color = 0x3c796a
+        logger.info(quote)
+        logger.info(author)
+        logger.info(thumbnail)
+        logger.info(color)
 
         embed = discord.Embed(title=quote, description='- ' + author, color=color)
         embed.set_thumbnail(url=thumbnail)
