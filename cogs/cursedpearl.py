@@ -41,7 +41,7 @@ class CursedPearl:
 
     @commands.command(pass_context=True)
     async def quote(self,ctx):
-        index = random.randint(0,len(self.quotes))
+        index = random.randint(0,len(self.quotes) - 1)
         quote = self.quotes[index]
         author = self.author[index]
         if 'Pearl' in author:
