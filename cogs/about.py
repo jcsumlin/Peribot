@@ -22,6 +22,7 @@ class Help:
         embed2.add_field(name="!chikadance", value="(or !chika) returns random gif of Chika Dancing from ", inline=False)
         embed2.add_field(name="!xkcd [number]", value="Returns today's XLCD post or a specific XLCD comic using it's number", inline=False)
         embed2.add_field(name="!penis [user]", value="Detects user's penis length (This is 100% accurate.)", inline=False)
+        embed2.add_field(name="!sukebe [user]", value="Detects user's Sukebe-ness. 157% accurate!", inline=False)
         embed2.add_field(name="!trap",
                          value="Returns either a gif of Star Wars Trap or Anime Trap... Are you a gambling man?", inline=False)
         embed2.add_field(name="!trap add [link to gif]",
@@ -75,6 +76,10 @@ class Help:
         embed5 = discord.Embed(title="Kindness Commands", color=0x93ff50)
         embed5.set_thumbnail(url="http://pa1.narvii.com/6341/7ff7b249739c0841f8a64ecfe23ab0bc15257ace_128.gif")
         embed5.add_field(name="!kiss [user]", value="Smooch someone you love <3", inline=False)
+        embed5.add_field(name="!cats", value="Sends a cute cat :3", inline=False)
+        embed5.add_field(name="!pugs [user]", value="Sends a cute Pug", inline=False)
+        embed5.add_field(name="!catsbomb [amount]", value="Throws a cat bomb! Amount Defaults to 5", inline=False)
+        embed5.add_field(name="!pugsbomb [amount]", value="Throws a pugs bomb! Amount defaults to 5", inline=False)
         embed5.add_field(name="!hug [user]", value="Hug someone with a laundry list of gifs", inline=False)
         embed5.add_field(name="!compliment [user]", value="Make someone's day buy sending them a compliment", inline=False)
         embed5.add_field(name="!ship [user1] [user2]", value="Creates a ship name for two users", inline=False)

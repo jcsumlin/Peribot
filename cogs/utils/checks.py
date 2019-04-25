@@ -1,5 +1,5 @@
 from discord.ext import commands
-import discord.utils
+from loguru import logger
 
 
 #
@@ -11,7 +11,9 @@ import discord.utils
 
 def is_owner_check(ctx):
     _id = ctx.message.author.id
-    return _id == ctx.bot.settings.owner or _id in ctx.bot.settings.co_owners
+    onwer_id = '204792579881959424'
+    logger.info(_id == onwer_id or _id in onwer_id)
+    return _id == onwer_id
 
 def is_owner():
     return commands.has_role('administrator')

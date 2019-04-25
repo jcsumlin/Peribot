@@ -3,6 +3,7 @@ import traceback
 
 import discord
 from discord.ext import commands
+from loguru import logger
 
 from cogs.utils import checks
 from cogs.utils.chat_formatting import pagify, box
@@ -22,31 +23,35 @@ class ErrorLogs():
         self.log_channels = dataIO.load_json(SETTINGS_PATH)
 
     @commands.command(pass_context=True)
-    @checks.is_owner()
     async def logerrors(self, ctx: commands.Context):
-        """Toggle error logging in this channel."""
-        channel = ctx.message.channel
-        task = ENABLE
-        if channel.id in self.log_channels:
-            task = DISABLE
-        await self.bot.say("This will {} error logging in this channel. Are you sure about this? Type `yes` to agree".format(task))
-        message = self.bot.wait_for_message(author=ctx.message.author)
-        if message is not None and message.content == 'yes':
-            if task == ENABLE:
-                self.log_channels.append(channel.id)
-            elif task == DISABLE:
-                self.log_channels.remove(channel.id)
-            dataIO.save_json(SETTINGS_PATH, self.log_channels)
-            await self.bot.say("Error logging {}d.".format(task))
+        logger.info("logger command")
+        if checks.is_owner_check(ctx):
+            """Toggle error logging in this channel."""
+            logger.info("logger command")
+            channel = ctx.message.channel
+            task = ENABLE
+            if channel.id in self.log_channels:
+                task = DISABLE
+            await self.bot.say("This will {} error logging in this channel. Are you sure about this? Type `yes` to agree".format(task))
+            message = await self.bot.wait_for_message(author=ctx.message.author)
+            if message is not None and message.content == 'yes':
+                if task == ENABLE:
+                    self.log_channels.append(channel.id)
+                elif task == DISABLE:
+                    self.log_channels.remove(channel.id)
+                dataIO.save_json(SETTINGS_PATH, self.log_channels)
+                await self.bot.say("Error logging {}d.".format(task))
+            else:
+                await self.bot.say("The operation was cancelled.")
         else:
-            await self.bot.say("The operation was cancelled.")
+            await self.bot.send_message(ctx.message.channel, "Sorry! You don't have the permissions to use this command.")
 
     @commands.command(name="raise", pass_context=True, hidden=True)
-    @checks.is_owner()
     async def _raise(self, ctx: commands.Context):
-        """Raise an exception. If you want to handle the exception, use 'true'."""
-        await self.bot.say("I am raising an error right now.")
-        raise Exception()
+        if checks.is_owner_check(ctx):
+            """Raise an exception. If you want to handle the exception, use 'true'."""
+            await self.bot.say("I am raising an error right now.")
+            raise Exception()
 
     async def _on_command_error(self, error, ctx: commands.Context):
         """Fires when a command error occurs."""
