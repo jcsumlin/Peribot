@@ -48,7 +48,7 @@ class Animal:
         try:
             async with self.session.get(search) as r:
                 result = await r.json()
-            await self.bot.say(embed=embed(image=result['url'], color=random.randint(0, 0xffffff)))
+            await self.bot.say(embed=embed(image=result['pug'], color=random.randint(0, 0xffffff)))
         except:
             await self.bot.say("Could Not Get An Image")
 
