@@ -30,7 +30,7 @@ class ErrorLogs():
         if channel.id in self.log_channels:
             task = DISABLE
         await self.bot.say("This will {} error logging in this channel. Are you sure about this? Type `yes` to agree".format(task))
-        message = await self.bot.wait_for_message(author=ctx.message.author)
+        message = self.bot.wait_for_message(author=ctx.message.author)
         if message is not None and message.content == 'yes':
             if task == ENABLE:
                 self.log_channels.append(channel.id)
