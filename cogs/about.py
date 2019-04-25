@@ -54,7 +54,10 @@ class Help:
                          inline=False)
         embed4.add_field(name="!eightball [question]", value="(or !8b) Ask the magic conch your deepest questions",
                         inline=False)
+
         embed4.add_field(name="!ping", value="Pong!",
+                         inline=False)
+        embed4.add_field(name="!avatar [User]", value="Sends the [user]'s Discord Avatar",
                          inline=False)
         embed4.add_field(name="!pin [message]", value="Copy your message in a stylish and modern frame, and then fix it!",
                          inline=False)
