@@ -100,5 +100,43 @@ class Help:
         await self.bot.say(embed=embed6)
         await self.bot.say(embed=embed7)
 
+    @commands.command(aliases=['server', 'sinfo', 'si'], pass_context=True)
+    async def serverinfo(self, ctx):
+        """Various info about the server. !help server for more info."""
+        server = ctx.message.server
+        online = 0
+        for i in server.members:
+            if str(i.status) == 'online' or str(i.status) == 'idle' or str(i.status) == 'dnd':
+                online += 1
+        all_users = []
+        for user in server.members:
+            all_users.append('{}#{}'.format(user.name, user.discriminator))
+        all_users.sort()
+        all = '\n'.join(all_users)
+
+        channel_count = len(
+            [x for x in server.channels if type(x) == self.bot.get_all_channels()])
+
+        role_count = len(server.roles)
+        emoji_count = len(server.emojis)
+
+        em = discord.Embed(color=0xea7938)
+        em.add_field(name='Name', value=server.name)
+        em.add_field(name='Owner', value=server.owner, inline=False)
+        em.add_field(name='Members', value=server.member_count)
+        em.add_field(name='Currently Online', value=online)
+        em.add_field(name='Text Channels', value=str(channel_count))
+        em.add_field(name='Region', value=server.region)
+        em.add_field(name='Verification Level', value=str(server.verification_level))
+        em.add_field(name='Highest role', value=server.role_hierarchy[0])
+        em.add_field(name='Number of roles', value=str(role_count))
+        em.add_field(name='Number of emotes', value=str(emoji_count))
+        em.add_field(name='Created At',
+                     value=server.created_at.__format__('%A, %d. %B %Y @ %H:%M:%S'))
+        em.set_thumbnail(url=server.icon_url)
+        em.set_author(name='Server Info', icon_url='https://i.imgur.com/RHagTDg.png')
+        em.set_footer(text='Server ID: %s' % server.id)
+        message = await self.bot.send_message(ctx.message.channel, embed=em)
+
 def setup(bot):
     bot.add_cog(Help(bot))
