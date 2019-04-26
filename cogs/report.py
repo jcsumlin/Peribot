@@ -4,6 +4,8 @@ import discord
 from discord.ext import commands
 from loguru import logger
 
+from .utils.easyembed import embed
+
 
 class reeeport:
     """Report system for admins"""
@@ -56,6 +58,17 @@ class reeeport:
             "Your report has been sent, the mods will look in to it as soon as possible.")
         # break
 
+    @commands.command(pass_context=True)
+    @commands.has_permissions(manage_messages=True)
+    async def warn(self, ctx, user: discord.User = None, reason = None):
+        if user is None and reason is None:
+            await self.bot.send_message(ctx.message.channel, embed(title="Sorry thats not how this command workd!", description="ex: !warn @user Stop spamming please"))
+        elif user is not None and reason is None:
+            await self.bot.send_message(ctx.message.channel, embed(title="Sorry thats not how this command workd!", description="ex: !warn @user Stop spamming please"))
+        elif user is not None and reason is not None:
+            await self.bot.send_message(user,
+                                        embed(title=f"Hey there {user.name} the mods from {ctx.message.server.name} have warned you!",
+                                              description=f"Their reason is as follows: {reason}"))
 
 def setup(bot):
     bot.add_cog(reeeport(bot))
