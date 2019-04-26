@@ -35,28 +35,37 @@ class reeeport:
 
 
     @commands.command(pass_context=True)
-    async def report(self, ctx, *, message: str):
+    async def report(self, ctx, server_id: int = None, *, message: str):
         """
         For users to report something going wrong.
         :param message: What you want included in the report
         """
-        server = ctx.message.server
-        with open('data/report/info.json', 'r') as f:
-            data = json.load(f)
-            if server.id not in data.keys():
-                logger.debug(f"No channel ID set for reports! {server.id}")
-                return
-            channel = data[server.id]
-        member = ctx.message.author
-
-        em = discord.Embed(title="Report Case", description=message)
-        em.add_field(name="author", value=member)
-        em.set_footer(text=f"#{ctx.message.channel}")
-        await self.bot.send_message(self.bot.get_channel(id=channel), embed=em)
-        # await self.bot.send_message(self.bot.get_channel(id=channel), '@here')
-        await self.bot.say(
-            "Your report has been sent, the mods will look in to it as soon as possible.")
-        # break
+        if ctx.message.channel.is_private:
+            if server_id is None:
+                await self.bot.send_message(ctx.message.author,
+                                            embed=embed(
+                                                title="No Server ID Specified!",
+                                                description="!report [server-id] [message]. You can get the server ID from right clicking on the Server icon and selecting 'Copy ID'"))
+            else:
+                server_id = str(server_id)
+                with open('data/report/info.json', 'r') as f:
+                    data = json.load(f)
+                    if server_id not in data.keys():
+                        logger.debug(f"No channel ID set for reports! {server_id}")
+                        await self.bot.say(embed(
+                            title="Invalid Server ID!",
+                            description="Either this server hasn't specified a channel to recieve reports or that ID you gave me is not a valid server ID"))
+                        return
+                    channel = data[server_id]
+                member = ctx.message.author
+                em = discord.Embed(title="Report Case", description=message)
+                em.add_field(name="author", value=member)
+                em.set_footer(text=f"#{ctx.message.channel}")
+                await self.bot.send_message(self.bot.get_channel(id=channel), embed=em)
+                # await self.bot.send_message(self.bot.get_channel(id=channel), '@here')
+                await self.bot.say(
+                    "Your report has been sent, the mods will look in to it as soon as possible.")
+                # break
 
     @commands.command(pass_context=True)
     @commands.has_permissions(manage_messages=True)
