@@ -6,7 +6,7 @@ class Help:
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command('help')
+    @commands.command('help', aliases=["phelp"])
     async def help(self, ):
         embed = discord.Embed(title="Modular Discord bot made by J_C___#8947", color=0x93ff50)
         embed.set_author(name="Peribot", url="http://www.patreon.com/botboi")
