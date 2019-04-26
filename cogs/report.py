@@ -69,6 +69,10 @@ class reeeport:
             await self.bot.send_message(user,
                                         embed = embed(title=f"Hey there {user.name} the mods from {ctx.message.server.name} have warned you!",
                                               description=f"Their reason is as follows: {reason}"))
+            await self.bot.send_message(ctx.message.channel,
+                                        embed=embed(
+                                            title="User has been warned in the DM's",
+                                            color=discord.Color.green()))
 
 def setup(bot):
     bot.add_cog(reeeport(bot))
