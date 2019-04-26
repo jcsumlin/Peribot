@@ -67,7 +67,7 @@ class reeeport:
             await self.bot.send_message(ctx.message.channel, embed(title="Sorry thats not how this command workd!", description="ex: !warn @user Stop spamming please"))
         elif user is not None and reason is not None:
             await self.bot.send_message(user,
-                                        embed(title=f"Hey there {user.name} the mods from {ctx.message.server.name} have warned you!",
+                                        embed = embed(title=f"Hey there {user.name} the mods from {ctx.message.server.name} have warned you!",
                                               description=f"Their reason is as follows: {reason}"))
 
 def setup(bot):
