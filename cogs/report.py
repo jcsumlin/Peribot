@@ -60,7 +60,7 @@ class reeeport:
 
     @commands.command(pass_context=True)
     @commands.has_permissions(manage_messages=True)
-    async def warn(self, ctx, user: discord.User = None, reason = None):
+    async def warn(self, ctx, user: discord.User = None, *, reason = None):
         if user is None and reason is None:
             await self.bot.send_message(ctx.message.channel, embed(title="Sorry thats not how this command workd!", description="ex: !warn @user Stop spamming please"))
         elif user is not None and reason is None:
