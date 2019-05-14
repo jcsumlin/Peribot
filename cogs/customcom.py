@@ -6,6 +6,8 @@ import os
 import re
 import json
 from loguru import logger
+import configparser
+
 
 
 class CustomCommands:
@@ -17,6 +19,8 @@ class CustomCommands:
         self.bot = bot
         self.file_path = "data/customcom/commands.json"
         self.c_commands = dataIO.load_json(self.file_path)
+        self.config = configparser.ConfigParser()
+        self.config.read('../auth.ini')
 
     @commands.group(aliases=["cc"], pass_context=True, no_pm=True)
     async def customcom(self, ctx):
@@ -144,11 +148,9 @@ class CustomCommands:
 
     def get_prefix(self, message):
         try:
-            with open('../config.json', 'r') as f:
-                config = json.load(f)
-                p = config['command-prefix']
-                if message.content.startswith(p):
-                    return p
+            p = self.config.get('discord', 'PREFIX')
+            if message.content.startswith(p):
+                return p
         except Exception as error:
             logger.exception(error)
         return False
