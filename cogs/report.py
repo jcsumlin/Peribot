@@ -17,7 +17,7 @@ class reeeport:
 
     def __init__(self, bot):
         self.bot = bot
-        engine = create_engine('sqlite:///data/warnings.db')
+        engine = create_engine('sqlite:///cogs/data/warnings.db')
         Base.metadata.bind = engine
         DBSession = sessionmaker(bind=engine)
         self.session = DBSession()  # session.commit() to store data, and session.rollback() to discard changes
