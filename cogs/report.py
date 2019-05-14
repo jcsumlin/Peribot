@@ -96,9 +96,7 @@ class reeeport:
                                         embed=embed(title="Sorry thats not how this command workd!",
                                                     description="ex: !warn add [user id] Stop spamming please"))
         elif user_id is not None and reason is not None:
-            logger.info(user_id)
             user = await self.bot.get_user_info(user_id)
-            logger.info(user.name)
             try:
                 new_report = Report(date=datetime.utcnow(), server_id=str(ctx.message.server.id),
                                     user_name=user.name, user_id=str(user_id),
@@ -122,8 +120,6 @@ class reeeport:
     async def list(self, ctx):
         reports = self.session.query(Report).filter(Report.server_id == str(ctx.message.server.id)).all()
         users = {}
-        logger.info(reports)
-        logger.info(len(reports))
         if len(reports) == 0:
             await self.bot.send_message(ctx.message.channel, "There have been no users warned on this server yet.")
         else:
@@ -137,7 +133,18 @@ class reeeport:
                 embed.add_field(name=user, value=str(number_of_reports))
             await self.bot.send_message(ctx.message.channel, embed=embed)
 
-
+    @warn.group(pass_context=True, name="reason")
+    async def info(self, ctx, user_id):
+        reports = self.session.query(Report).filter(Report.server_id == str(ctx.message.server.id) and Report.user_id == str(user_id)).all()
+        if len(reports) == 0:
+            await self.bot.send_message(ctx.message.channel,
+                                        "That user has no warnings logged at this time.")
+        else:
+            user = await self.bot.get_user_info(user_id)
+            embed = discord.Embed(title=f"Warnings for {user.name} are as follows:")
+            for report in reports:
+                embed.add_field(name=f"{report.date} by {report.mod_name}", value=report.reason, )
+            await self.bot.send_message(ctx.message.channel, embed=embed)
 
 def setup(bot):
     bot.add_cog(reeeport(bot))
