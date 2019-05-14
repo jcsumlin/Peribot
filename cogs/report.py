@@ -8,7 +8,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 # declaration for User class is in here
-from .utils.create_databases import Base, Report
+from create_databases import Base, Report
 from .utils.easyembed import embed
 
 
@@ -17,7 +17,7 @@ class reeeport:
 
     def __init__(self, bot):
         self.bot = bot
-        engine = create_engine('sqlite:///cogs/data/warnings.db')
+        engine = create_engine('sqlite:///warnings.db')
         Base.metadata.bind = engine
         DBSession = sessionmaker(bind=engine)
         self.session = DBSession()  # session.commit() to store data, and session.rollback() to discard changes
@@ -78,36 +78,54 @@ class reeeport:
 
     @commands.group(pass_context=True)
     @commands.has_permissions(manage_messages=True)
-    async def warn(self, ctx, user_id = None, *, reason = None):
+    async def warn(self, ctx):
         if ctx.invoked_subcommand is None:
-            if user_id is None and reason is None:
-                await self.bot.send_message(ctx.message.channel, embed(title="Sorry thats not how this command workd!", description="ex: !warn @user Stop spamming please"))
-            elif user_id is not None and reason is None:
-                await self.bot.send_message(ctx.message.channel, embed(title="Sorry thats not how this command workd!", description="ex: !warn @user Stop spamming please"))
-            elif user_id is not None and reason is not None:
-                user = await self.bot.get_user(user_id)
-                try:
-                    new_report = Report(date=datetime.utcnow(), server_id=str(ctx.message.server.id),
-                                        user_name=user.name, user_id=str(user_id), mod_name=str(ctx.message.author.name),
-                                        mod_id=str(ctx.message.author.id), reason=reason)
-                    self.session.add(new_report)
-                    self.session.commit()
-                except:
-                    self.bot.send_message(ctx.message.channel, embed=embed(title="Error adding report to databse"))
-                await self.bot.send_message(user,
-                                            embed = embed(title=f"Hey there {user.name} the mods from {ctx.message.server.name} have warned you!",
-                                                  description=f"Their reason is as follows: {reason}"))
+            await self.bot.send_message(ctx.message.channel,
+                                        embed=embed(title="Sorry thats not how this command workd!",
+                                                    description="ex: !warn add [user id] Stop spamming please"))
+
+    @warn.group(pass_context=True, name="add", aliases=['user'])
+    @commands.has_permissions(manage_messages=True)
+    async def add(self, ctx, user_id = None, *, reason = None):
+        if user_id is None and reason is None:
+            await self.bot.send_message(ctx.message.channel,
+                                        embed=embed(title="Sorry thats not how this command workd!",
+                                                    description="ex: !warn add [user id] Stop spamming please"))
+        elif user_id is not None and reason is None:
+            await self.bot.send_message(ctx.message.channel,
+                                        embed=embed(title="Sorry thats not how this command workd!",
+                                                    description="ex: !warn add [user id] Stop spamming please"))
+        elif user_id is not None and reason is not None:
+            logger.info(user_id)
+            user = await self.bot.get_user_info(user_id)
+            logger.info(user.name)
+            try:
+                new_report = Report(date=datetime.utcnow(), server_id=str(ctx.message.server.id),
+                                    user_name=user.name, user_id=str(user_id),
+                                    mod_name=str(ctx.message.author.name),
+                                    mod_id=str(ctx.message.author.id), reason=reason)
+                self.session.add(new_report)
+                self.session.commit()
+            except:
                 await self.bot.send_message(ctx.message.channel,
-                                            embed=embed(
-                                                title="User has been warned in the DM's",
-                                                color=discord.Color.green()))
+                                      embed=embed(title="Error adding report to databse"))
+            await self.bot.send_message(user,
+                                        embed=embed(
+                                            title=f"Hey there {user.name} the mods from {ctx.message.server.name} have warned you!",
+                                            description=f"Their reason is as follows: {reason}"))
+            await self.bot.send_message(ctx.message.channel,
+                                        embed=embed(
+                                            title="User has been warned in the DM's",
+                                            color=discord.Color.green()))
 
     @warn.group(pass_context=True, name="list")
     async def list(self, ctx):
         reports = self.session.query(Report).filter(Report.server_id == str(ctx.message.server.id)).all()
         users = {}
+        logger.info(reports)
+        logger.info(len(reports))
         if len(reports) == 0:
-            self.bot.send_message(ctx.message.channel, "There have been no users warned on this server yet.")
+            await self.bot.send_message(ctx.message.channel, "There have been no users warned on this server yet.")
         else:
             for report in reports:
                 if report.user_name not in users.keys():
