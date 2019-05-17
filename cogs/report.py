@@ -4,12 +4,12 @@ from datetime import datetime
 import discord
 from discord.ext import commands
 from loguru import logger
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, and_
 from sqlalchemy.orm import sessionmaker
 
 # declaration for User class is in here
 from create_databases import Base, Report
-from .utils.easyembed import embed
+from .utils.easyembed import embed as easyembed
 
 
 class reeeport:
@@ -52,7 +52,7 @@ class reeeport:
         if ctx.message.channel.is_private:
             if server_id is None:
                 await self.bot.send_message(ctx.message.author,
-                                            embed=embed(
+                                            embed=easyembed(
                                                 title="No Server ID Specified!",
                                                 description="!report [server-id] [message]. You can get the server ID from right clicking on the Server icon and selecting 'Copy ID'"))
             else:
@@ -61,7 +61,7 @@ class reeeport:
                     data = json.load(f)
                     if server_id not in data.keys():
                         logger.debug(f"No channel ID set for reports! {server_id}")
-                        await self.bot.say(embed(
+                        await self.bot.say(easyembed(
                             title="Invalid Server ID!",
                             description="Either this server hasn't specified a channel to recieve reports or that ID you gave me is not a valid server ID"))
                         return
@@ -81,7 +81,7 @@ class reeeport:
     async def warn(self, ctx):
         if ctx.invoked_subcommand is None:
             await self.bot.send_message(ctx.message.channel,
-                                        embed=embed(title="Sorry thats not how this command workd!",
+                                        embed=easyembed(title="Sorry that's not how this command works!",
                                                     description="ex: !warn add [user id] Stop spamming please"))
 
     @warn.group(pass_context=True, name="add", aliases=['user'])
@@ -89,11 +89,11 @@ class reeeport:
     async def add(self, ctx, user_id = None, *, reason = None):
         if user_id is None and reason is None:
             await self.bot.send_message(ctx.message.channel,
-                                        embed=embed(title="Sorry thats not how this command workd!",
+                                        embed=easyembed(title="Sorry that's not how this command works!",
                                                     description="ex: !warn add [user id] Stop spamming please"))
         elif user_id is not None and reason is None:
             await self.bot.send_message(ctx.message.channel,
-                                        embed=embed(title="Sorry thats not how this command workd!",
+                                        embed=easyembed(title="Sorry that's not how this command works!",
                                                     description="ex: !warn add [user id] Stop spamming please"))
         elif user_id is not None and reason is not None:
             user = await self.bot.get_user_info(user_id)
@@ -106,13 +106,13 @@ class reeeport:
                 self.session.commit()
             except:
                 await self.bot.send_message(ctx.message.channel,
-                                      embed=embed(title="Error adding report to databse"))
+                                      embed=easyembed(title="Error adding report to databse"))
             await self.bot.send_message(user,
-                                        embed=embed(
+                                        embed=easyembed(
                                             title=f"Hey there {user.name} the mods from {ctx.message.server.name} have warned you!",
                                             description=f"Their reason is as follows: {reason}"))
             await self.bot.send_message(ctx.message.channel,
-                                        embed=embed(
+                                        embed=easyembed(
                                             title="User has been warned in the DM's",
                                             color=discord.Color.green()))
 
@@ -128,23 +128,66 @@ class reeeport:
                     users[report.user_name] = 1
                 else:
                     users[report.user_name] += 1
-            embed = discord.Embed(title=f"Warned Users from {ctx.message.server.name}")
+            embed1 = discord.Embed(title=f"Warned Users from {ctx.message.server.name}")
             for user, number_of_reports in users.items():
-                embed.add_field(name=user, value=str(number_of_reports))
-            await self.bot.send_message(ctx.message.channel, embed=embed)
+                embed1.add_field(name=user, value=str(number_of_reports))
+            await self.bot.send_message(ctx.message.channel, embed=embed1)
 
     @warn.group(pass_context=True, name="reason")
-    async def info(self, ctx, user_id):
-        reports = self.session.query(Report).filter(Report.server_id == str(ctx.message.server.id) and Report.user_id == str(user_id)).all()
+    async def reason(self, ctx, user_id = None):
+        if user_id == None:
+            easy_embed = easyembed(title="Sorry that's not how this command works!",
+                                                    description="ex: !warn reason [user id]")
+            await self.bot.send_message(ctx.message.channel, embed=easy_embed)
+            return
+        reports = self.session.query(Report).filter(and_(Report.server_id == str(ctx.message.server.id), Report.user_id == str(user_id))).all()
         if len(reports) == 0:
             await self.bot.send_message(ctx.message.channel,
                                         "That user has no warnings logged at this time.")
         else:
             user = await self.bot.get_user_info(user_id)
-            embed = discord.Embed(title=f"Warnings for {user.name} are as follows:")
+            embed1 = discord.Embed(title=f"Warnings for {user.name} are as follows:")
             for report in reports:
-                embed.add_field(name=f"{report.date} by {report.mod_name}", value=report.reason, )
-            await self.bot.send_message(ctx.message.channel, embed=embed)
+                embed1.add_field(name=f"{report.date} by {report.mod_name}", value=report.reason)
+            await self.bot.send_message(ctx.message.channel, embed=embed1)
+
+    @warn.group(pass_context=True, name="delete")
+    async def delete(self, ctx, user_id = None):
+        if user_id == None:
+            easy_embed = easyembed(title="Sorry that's not how this command works!",
+                                                    description="ex: !warn delete [user id]")
+            await self.bot.send_message(ctx.message.channel, embed=easy_embed)
+            return
+        reports = self.session.query(Report).filter(
+            and_(
+                Report.server_id == str(ctx.message.server.id),
+                Report.user_id == str(user_id)
+            )).all()
+        if len(reports) == 0:
+            await self.bot.send_message(ctx.message.channel,
+                                        "That user has no warnings logged at this time.")
+        else:
+            user = await self.bot.get_user_info(user_id)
+            try:
+                num_rows_deleted = self.session.query(Report).filter(
+                    and_(
+                        Report.server_id == str(ctx.message.server.id),
+                        Report.user_id == str(user_id)
+                    )).delete()
+                self.session.commit()
+            except:
+                self.session.rollback()
+                await self.bot.send_message(ctx.message.channel,
+                                            embed=easyembed(title="Error removing that user from the databse!",
+                                                            color=discord.Color.red()))
+                return
+            user = await self.bot.get_user_info(user_id)
+            await self.bot.send_message(ctx.message.channel,
+                                        embed=easyembed(title=f"{user.name} has been removed from the database!",
+                                                        description=f"{num_rows_deleted} warning records were removed!",
+                                                         color=discord.Color.green()))
+
+
 
 def setup(bot):
     bot.add_cog(reeeport(bot))
