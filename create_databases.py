@@ -1,4 +1,6 @@
-from sqlalchemy import Column, String, Date,Integer
+import os
+
+from sqlalchemy import Column, String, Date, Integer
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -22,3 +24,6 @@ engine = create_engine('sqlite:///warnings.db')
 # Create all tables in the engine. This is equivalent to "Create Table"
 # statements in raw SQL.
 Base.metadata.create_all(bind=engine)
+# moves database to correct folder for bot to function
+if __name__ == '__main__':
+    os.rename('./database.db', './cogs/database.db')

@@ -127,7 +127,7 @@ class reeeport:
                 if report.user_name not in users.keys():
                     users[f"{report.user_name} | {report.user_id}"] = 1
                 else:
-                    users[f"{report.user_name} | {report.user_id}"] += 1
+                    users[f"{report.user_name} | {report.user_id}"] = users[f"{report.user_name} | {report.user_id}"] + 1
             embed1 = discord.Embed(title=f"Warned Users from {ctx.message.server.name}")
             for user, number_of_reports in users.items():
                 embed1.add_field(name=user, value=str(number_of_reports))
