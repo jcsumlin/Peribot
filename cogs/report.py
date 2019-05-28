@@ -194,12 +194,12 @@ class reeeport:
         outfile = open('mydump.csv', 'wb')
         outcsv = csv.writer(outfile)
         cursor  = self.session.execute("select * from report")
+        await self.bot.send_message(ctx.message.channel, f"{len(cursor)} Rows being exported")
         # dump column titles (optional)
         outcsv.writerow(x[0] for x in cursor.description)
         # dump rows
         outcsv.writerows(cursor.fetchall())
         await self.bot.send_file(ctx.message.channel, outfile)
-
         outfile.close()
         os.remove("mydump.csv")
 
