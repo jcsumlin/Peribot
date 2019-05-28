@@ -1,4 +1,6 @@
+import csv
 import json
+import os
 from datetime import datetime
 
 import discord
@@ -186,6 +188,20 @@ class reeeport:
                                         embed=easyembed(title=f"{user.name} has been removed from the database!",
                                                         description=f"{num_rows_deleted} warning records were removed!",
                                                          color=discord.Color.green()))
+
+    @warn.group(pass_context=True, name="backup")
+    async def backup(self, ctx):
+        outfile = open('mydump.csv', 'wb')
+        outcsv = csv.writer(outfile)
+        cursor  = self.session.execute("select * from report")
+        # dump column titles (optional)
+        outcsv.writerow(x[0] for x in cursor.description)
+        # dump rows
+        outcsv.writerows(cursor.fetchall())
+
+        outfile.close()
+        self.bot.send_file("mydump.csv")
+        os.remove("mydump.csv")
 
 
 
