@@ -198,7 +198,7 @@ class reeeport:
         outcsv.writerow(x[0] for x in cursor.description)
         # dump rows
         outcsv.writerows(cursor.fetchall())
-        self.bot.send_file(ctx.message.channel, outfile)
+        await self.bot.send_file(ctx.message.channel, outfile)
 
         outfile.close()
         os.remove("mydump.csv")
