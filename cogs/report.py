@@ -126,7 +126,7 @@ class reeeport:
             await self.bot.send_message(ctx.message.channel, "There have been no users warned on this server yet.")
         else:
             for report in reports:
-                if report.user_name not in users.keys():
+                if f"{report.user_name} | {report.user_id}" not in users.keys():
                     users[f"{report.user_name} | {report.user_id}"] = 1
                 else:
                     users[f"{report.user_name} | {report.user_id}"] = users[f"{report.user_name} | {report.user_id}"] + 1
