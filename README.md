@@ -1,6 +1,9 @@
 # Peribot - Modular Discord Bot
 
 Highly customizable discord bot made with love in the US
+
+<a href="https://patreon.com/boiboi"><img src="https://img.shields.io/endpoint.svg?url=https%3A%2F%2Fshieldsio-patreon.herokuapp.com%2Fbotboi&style=for-the-badge" /> </a>
+
 ## Getting Started
 
 There are several branches for various environments (Heroku, Docker, Master (python console)). Pick the branch that you want to pull down and clone it to your machine.
