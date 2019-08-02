@@ -46,8 +46,11 @@ class Help:
                          inline=False)
         embed4 = discord.Embed(title="Utility Commands", color=0x93ff50)
         embed4.set_thumbnail(url="https://pa1.narvii.com/6328/aef12f691e993564ae13c1e19c6d19d907d5886a_128.gif")
-        embed4.add_field(name="!setwelcome",
-                         value="Sets the channel of your server where you want Peribot to welcome users",
+        embed4.add_field(name="!welcome enable #channel [custom message | optional]",
+                         value="Sets the channel of your server where you want Peribot to welcome users\nNote: you can add [user] to your custom message to mention the new user!",
+                         inline=False)
+        embed4.add_field(name="!welcome disable",
+                         value="Disables the welcome new users function",
                          inline=False)
         embed4.add_field(name="!ded",
                          value="Press F the chat is dead.",
