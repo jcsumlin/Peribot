@@ -40,10 +40,10 @@ class CustomCommands:
         """
         server = ctx.message.server
         command = command.lower()
-        if command[:1] == "!":
-            command = command[1:]
-        if text[:1] == "!":
-            text = text[1:]
+        if "!" in command:
+            command = command.replace('!', '')
+        if '!' in text:
+            text = text.replace('!', '')
         if command in self.bot.commands:
             await self.bot.say("That command is already a standard command.")
             return
