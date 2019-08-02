@@ -69,6 +69,10 @@ class CustomCommands:
         """
         server = ctx.message.server
         command = command.lower()
+        if "!" in command:
+            command = command.replace('!', '')
+        if '!' in text:
+            text = text.replace('!', '')
         if server.id in self.c_commands:
             cmdlist = self.c_commands[server.id]
             if command in cmdlist:
