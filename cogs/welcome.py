@@ -29,7 +29,6 @@ class Welcome():
         try:
             server_id = ctx.message.server.id
             channel_id = channel.replace("#", "").replace("<", "").replace(">", "")
-            channel = self.bot.get_channel(channel_id)
             config = dataIO.load_json('data/welcome/info.json')
             config[server_id] = {"channel": channel_id, "message": message}
             dataIO.save_json('data/welcome/info.json', config)
