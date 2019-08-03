@@ -1,4 +1,3 @@
-from datetime import datetime
 import configparser
 from datetime import datetime
 
@@ -11,7 +10,7 @@ class Hiatus:
     def __init__(self, bot):
         self.bot = bot
         config = configparser.ConfigParser()
-        config.read('auth.ini')
+        config.read('../auth.ini')
 
         self.tmdb = TMDb()
         self.tmdb.api_key = config.get('TMDB', 'api_key')
