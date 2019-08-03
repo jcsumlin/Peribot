@@ -46,7 +46,7 @@ class Hiatus:
             embed = discord.Embed(title="Steven Universe Hiatus Calculator")
             embed.set_thumbnail('https://image.tmdb.org/t/p/w600_and_h900_bestv2/g31ZPZSjv8ySPbclyYZZU50XhZy.jpg')
             embed.add_field(name=f"Days Since Season {episode['season_number']} {episode['name']}", value=f"{diffrence.days} Days")
-            return await self.bot.say(embed=embed)
+            return await self.bot.send_message(ctx.message.channel, embed=embed)
 
         if ctx.message.server.id == "448695150135345152":
             season = Season()
@@ -65,7 +65,7 @@ class Hiatus:
             embed = discord.Embed(title="Star Vs The Forces Of Evil Hiatus Calculator")
             embed.set_thumbnail("https://image.tmdb.org/t/p/w600_and_h900_bestv2/dKFL1AOdKNoazqZDg1zq2z69Lx1.jpg")
             embed.add_field(name=f"Days Since Season {episode['season_number']} {episode['name']}", value=f"{diffrence.days} Days")
-            return await self.bot.say(embed=embed)
+            return await self.bot.send_message(ctx.message.channel, embed=embed)
 
 
 
