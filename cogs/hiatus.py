@@ -63,7 +63,7 @@ class Hiatus:
             air_date = episode['air_date']
             diffrence = datetime.now() - datetime.strptime(air_date, "%Y-%m-%d")
             embed = discord.Embed(title="Star Vs The Forces Of Evil Hiatus Calculator")
-            embed.set_thumbnail("https://image.tmdb.org/t/p/w600_and_h900_bestv2/dKFL1AOdKNoazqZDg1zq2z69Lx1.jpg")
+            embed.set_thumbnail(url="https://image.tmdb.org/t/p/w600_and_h900_bestv2/dKFL1AOdKNoazqZDg1zq2z69Lx1.jpg")
             embed.add_field(name=f"Days Since Season {episode['season_number']} {episode['name']}", value=f"{diffrence.days} Days")
             return await self.bot.send_message(ctx.message.channel, embed=embed)
 
