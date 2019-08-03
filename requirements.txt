@@ -8,3 +8,4 @@ beautifulsoup4
 psaw
 GitPython
 sqlalchemy
+tmdbv3api
