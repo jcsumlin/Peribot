@@ -49,6 +49,7 @@ class Birthdays:
         for user in users:
             user_name = self.bot.get_user(user['user_id'])
             embed.add_field(name=user_name.name, value=user['birthday'])
+        await self.bot.send_message(ctx.message.channel, embed=embed)
 
     @birthday.group(pass_context=True)
     @commands.has_permissions(administrator=True)
