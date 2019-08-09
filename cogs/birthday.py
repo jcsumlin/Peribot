@@ -29,12 +29,10 @@ class Birthdays:
     async def add(self, ctx, user: discord.User, birthday):
         birthday = birthday.split('/')
         birthdays = await self.get_config()
-        logger.info(birthdays)
-        logger.info(str(ctx.message.server.id) in birthdays.keys())
+        if int(birthday[2]) >= datetime.now().year:
+            await self.bot.send_message(ctx.message.channel, "That's not a valid year silly")
         if str(ctx.message.server.id) in birthdays.keys():
-            logger.info(birthday)
             birthday = datetime(year=int(birthday[2]), month=int(birthday[0]), day=int(birthday[1]))
-            logger.info(birthday)
             for birthday_user in birthdays[ctx.message.server.id]['users']:
                 if birthday_user['user_id'] == user.id:
                     await self.bot.send_message(ctx.message.channel, "That User's birthday is already registered!")
