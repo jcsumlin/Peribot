@@ -28,13 +28,16 @@ class Birthdays:
     async def add(self, ctx, user: discord.User, birthday):
         birthday = birthday.split('/')
         birthdays = await self.get_config()
-        logger.info(birthday)
         logger.info(birthdays)
         logger.info(str(ctx.message.server.id) in birthdays.keys())
         if str(ctx.message.server.id) in birthdays.keys():
             logger.info(birthday)
             birthday = datetime(year=int(birthday[2]), month=int(birthday[0]), day=int(birthday[1]))
             logger.info(birthday)
+            for birthday_user in birthdays[ctx.message.server.id]['users']:
+                if birthday_user['user_id'] == user.id:
+                    await self.bot.send_message(ctx.message.channel, "That User's birthday is already registered!")
+                    return
             birthdays[ctx.message.server.id]['users'].append({'user_id': user.id, 'birthday': str(birthday), 'COMPLETE': False})
             await self.save_config(birthdays)
             await self.bot.send_message(ctx.message.channel,"Done!")
@@ -46,9 +49,11 @@ class Birthdays:
         birthdays = await self.get_config()
         users = birthdays[ctx.message.server.id]['users']
         embed = discord.Embed(title=f"{ctx.message.server.name}'s Birthday list :birthday:")
+        logger.info(users)
         for user in users:
-            user_name = self.bot.get_user(user['user_id'])
-            embed.add_field(name=user_name.name, value=user['birthday'])
+            user_name = discord.utils.get(ctx.message.server.members, id=user['user_id'])
+            logger.info(user_name)
+            embed.add_field(name=user_name.name, value=user['birthday'].replace(' 00:00:00', ''))
         await self.bot.send_message(ctx.message.channel, embed=embed)
 
     @birthday.group(pass_context=True)
