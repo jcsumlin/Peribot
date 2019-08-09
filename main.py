@@ -4,7 +4,7 @@ import os
 import re
 import time
 from configparser import *
-import discord
+
 from discord.ext import commands
 from loguru import logger
 
@@ -18,7 +18,7 @@ def load_cogs(folder):
     os.chdir(folder)
     files = []
     for file in glob.glob("*.py"):
-        file = re.search('^([A-Za-z1-9]{1,})[^.py]', file).group(0)
+        file = re.search('^([A-Za-z1-9]{1,})(?:.py)$', file).group(1)
         files.append(file)
     return files
 
