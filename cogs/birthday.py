@@ -106,7 +106,7 @@ class Birthdays:
                         user['COMPLETE'] = True
 
                         await self.save_config(birthdays)
-                await asyncio.sleep(1)
+            await asyncio.sleep(1)
 
 
 def check_folders():
