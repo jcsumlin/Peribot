@@ -41,7 +41,14 @@ class Birthdays:
         else:
             await self.bot.send_message(ctx.message.channel,"Birthdays not setup!")
 
-
+    @birthday.group(pass_context=True)
+    async def list(self, ctx):
+        birthdays = await self.get_config()
+        users = birthdays[ctx.message.server.id]['users']
+        embed = discord.Embed(title=f"{ctx.message.server.name}'s Birthday list :birthday:")
+        for user in users:
+            user_name = self.bot.get_user(user['user_id'])
+            embed.add_field(name=user_name.name, value=user['birthday'])
 
     @birthday.group(pass_context=True)
     @commands.has_permissions(administrator=True)
