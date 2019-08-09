@@ -93,14 +93,18 @@ class Birthdays:
                     if birthday.month == now.month and birthday.day == now.day and not user['COMPLETE']:
                         channel = self.bot.get_channel(value['channel'])
                         if channel is None:
+                            logger.info("No Channel")
                             continue
                         years = now.year - birthday.year
                         if 4 <= years <= 20 or 24 <= years <= 30:
                             suffix = "th"
                         else:
                             suffix = ["st", "nd", "rd"][years % 10 - 1]
+                        logger.info("Sending message")
+
                         await self.bot.send_message(channel, f"Hey  <@{user['user_id']}>! I just wanted to wish you the happiest of brthdays on your {years}{suffix} birthday! :birthday: :heart:")
                         user['COMPLETE'] = True
+
                         await self.save_config(birthdays)
                 await asyncio.sleep(1)
 
