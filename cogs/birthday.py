@@ -5,6 +5,7 @@ from datetime import datetime
 import discord
 from discord.ext import commands
 from loguru import logger
+from pytz import timezone
 
 from .utils.dataIO import dataIO, fileIO
 
@@ -86,8 +87,8 @@ class Birthdays:
             for key, value in birthdays.items():
                 for user in value['users']:
                     birthday = datetime.strptime(user['birthday'], "%Y-%m-%d 00:00:00")
-                    now = datetime.now()
-                    logger.info(birthday)
+                    eastern = timezone('US/Eastern')
+                    now = datetime.now(eastern)
 
                     if birthday.month != now.month or birthday.day != now.day and user['COMPLETE']:
                         user['COMPLETE'] = False
@@ -95,14 +96,12 @@ class Birthdays:
                     if birthday.month == now.month and birthday.day == now.day and not user['COMPLETE']:
                         channel = self.bot.get_channel(value['channel'])
                         if channel is None:
-                            logger.info("No Channel")
                             continue
                         years = now.year - birthday.year
                         if 4 <= years <= 20 or 24 <= years <= 30:
                             suffix = "th"
                         else:
                             suffix = ["st", "nd", "rd"][years % 10 - 1]
-                        logger.info("Sending message")
 
                         await self.bot.send_message(channel, f"Hey  <@{user['user_id']}>! I just wanted to wish you the happiest of brthdays on your {years}{suffix} birthday! :birthday: :heart:")
                         user['COMPLETE'] = True
