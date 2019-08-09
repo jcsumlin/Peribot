@@ -81,7 +81,7 @@ class Birthdays:
             return await self.bot.send_message(ctx.message.channel, ":interrobang: Birthday Message Channel Not Set For This Server!")
 
     async def check_birthdays(self):
-        while self is self.bot.get_cog("Birthdays"):
+        while True:
             birthdays = await self.get_config()
             for key, value in birthdays.items():
                 for user in value['users']:
@@ -106,7 +106,6 @@ class Birthdays:
                         user['COMPLETE'] = True
 
                         await self.save_config(birthdays)
-            logger.info('dead')
             await asyncio.sleep(1)
 
 
