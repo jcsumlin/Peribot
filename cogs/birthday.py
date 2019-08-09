@@ -106,6 +106,7 @@ class Birthdays:
                         user['COMPLETE'] = True
 
                         await self.save_config(birthdays)
+            logger.info('dead')
             await asyncio.sleep(1)
 
 
