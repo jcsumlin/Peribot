@@ -31,6 +31,7 @@ class Birthdays:
         birthdays = await self.get_config()
         if int(birthday[2]) >= datetime.now().year:
             await self.bot.send_message(ctx.message.channel, "That's not a valid year silly")
+            return
         if str(ctx.message.server.id) in birthdays.keys():
             birthday = datetime(year=int(birthday[2]), month=int(birthday[0]), day=int(birthday[1]))
             for birthday_user in birthdays[ctx.message.server.id]['users']:
