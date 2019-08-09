@@ -83,11 +83,12 @@ class Birthdays:
     async def check_birthdays(self):
         while True:
             birthdays = await self.get_config()
-            logger.info(birthdays)
             for key, value in birthdays.items():
                 for user in value['users']:
                     birthday = datetime.strptime(user['birthday'], "%Y-%m-%d 00:00:00")
                     now = datetime.now()
+                    logger.info(birthday)
+
                     if birthday.month != now.month or birthday.day != now.day and user['COMPLETE']:
                         user['COMPLETE'] = False
                         await self.save_config(birthdays)
