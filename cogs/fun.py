@@ -3,7 +3,6 @@ from random import choice
 
 import discord
 from discord.ext import commands
-from loguru import logger
 
 
 class Fun:
@@ -75,9 +74,8 @@ class Fun:
     async def on_message(self, message):
         if message.content.lower() == "f":
             await self.bot.add_reaction(message, u"\U0001F1EB")
-
-        if message.channel.type == "dm":
-            logger.info("dm: " + message.content)
+        if message.content.lower() == 'uwu' or message.content.lower() == 'owo':
+            await self.bot.send_message(message.author, f"{message.content} again and see what happens! :mask:")
 
 
 def setup(bot):
