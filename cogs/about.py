@@ -70,7 +70,7 @@ class Help:
                          inline=False)
         embed4.add_field(name="!flip", value="Flips a coin ... or a user. But not me.",
                          inline=False)
-        embed4.add_field(name="!hiatus", value="How long has this Hiatus been going on for? (SVTFOE)", inline=False)
+        embed4.add_field(name="!hiatus", value="How long has this Hiatus been going on for? (SVTFOE and SU)", inline=False)
         embed4.add_field(name="!urban [word] [definition number]",
                          value="Uses Urban Dictionary to define a word. Example: !urban hello. If there is more than one definition you can return a specific definition by secifying its number",
                          inline=False)
@@ -84,6 +84,7 @@ class Help:
         embed5 = discord.Embed(title="Kindness Commands", color=0x93ff50)
         embed5.set_thumbnail(url="http://pa1.narvii.com/6341/7ff7b249739c0841f8a64ecfe23ab0bc15257ace_128.gif")
         embed5.add_field(name="!kiss [user]", value="Smooch someone you love <3", inline=False)
+        embed5.add_field(name="!cuddle [user]", value="Cuddle your favorite users with lots of love <3. Results may vary...", inline=False)
         embed5.add_field(name="!cats", value="Sends a cute cat :3", inline=False)
         embed5.add_field(name="!pugs [user]", value="Sends a cute Pug", inline=False)
         embed5.add_field(name="!catsbomb [amount]", value="Throws a cat bomb! Amount Defaults to 5", inline=False)
