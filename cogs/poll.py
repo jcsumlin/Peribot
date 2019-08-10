@@ -1,5 +1,6 @@
 import shlex
 
+import discord
 from discord.ext import commands
 
 
@@ -14,7 +15,7 @@ class Polls:
         self.bot = bot
 
     @commands.command(no_pm=True, pass_context=True)
-    async def quickpoll(self, ctx, *, questions_and_choices: str):
+    async def poll(self, ctx, *, questions_and_choices: str):
         """
         delimit questions and answers by either | or ,
         supports up to 10 choices
@@ -53,11 +54,14 @@ class Polls:
             await self.bot.add_reaction(poll, emoji)
 
     @commands.command(no_pm=True, pass_context=True)
-    async def poll(self, ctx, *, question: str):
+    async def quickpoll(self, ctx, *, question: str):
         """
         Quick and easy yes/no poll, for multiple answers, see !quickpoll
         """
-        msg = await self.bot.send_message(ctx.message.channel, "**{}** asks: {}".format(ctx.message.author.name, question))
+        author = ctx.message.author.name.replace('_', '\_').replace('~', '\~').replace('|', '\|').replace('*', '\*')
+        message = "**{}** asks: {}".format(author, question)
+        embed = discord.Embed(title=':newspaper: ' +message, color=discord.Color.green())
+        msg = await self.bot.send_message(ctx.message.channel, embed=embed)
         try:
             await self.bot.delete_message(ctx.message)
         except:
@@ -67,38 +71,6 @@ class Polls:
         no_thumb = "👎"
         await self.bot.add_reaction(msg, yes_thumb)
         await self.bot.add_reaction(msg, no_thumb)
-
-    @commands.command()
-    async def strawpoll(self, ctx, *, question_and_choices: str=None):
-        """
-        Usage: !strawpoll my question | answer a | answer b | answer c\nAt least two answers required.
-        """
-        if question_and_choices is None:
-            return await self.bot.send_message(ctx.message.channel, "Usage: !strawpoll my question | answer a | answer b | answer c\nAt least two answers required.")
-        if "|" in question_and_choices:
-            delimiter = "|"
-        else:
-            delimiter = ","
-        question_and_choices = question_and_choices.split(delimiter)
-        if len(question_and_choices) == 1:
-            return await self.bot.send_message(ctx.message.channel, "Not enough choices supplied")
-        elif len(question_and_choices) >= 31:
-            return await self.bot.send_message(ctx.message.channel, "Too many choices")
-        question, *choices = question_and_choices
-        choices = [x.lstrip() for x in choices]
-        print(choices)
-        header = {"Content-Type": "application/json"}
-        payload = {
-            "title": question,
-            "options": choices,
-            "multi": False
-        }
-        print(payload)
-        async with self.bot.session.post("https://www.strawpoll.me/api/v2/polls", headers=header, json=payload) as r:
-            data = await r.json()
-        print(data)
-        id = data["id"]
-        await self.bot.send_message(ctx.message.channel, f"http://www.strawpoll.me/{id}")
 
 
 def setup(bot):
