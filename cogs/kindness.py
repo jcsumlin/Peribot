@@ -64,7 +64,7 @@ class Kindness:
         message = random.choice(messages).format(cuddler=ctx.message.author.name,victim=target.name)
         embed = discord.Embed(title=message)
         embed.set_image(url=random.choice(cuddles))
-        await self.bot.send_message(embed=embed)
+        await self.bot.send_message(ctx.message.channel, embed=embed)
 
     @commands.command(pass_context=True)
     async def compliment(self, ctx, target):
