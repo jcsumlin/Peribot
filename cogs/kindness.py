@@ -62,7 +62,7 @@ class Kindness:
                    ]
         messages = dataIO.load_json('data/lewd/cuddles.json')
         message = random.choice(messages).format(cuddler=ctx.message.author.name,victim=target.name)
-        embed = discord.Embed(title=message)
+        embed = discord.Embed(title=message, color=discord.Color.purple())
         embed.set_image(url=random.choice(cuddles))
         await self.bot.send_message(ctx.message.channel, embed=embed)
 
