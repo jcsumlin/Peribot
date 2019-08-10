@@ -43,7 +43,7 @@ class Kindness:
         :return: The gif of your hug
         """
         if number is None:
-            file = str(random.randint(1,34)) + '.gif'
+            file = str(random.randint(1,58)) + '.gif'
         else:
             file = str(number) + '.gif'
         area = ctx.message.channel
@@ -52,6 +52,19 @@ class Kindness:
         # embed.set_image(url=)
         with open('data/lewd/hugs/'+file, 'rb') as file:
             await self.bot.send_file(area, file)
+
+    @commands.command(pass_context=True)
+    async def cuddle(self, ctx, target: discord.Member):
+        cuddles = ['https://tenor.com/view/wanderoveryonder-hug-friends-gif-8054162',
+                   'https://media.giphy.com/media/xR9FIxmoAPCMw/giphy.gif',
+                   'https://i.imgur.com/fgPMy3v.gif',
+                   'https://proxy.duckduckgo.com/iu/?u=http%3A%2F%2Fmedia.giphy.com%2Fmedia%2F3bqtLDeiDtwhq%2Fgiphy.gif',
+                   ]
+        messages = dataIO.load_json('data/lewd/cuddles.json')
+        message = random.choice(messages).format(cuddler=ctx.message.author.name,victim=target.name)
+        embed = discord.Embed(title=message)
+        embed.set_image(url=random.choice(cuddles))
+        await self.bot.send_message(embed=embed)
 
     @commands.command(pass_context=True)
     async def compliment(self, ctx, target):
