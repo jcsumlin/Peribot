@@ -1,8 +1,8 @@
 from discord.ext import commands
-import discord
-import json
 from loguru import logger
+
 from .utils.dataIO import dataIO
+
 
 class Welcome():
     def __init__(self, bot):
@@ -23,6 +23,7 @@ class Welcome():
                                         "Note: Using [user] in your custom message will mention the user")
 
     @welcome.group(pass_context=True)
+    @commands.has_permissions(administrator=True)
     async def enable(self, ctx, channel=None, *, message=":balloon: Hey! Listen! [user] is here! :100:"):
         if channel is None:
             await self.bot.send_message(ctx.message.channel ,"Please specify a channel!\nEx: !welcome enable {0} Hey [user]! welcome to our server!\n\n Note: [user] will mention the user".format(ctx.message.channel.mention))
@@ -38,6 +39,7 @@ class Welcome():
             pass
 
     @welcome.group(pass_context=True)
+    @commands.has_permissions(administrator=True)
     async def disable(self, ctx):
         try:
             server_id = ctx.message.server.id
