@@ -42,6 +42,9 @@ class Kindness:
         :param number: The specific gif you want to return. If None picks a random gif.
         :return: The gif of your hug
         """
+        if victim == ctx.message.author:
+            await self.bot.send_message(ctx.message.channel, 'https://tenor.com/view/steven-universe-su-stevenuniverse-diamonddays-gif-13326567')
+            return
         if number is None:
             file = str(random.randint(1,58)) + '.gif'
         else:
@@ -55,6 +58,9 @@ class Kindness:
 
     @commands.command(pass_context=True)
     async def cuddle(self, ctx, target: discord.Member):
+        if target == ctx.message.author:
+            await self.bot.send_message(ctx.message.channel, 'https://tenor.com/view/steven-universe-su-stevenuniverse-diamonddays-gif-13326567')
+            return
         cuddles = ['https://i.imgur.com/d7gjIVu.gif',
                    'https://media.giphy.com/media/xR9FIxmoAPCMw/giphy.gif',
                    'https://i.imgur.com/fgPMy3v.gif',
