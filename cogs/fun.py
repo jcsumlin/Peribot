@@ -74,8 +74,6 @@ class Fun:
     async def on_message(self, message):
         if message.content.lower() == "f":
             await self.bot.add_reaction(message, u"\U0001F1EB")
-        if 'uwu' in message.content.lower() or 'owo' in message.content.lower() or 'ÒwÓ' in message.content:
-            await self.bot.send_message(message.author, f"{message.content} again and see what happens! :mask:")
 
 
 def setup(bot):
