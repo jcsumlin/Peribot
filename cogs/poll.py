@@ -46,10 +46,15 @@ class Polls:
             await self.bot.delete_message(ctx.message)
         except:
             pass
+        answers = ""
+        number = 1
+        for answer in choices:
+            answers += f"**{number})** {answer[1]}\n"
+            number += 1
+        author = ctx.message.author.name.replace('_', '\_').replace('~', '\~').replace('|', '\|').replace('*', '\*')
+        e = discord.Embed(title=f':newspaper: {author} asks: {question}', color=discord.Color.green(), description=answers)
 
-        fmt = '{0} asks: {1}\n\n{2}'
-        answer = '\n'.join('%s: %s' % t for t in choices)
-        poll = await self.bot.send_message(ctx.message.channel, fmt.format(ctx.message.author, question.replace("@", "@\u200b"), answer.replace("@", "@\u200b")))
+        poll = await self.bot.send_message(ctx.message.channel, embed=e)
         for emoji, _ in choices:
             await self.bot.add_reaction(poll, emoji)
 
@@ -69,7 +74,9 @@ class Polls:
 
         yes_thumb = "👍"
         no_thumb = "👎"
+        shrug_emoji = "🤷"
         await self.bot.add_reaction(msg, yes_thumb)
+        await self.bot.add_reaction(msg, shrug_emoji)
         await self.bot.add_reaction(msg, no_thumb)
 
 
