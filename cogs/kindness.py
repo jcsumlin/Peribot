@@ -59,8 +59,10 @@ class Kindness:
                    'https://media.giphy.com/media/xR9FIxmoAPCMw/giphy.gif',
                    'https://i.imgur.com/fgPMy3v.gif',
                    'https://proxy.duckduckgo.com/iu/?u=http%3A%2F%2Fmedia.giphy.com%2Fmedia%2F3bqtLDeiDtwhq%2Fgiphy.gif',
-                   'https://i.imgur.com/TVT4K9d.gifv',
-                   'https://i.imgur.com/65ZrxPf.gifv'
+                   'https://i.imgur.com/TVT4K9d.gif',
+                   'https://i.imgur.com/65ZrxPf.gif',
+                    'https://proxy.duckduckgo.com/iu/?u=https%3A%2F%2Fi.pinimg.com%2Foriginals%2Faf%2F6a%2Ff9%2Faf6af9f078d34217d49287514b2d24d5.gif'
+                   'https://proxy.duckduckgo.com/iu/?u=http%3A%2F%2Fmedia.giphy.com%2Fmedia%2Flrr9rHuoJOE0w%2Fgiphy.gif'
                    ]
         messages = dataIO.load_json('data/lewd/cuddles.json')
         message = random.choice(messages).format(cuddler=ctx.message.author.name,victim=target.name)
