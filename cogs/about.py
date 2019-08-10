@@ -52,6 +52,8 @@ class Help:
         embed4.add_field(name="!welcome disable",
                          value="Disables the welcome new users function",
                          inline=False)
+        embed4.add_field(name="!poll [question], [option 1], [option ...]", value="Creates a poll for users to respond to. You can use up to 10 options!")
+        embed4.add_field(name="!quickpoll [question]", value="Creates a quick yes, no or i dont car poll for users to respond to")
         embed4.add_field(name="!ded",
                          value="Press F the chat is dead.",
                          inline=False)
