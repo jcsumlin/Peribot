@@ -48,10 +48,13 @@ class Birthdays:
     async def list(self, ctx):
         birthdays = await self.get_config()
         users = birthdays[ctx.message.server.id]['users']
-        embed = discord.Embed(title=f"{ctx.message.server.name}'s Birthday list :birthday:")
+        embed = discord.Embed(title=f"{ctx.message.server.name}'s Birthday list for this month :birthday:")
         for user in users:
-            user_name = discord.utils.get(ctx.message.server.members, id=user['user_id'])
-            embed.add_field(name=user_name.name, value=user['birthday'].replace(' 00:00:00', ''))
+            birthday = datetime.strptime(user['birthday'], "%Y-%m-%d 00:00:00")
+            now = datetime.now()
+            if birthday.month == now.month:
+                user_name = discord.utils.get(ctx.message.server.members, id=user['user_id'])
+                embed.add_field(name=user_name.name, value=birthday.strftime('%m/%d/%Y'))
         await self.bot.send_message(ctx.message.channel, embed=embed)
 
     @birthday.group(pass_context=True)
