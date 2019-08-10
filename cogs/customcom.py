@@ -133,6 +133,8 @@ class CustomCommands:
                 await self.bot.whisper(box(page))
 
     async def on_message(self, message):
+        if message.author.bot is True:
+            return
         if len(message.content) < 2 or message.channel.is_private:
             return
 
