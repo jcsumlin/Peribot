@@ -55,10 +55,12 @@ class Kindness:
 
     @commands.command(pass_context=True)
     async def cuddle(self, ctx, target: discord.Member):
-        cuddles = ['https://tenor.com/view/wanderoveryonder-hug-friends-gif-8054162',
+        cuddles = ['https://i.imgur.com/d7gjIVu.gif',
                    'https://media.giphy.com/media/xR9FIxmoAPCMw/giphy.gif',
                    'https://i.imgur.com/fgPMy3v.gif',
                    'https://proxy.duckduckgo.com/iu/?u=http%3A%2F%2Fmedia.giphy.com%2Fmedia%2F3bqtLDeiDtwhq%2Fgiphy.gif',
+                   'https://i.imgur.com/TVT4K9d.gifv',
+                   'https://i.imgur.com/65ZrxPf.gifv'
                    ]
         messages = dataIO.load_json('data/lewd/cuddles.json')
         message = random.choice(messages).format(cuddler=ctx.message.author.name,victim=target.name)
