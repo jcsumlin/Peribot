@@ -81,31 +81,60 @@ class Birthdays:
         else:
             return await self.bot.send_message(ctx.message.channel, ":interrobang: Birthday Message Channel Not Set For This Server!")
 
+    @birthday.group(pass_context=True)
+    @commands.has_permissions(administrator=True)
+    async def role(self, ctx, role: discord.Role):
+        birthdays = await self.get_config()
+        birthdays[ctx.message.server.id]['role_id'] = role.id
+        await self.save_config(birthdays)
+        await self.bot.send_message(ctx.message.channel, "Birthday Role Set!")
+
     async def check_birthdays(self):
         while True:
+            await asyncio.sleep(10)
             birthdays = await self.get_config()
             for key, value in birthdays.items():
+                if len(value['users']) == 0:
+                    continue
                 for user in value['users']:
                     birthday = datetime.strptime(user['birthday'], "%Y-%m-%d 00:00:00")
                     eastern = timezone('US/Eastern')
                     now = datetime.now(eastern)
-
+                    channel = self.bot.get_channel(value['channel'])
+                    if channel is None:
+                        continue
+                    birthday_role = None
+                    if 'role_id' in value:
+                        birthday_role = discord.utils.find(lambda r: r.id == value['role_id'],
+                                                           channel.server.roles)
+                    member = discord.utils.find(lambda m: m.id == user['user_id'], channel.server.members)
+                    if member is None:
+                        logger.error('Could not find user')
+                        continue
                     if birthday.month != now.month or birthday.day != now.day and user['COMPLETE']:
                         user['COMPLETE'] = False
+                        if birthday_role:
+                            try:
+                                await self.bot.remove_roles(member, birthday_role)
+                            except discord.Forbidden:
+                                logger.error("Does Not have permissions to add roles to users!")
+                            except Exception:
+                                logger.error("Error removing role from user" + member.name)
                         await self.save_config(birthdays)
                     if birthday.month == now.month and birthday.day == now.day and not user['COMPLETE']:
-                        channel = self.bot.get_channel(value['channel'])
-                        if channel is None:
-                            continue
+                        if birthday_role:
+                            try:
+                                await self.bot.add_roles(member, birthday_role)
+                            except discord.Forbidden:
+                                logger.error("Does Not have permissions to add roles to users!")
                         years = now.year - birthday.year
                         if 4 <= years <= 20 or 24 <= years <= 30:
                             suffix = "th"
                         else:
                             suffix = ["st", "nd", "rd"][years % 10 - 1]
 
-                        await self.bot.send_message(channel, f"Hey  <@{user['user_id']}>! I just wanted to wish you the happiest of brthdays on your {years}{suffix} birthday! :birthday: :heart:")
+                        await self.bot.send_message(channel, f"Hey <@{user['user_id']}>! I just wanted to wish you the happiest of birthdays on your {years}{suffix} birthday! :birthday: :heart:")
                         user['COMPLETE'] = True
-
                         await self.save_config(birthdays)
             await asyncio.sleep(1)
 
