@@ -37,6 +37,8 @@ class Youtube:
         if len(regex) > 0 and "youtube.com" in regex[0][0]:
             servers = await self.get_config()
             if await self.server_in_config(servers, ctx.message.server.id):
+                if ctx.message.author.id not in servers[ctx.message.server.id]:
+                    servers[ctx.message.server.id][ctx.message.author.id] = []
                 if len(servers[ctx.message.server.id][ctx.message.author.id]) < 3 and regex[0][0] not in servers[ctx.message.server.id][ctx.message.author.id]:
                     servers[ctx.message.server.id][ctx.message.author.id].append(regex[0][0])
                     await self.bot.send_message(ctx.message.channel, "Added!")
