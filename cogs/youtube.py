@@ -46,6 +46,8 @@ class Youtube:
                     await self.bot.send_message(ctx.message.channel, "Sorry! Either you already added that link or you've hit your max of 3 links!")
             else:
                 servers[ctx.message.server.id] = {ctx.message.author.id: [regex[0][0]]}
+                await self.bot.send_message(ctx.message.channel, "Added!")
+
             await self.save_config(servers)
         else:
             await self.bot.send_message(ctx.message.channel, "Sorry that doesn't seem to be a valid Youtube link!")
