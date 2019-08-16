@@ -39,6 +39,7 @@ class Youtube:
             if await self.server_in_config(servers, ctx.message.server.id):
                 if len(servers[ctx.message.server.id][ctx.message.author.id]) < 3 and regex[0][0] not in servers[ctx.message.server.id][ctx.message.author.id]:
                     servers[ctx.message.server.id][ctx.message.author.id].append(regex[0][0])
+                    await self.bot.send_message(ctx.message.channel, "Added!")
                 else:
                     await self.bot.send_message(ctx.message.channel, "Sorry! Either you already added that link or you've hit your max of 3 links!")
             else:
