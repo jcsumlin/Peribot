@@ -34,7 +34,7 @@ class Youtube:
     async def add(self, ctx, link):
         youtube_url_regex = "(http(?:s?):\/\/(?:www\.)?youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-\_]*)(&(amp;)?‌​[\w\?‌​=]*)?)"
         regex = re.findall(youtube_url_regex, link)
-        if len(regex) > 0 and "youtube.com" in regex[0][0]:
+        if len(regex) > 0 and "youtube.com" in regex[0][0] or "youtu.be" in regex[0][0]:
             servers = await self.get_config()
             if await self.server_in_config(servers, ctx.message.server.id):
                 if ctx.message.author.id not in servers[ctx.message.server.id]:
