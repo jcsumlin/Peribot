@@ -61,7 +61,7 @@ class Youtube:
         for user in list(server[server_object.id].keys()):
             user = await self.bot.get_user_info(user_id=user)
             if len(server[server_object.id][user.id]) != 0:
-                songs = ', '.join(server[server_object.id][user.id])
+                songs = '\n'.join(server[server_object.id][user.id])
             else:
                 songs = "None"
             e.add_field(name=f"{user}'s songs:", value=songs)
