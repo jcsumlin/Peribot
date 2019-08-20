@@ -2,12 +2,12 @@ import discord
 from discord.ext import commands
 
 
-class Help:
+class Help(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
     @commands.command('help', aliases=["phelp"])
-    async def help(self, ):
+    async def help(self, ctx):
         embed = discord.Embed(title="Modular Discord bot made by J_C___#8947", color=0x93ff50)
         embed.set_author(name="Peribot", url="http://www.patreon.com/botboi")
         embed.set_thumbnail(url="https://pa1.narvii.com/6363/a99a0f938da2c75791c1cfd8a93173eaf6c54b6a_128.gif")
@@ -106,51 +106,58 @@ class Help:
         embed7.add_field(name="!starboard threshold [threshold]", value="Sets the threshold of 'stars' required for a post to make it to the starboard.")
         embed7.add_field(name="!starboard clear", value="Clears the database of previous starred messages.")
 
-        await self.bot.say(embed=embed)
-        await self.bot.say(embed=embed2)
-        await self.bot.say(embed=embed3)
-        await self.bot.say(embed=embed4)
-        await self.bot.say(embed=embed5)
-        await self.bot.say(embed=embed6)
-        await self.bot.say(embed=embed7)
+        await ctx.send(embed=embed)
+        await ctx.send(embed=embed2)
+        await ctx.send(embed=embed3)
+        await ctx.send(embed=embed4)
+        await ctx.send(embed=embed5)
+        await ctx.send(embed=embed6)
+        await ctx.send(embed=embed7)
 
-    @commands.command(aliases=['server', 'sinfo', 'si'], pass_context=True)
+    @commands.command(aliases=['server', 'sinfo', 'si'], )
     async def serverinfo(self, ctx):
         """Various info about the server. !help server for more info."""
-        server = ctx.message.server
+        guild = ctx.guild
         online = 0
-        for i in server.members:
+        for i in guild.members:
             if str(i.status) == 'online' or str(i.status) == 'idle' or str(i.status) == 'dnd':
                 online += 1
         all_users = []
-        for user in server.members:
+        for user in guild.members:
             all_users.append('{}#{}'.format(user.name, user.discriminator))
         all_users.sort()
         all = '\n'.join(all_users)
 
         channel_count = len(
-            [x for x in server.channels if type(x) == self.bot.get_all_channels()])
+            [x for x in guild.channels if type(x) == self.bot.get_all_channels()])
 
-        role_count = len(server.roles)
-        emoji_count = len(server.emojis)
-
-        em = discord.Embed(color=0xea7938)
-        em.add_field(name='Name', value=server.name)
-        em.add_field(name='Owner', value=server.owner, inline=False)
-        em.add_field(name='Members', value=server.member_count)
+        role_count = len(guild.roles)
+        emoji_count = len(guild.emojis)
+        print("Done with calculations")
+        em = discord.Embed(title="", color=0xea7938)
+        em.add_field(name='Name', value=guild.name)
+        em.add_field(name='Owner', value=guild.owner.nick, inline=False)
+        em.add_field(name='Members', value=str(guild.member_count))
         em.add_field(name='Currently Online', value=online)
         em.add_field(name='Text Channels', value=str(channel_count))
-        em.add_field(name='Region', value=server.region)
-        em.add_field(name='Verification Level', value=str(server.verification_level))
-        em.add_field(name='Highest role', value=server.role_hierarchy[0])
+        em.add_field(name='Region', value=guild.region)
+        em.add_field(name='Verification Level', value=str(guild.verification_level))
+        # em.add_field(name='Highest role', value=guild.role_hierarchy[0])
         em.add_field(name='Number of roles', value=str(role_count))
         em.add_field(name='Number of emotes', value=str(emoji_count))
+        em.add_field(name='Number of boosts', value=str(guild.premium_subscription_count))
+        if len(guild.features) > 0:
+            em.add_field(name='Guild Features', value=f"{guild.features.join(', ')}")
         em.add_field(name='Created At',
-                     value=server.created_at.__format__('%A, %d. %B %Y @ %H:%M:%S'))
-        em.set_thumbnail(url=server.icon_url)
-        em.set_author(name='Server Info', icon_url='https://i.imgur.com/RHagTDg.png')
-        em.set_footer(text='Server ID: %s' % server.id)
-        message = await self.bot.send_message(ctx.message.channel, embed=em)
+                     value=guild.created_at.__format__('%A, %d. %B %Y @ %H:%M:%S'))
+        if guild.is_icon_animated():
+            em.set_thumbnail(url=guild.icon_url_as(format='gif'))
+        else:
+            em.set_thumbnail(url=guild.icon_url_as(format='png'))
+        em.set_author(name='Server Info')
+        em.set_footer(text='Server ID: %s' % guild.id)
+        print("sending")
+        message = await ctx.send(embed=em)
 
 def setup(bot):
     bot.add_cog(Help(bot))
