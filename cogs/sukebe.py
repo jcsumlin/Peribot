@@ -24,7 +24,6 @@ class Sukebe(commands.Cog):
 
         random.seed(int(user.id) % int(d))
         x = ":fire:" * random.randint(1, 10)
-        print(x)
         await ctx.send("{}'s Sukebe-ness is : ".format(user.display_name) + x)
 
 
