@@ -15,7 +15,7 @@ class CursedPearl(commands.Cog):
 
 
     def guildCheck(self, ctx):
-        if ctx.guild.id == 593887030216228973:
+        if ctx.guild.id == 515370084538253333:
             return True
         else: return False
 
