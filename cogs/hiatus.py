@@ -6,7 +6,7 @@ from discord.ext import commands
 from tmdbv3api import TMDb, Season
 
 
-class Hiatus:
+class Hiatus(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         config = configparser.ConfigParser()
@@ -18,7 +18,7 @@ class Hiatus:
     @commands.command(name='hiatus',
                     description="How long has this Hiatus been going on for?",
                     breif="The hiatus is cold and long",
-                    pass_context=True)
+                    )
     async def hiatus(self, ctx):
         """
         Will return the number of days since the last episode of SVTFOE. The nexus of the hiatus...
@@ -29,7 +29,7 @@ class Hiatus:
         # days = re.search('\d{1,3}\s', str(datetime.now() - date_of_last_episode)).group(0)
         # msg = "Days since last episode:\n\n" + "[" + days + "Days]"
 
-        if ctx.message.server.id == "515370084538253333":
+        if ctx.guild.id == 515370084538253333:
             season = Season()
             latest_season = False
             season_number = 1
@@ -46,9 +46,9 @@ class Hiatus:
             embed = discord.Embed(title="Steven Universe Hiatus Calculator")
             embed.set_thumbnail(url='https://image.tmdb.org/t/p/w600_and_h900_bestv2/g31ZPZSjv8ySPbclyYZZU50XhZy.jpg')
             embed.add_field(name=f"Days Since Season {episode['season_number']} {episode['name']}", value=f"{diffrence.days} Days")
-            return await self.bot.send_message(ctx.message.channel, embed=embed)
+            return await ctx.channel.send(embed=embed)
 
-        if ctx.message.server.id == "448695150135345152":
+        if ctx.guild.id == 448695150135345152:
             season = Season()
             latest_season = False
             season_number = 1
@@ -65,7 +65,7 @@ class Hiatus:
             embed = discord.Embed(title="Star Vs The Forces Of Evil Hiatus Calculator")
             embed.set_thumbnail(url="https://image.tmdb.org/t/p/w600_and_h900_bestv2/dKFL1AOdKNoazqZDg1zq2z69Lx1.jpg")
             embed.add_field(name=f"Days Since Season {episode['season_number']} {episode['name']}", value=f"{diffrence.days} Days")
-            return await self.bot.send_message(ctx.message.channel, embed=embed)
+            return await ctx.channel.send(embed=embed)
 
 
 
