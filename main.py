@@ -38,34 +38,37 @@ async def on_ready():
     """
     logger.debug("Bot is ready!")
 
-@bot.command(pass_context=True)
-@commands.has_permissions(administrator=True)
+
+@bot.command()
+@commands.is_owner()
 async def load(ctx, extension):
     try:
         bot.load_extension('cogs.' + extension)
         logger.debug(f'Loaded {extension}')
-        await bot.say(f'Loaded {extension}')
+        await ctx.send(f'Loaded {extension}')
     except Exception as error:
         logger.exception(f"Extension {extension} could not be loaded. [{error}]")
 
-@bot.command(pass_context=True)
-@commands.has_permissions(administrator=True)
+
+@bot.command()
+@commands.is_owner()
 async def reload(ctx, extension):
     try:
         bot.unload_extension('cogs.' + extension)
         bot.load_extension('cogs.' + extension)
         logger.debug(f'Reloaded {extension}')
-        await bot.say(f'Reloaded {extension}')
+        await ctx.send(f'Reloaded {extension}')
     except Exception as error:
         logger.exception(f"Extension {extension} could not be reloaded. [{error}]")
 
+
 @bot.command()
-@commands.has_permissions(administrator=True)
-async def unload(extension):
+@commands.is_owner()
+async def unload(ctx, extension):
     try:
         bot.unload_extension('cogs.' + extension)
         logger.debug(f'Unloaded {extension}')
-        await bot.say(f'{extension} successfully unloaded')
+        await ctx.send(f'{extension} successfully unloaded')
     except Exception as error:
         logger.exception(f"Extension {extension} could not be unloaded. [{error}]")
 
@@ -79,4 +82,5 @@ if __name__ == "__main__":
             logger.debug(f'Loaded {extension} cog.')
         except Exception as error:
             logger.exception(f"Extension {extension} could not be loaded. [{error}]")
+    logger.info(str(bot.guilds) + "Peribot is apart of")
     bot.run(auth.get('discord', 'TOKEN'))
