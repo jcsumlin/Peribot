@@ -7,7 +7,7 @@ class Shipper:
         self.bot = bot
 
     @commands.command()
-    async def ship(self, user1 : discord.Member, user2 : discord.Member):
+    async def ship(self,ctx, user1 : discord.Member, user2 : discord.Member):
         """Creates a ship name for two users"""
         name1 = user1.name
         name2 = user2.name
