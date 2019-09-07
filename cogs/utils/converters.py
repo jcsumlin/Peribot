@@ -1,13 +1,14 @@
+import re
+
 from discord.ext.commands.converter import IDConverter
 from discord.ext.commands.errors import BadArgument
-import re
 
 
 # This could've been imported but since it's an internal it's safer
 # to get it here
 def _get_from_servers(bot, getter, argument):
     result = None
-    for server in bot.servers:
+    for server in bot.guilds:
         result = getattr(server, getter)(argument)
         if result:
             return result
@@ -25,7 +26,7 @@ class GlobalUser(IDConverter):
         message = self.ctx.message
         bot = self.ctx.bot
         match = self._get_id_match() or re.match(r'<@!?([0-9]+)>$', self.argument)
-        server = message.server
+        server = message.guild
         result = None
         if match is None:
             # not a mention...
