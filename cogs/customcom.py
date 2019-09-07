@@ -26,9 +26,15 @@ class CustomCommands:
     async def customcom(self, ctx):
         """Custom commands management"""
         if ctx.invoked_subcommand is None:
-            await self.bot.send_cmd_help(ctx)
+            e = discord.Embed(title="Error: That's not how you use this command!",
+                              description="", color=discord.Color.red())
+            e.add_field(name="!cc add [command] [result]", value="This will create a new custom command. Every time the [command] is invoked I will reply with the [result]")
+            e.add_field(name="!cc edit [command] [result]", value="This will edit an existing custom command. Just incase you don't like my response any more")
+            e.add_field(name="!cc delete [command]", value="This will completly delete a custom command from this server. I will no lover respond to it.")
+            await ctx.send(embed=e)
 
-    @customcom.command(name="add", pass_context=True)
+
+    @customcom.command(name="add", )
     async def cc_add(self, ctx, command : str, *, text):
         """Adds a custom command
 
@@ -150,11 +156,11 @@ class CustomCommands:
             if cmd in cmdlist:
                 cmd = cmdlist[cmd]
                 cmd = self.format_cc(cmd, message)
-                await self.bot.send_message(message.channel, cmd)
+                await message.channel.send(cmd)
             elif cmd.lower() in cmdlist:
                 cmd = cmdlist[cmd.lower()]
                 cmd = self.format_cc(cmd, message)
-                await self.bot.send_message(message.channel, cmd)
+                await message.channel.send(cmd)
 
     def get_prefix(self, message):
         try:
