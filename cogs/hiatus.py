@@ -29,7 +29,7 @@ class Hiatus(commands.Cog):
         # days = re.search('\d{1,3}\s', str(datetime.now() - date_of_last_episode)).group(0)
         # msg = "Days since last episode:\n\n" + "[" + days + "Days]"
 
-        if ctx.guild.id == 515370084538253333:
+        if ctx.guild.id == 593887030216228973:
             season = Season()
             latest_season = False
             season_number = 1
@@ -43,9 +43,12 @@ class Hiatus(commands.Cog):
             episode =show_season.entries['episodes'][-1]
             air_date = episode['air_date']
             diffrence = datetime.now() - datetime.strptime(air_date, "%Y-%m-%d")
+            a = datetime(2019, 9, 2)
+            b = datetime.now()
             embed = discord.Embed(title="Steven Universe Hiatus Calculator")
             embed.set_thumbnail(url='https://image.tmdb.org/t/p/w600_and_h900_bestv2/g31ZPZSjv8ySPbclyYZZU50XhZy.jpg')
-            embed.add_field(name=f"Days Since Season {episode['season_number']} {episode['name']}", value=f"{diffrence.days} Days")
+            embed.add_field(name=f"Days Since Season {episode['season_number']} {episode['name']}", value=f"{diffrence.days} Days", inline=False)
+            embed.add_field(name=f"Days Since Season The Movie", value=f"{(b-a).days} Days", inline=False)
             return await ctx.channel.send(embed=embed)
 
         if ctx.guild.id == 448695150135345152:
