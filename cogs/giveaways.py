@@ -84,6 +84,7 @@ class Giveaways:
         self.settings[server.id][str(message.id)] = settings
         self.save_settings()
         await self.bot.add_reaction(message, "✅")
+        await self.bot.delete_message(ctx.message)
 
     @giveaway.command(pass_context=True)
     @checks.admin_or_permissions()
@@ -118,7 +119,7 @@ class Giveaways:
         giveaways = {}
         ids = []
         for id, giveaway in self.settings[server.id].items():
-            embed.add_field(name=f"{index}) {giveaway['name']}", value=f"Entries: {len(giveaway['users'])}")
+            embed.add_field(name=f"{index}) {giveaway['name']}", value=f"Entries: {giveaway['entries']}")
             giveaways[index] = giveaway
             ids.append(id)
             index += 1
