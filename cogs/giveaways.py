@@ -168,7 +168,7 @@ class Giveaways:
         server = reaction.message.server
         author_id = user.id
         message_id = reaction.message.id
-        if author_id == "608824312689983488":
+        if author_id == "608824312689983488" or author_id == "484461035315527700":
             return
         if message_id in self.settings[server.id]:
             giveaway = self.settings[server.id][message_id]
