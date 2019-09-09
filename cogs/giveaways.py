@@ -43,7 +43,7 @@ class Giveaways:
         # Setting all of the settings.
         for setting in settings:
             if not setdict:
-                settings = {"name": "", "length": -1, "maxentries": -1, 'entries': 0, "users": [], "started": True}
+                settings = {"name": "", "length": -1, 'entries': 0, "users": [], "started": True}
                 setdict = True
             if setting.startswith("name: "):
                 if setting[6:] in self.settings[ctx.message.server.id]:
@@ -69,13 +69,7 @@ class Giveaways:
                 else:
                     await self.bot.say("You can only use hours and days.")
                     return
-            elif setting.startswith("entries:"):
-                try:
-                    settings['maxentries'] = int(setting[8:])
-                except:
-                    await self.bot.say("The 'entries' parameter is not an integer.")
-                    return
-        # Checking if mandatory settings are there.
+                # Checking if mandatory settings are there.
         if settings['name'] == "":
             await self.bot.say("The 'name' parameter cannot be empty.")
             return
@@ -84,11 +78,8 @@ class Giveaways:
             return
         embed = discord.Embed(title=":tada: New Giveaway Started! :tada:", description="React to this message to enter!", color=discord.Color.green())
         embed.add_field(name=f"Prize:", value=f"{settings['name']}")
-        if settings['maxentries'] == -1:
-            max_entries = "Unlimited"
-        else:
-            max_entries = settings['maxentries']
-        embed.add_field(name=f"Length:", value=settings['length'])
+        embed.add_field(name=f"Length:", value=f"{int(settings['length']) / 3600} Hours")
+        embed.add_field(name=f"Sponsored by:", value=f"{ctx.message.author}")
         message = await self.bot.say(embed=embed)
         self.settings[server.id][str(message.id)] = settings
         self.save_settings()
@@ -174,6 +165,7 @@ class Giveaways:
             giveaway = self.settings[server.id][message_id]
             if author_id not in self.settings[server.id][message_id]['users']:
                 self.settings[server.id][message_id]['users'].append(author_id)
+                self.settings[server.id][message_id]['entries'] =+ 1
                 self.save_settings()
                 return await self.bot.send_message(user, "You have successfully entered the {} giveaway, good luck!".format(giveaway['name']))
 
