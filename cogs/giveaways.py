@@ -166,7 +166,7 @@ class Giveaways:
             giveaway = self.settings[server.id][message_id]
             if author_id not in self.settings[server.id][message_id]['users']:
                 self.settings[server.id][message_id]['users'].append(author_id)
-                self.settings[server.id][message_id]['entries'] = + 1
+                self.settings[server.id][message_id]['entries'] =+ 1
                 self.save_settings()
                 return await self.bot.send_message(user,
                                                    "You have successfully entered the {} giveaway, good luck!".format(
