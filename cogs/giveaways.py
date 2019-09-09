@@ -77,7 +77,8 @@ class Giveaways:
         if settings['length'] == -1:
             await self.bot.say("The 'length' parameter cannot be empty.")
             return
-        embed = discord.Embed(title=":tada: New Giveaway Started! :tada:", description="React to this message to enter!", color=discord.Color.green())
+        embed = discord.Embed(title=":tada: New Giveaway Started! :tada:",
+                              description="React to this message to enter!", color=discord.Color.green())
         embed.add_field(name=f"Prize:", value=f"{settings['name']}")
         embed.add_field(name=f"Length:", value=f"{int(settings['length']) / 3600} Hours")
         embed.add_field(name=f"Sponsored by:", value=f"{ctx.message.author}")
@@ -104,7 +105,8 @@ class Giveaways:
         else:
             self.settings[server.id][message_id]['started'] = False
             self.save_settings()
-            await self.bot.say("You can now pick a winner with {}giveaway pick <amount>".format(ctx.prefix))
+            await self.bot.say(
+                "You can now pick a winner with {}giveaway pick <amount> <message_id>".format(ctx.prefix))
 
     @giveaway.command(pass_context=True)
     @checks.mod_or_higher()
@@ -117,8 +119,16 @@ class Giveaways:
             return await self.bot.say("This server does not have any giveaways yet.")
         giveaways = self.settings[server.id]
         if giveaway_id not in giveaways:
-            return await self.bot.say("Sorry thats not a valid message ID!\n```\nHINT: The message ID will be found on the bot's message announcing the giveaway\n```")
+            return await self.bot.say(
+                "Sorry thats not a valid message ID!\n```\nHINT: The message ID will be found on the bot's message announcing the giveaway\n```")
         giveaway = giveaways[giveaway_id]
+        if giveaways[giveaway_id]['started'] == True:
+            return await self.bot.say(
+                "This giveaway has not ended yet! Please end it with `!giveaway stop <message_id>`")
+        if len(giveaways[giveaway_id]['users']) == 0:
+            del self.settings[server.id][giveaway_id]
+            self.save_settings()
+            return await self.bot.say("This giveaway has no entries! I guess that means no one wins :(")
         status = await self.bot.say("Picking winners.")
         winnersIDs = []
         winners = []
@@ -134,12 +144,14 @@ class Giveaways:
         self.save_settings()
         if amount == 1:
             await self.bot.edit_message(status,
-                                  "And thats a wrap! The winner is: {}! Congratulations, you won {}!".format(" ".join(winners),
-                                                                                           giveaway['name']))
+                                        "And thats a wrap! The winner is: {}! Congratulations, you won {}!".format(
+                                            " ".join(winners),
+                                            giveaway['name']))
         else:
             await self.bot.edit_message(status,
-                                  "And thats a wrap! The winners are: {}! Congratulations, you won {}!".format(" ".join(winners),
-                                                                                             giveaway['name']))
+                                        "And thats a wrap! The winners are: {}! Congratulations, you won {}!".format(
+                                            " ".join(winners),
+                                            giveaway['name']))
 
     async def on_reaction_add(self, reaction, user):
         """Enter a giveaway.
@@ -154,12 +166,11 @@ class Giveaways:
             giveaway = self.settings[server.id][message_id]
             if author_id not in self.settings[server.id][message_id]['users']:
                 self.settings[server.id][message_id]['users'].append(author_id)
-                self.settings[server.id][message_id]['entries'] =+ 1
+                self.settings[server.id][message_id]['entries'] = + 1
                 self.save_settings()
-                return await self.bot.send_message(user, "You have successfully entered the {} giveaway, good luck!".format(giveaway['name']))
-
-
-
+                return await self.bot.send_message(user,
+                                                   "You have successfully entered the {} giveaway, good luck!".format(
+                                                       giveaway['name']))
 
     @giveaway.command(pass_context=True)
     async def list(self, ctx):
@@ -171,9 +182,8 @@ class Giveaways:
             await self.bot.say("This server has the following giveaways running:\n\t{}".format(
                 "\n\t".join(list(self.settings[server.id].keys()))))
 
-
     @giveaway.command(pass_context=True)
-    async def info(self, ctx, *, giveaway):
+    async def info(self, ctx, giveaway):
         """Get information for a giveaway.
         Example:
         [p]giveaway info Minecraft account"""
@@ -184,20 +194,13 @@ class Giveaways:
             await self.bot.say("That's not a valid giveaway running in this server.")
         else:
             settings = self.settings[server.id][giveaway]
-            await self.bot.say("Name: **{}**\nTime left: **{}**\nMax entries: **{}**\nEntries: **{}**".format(giveaway,
-                                                                                                        self.secondsToText(
-                                                                                                            settings[
-                                                                                                                'length']),
-                                                                                                        settings[
-                                                                                                            'maxentries'],
-                                                                                                        len(settings[
-                                                                                                                'users'])))
-
-
+            await self.bot.say("Name: **{}**\nTime left: **{}**\nEntries: **{}**".format(settings['name'],
+                                                                                         self.secondsToText(
+                                                                                             settings['length']),
+                                                                                         len(settings['users'])))
 
     def save_settings(self):
         return dataIO.save_json("data/giveaways/settings.json", self.settings)
-
 
     async def on_message(self, message):
         if not self.started:
