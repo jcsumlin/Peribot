@@ -22,9 +22,10 @@ class Giveaways:
             await             self.bot.send_cmd_help(ctx)
 
     @giveaway.command(pass_context=True)
-    @checks.admin_or_permissions()
+    @checks.mod_or_higher()
     async def start(self, ctx, *, settings):
         """Start a giveaway.
+        TODO: Allow Mods to use this command
         Usage"
         [p]giveaway start name: <Giveaway  name>; length: <Time length>; entries: [Max entries]
         Giveaway name is mandatory.
@@ -87,71 +88,58 @@ class Giveaways:
         await self.bot.delete_message(ctx.message)
 
     @giveaway.command(pass_context=True)
-    @checks.admin_or_permissions()
-    async def stop(self, ctx, *, giveaway):
+    @checks.mod_or_higher()
+    async def stop(self, ctx, message_id):
         """Stops a giveaway early so you can pick a winner.
         Example:
-        [p]giveaway stop Minecraft account"""
+        [p]giveaway stop 620715054211268637"""
         server = ctx.message.server
         if server.id not in self.settings:
             await self.bot.say("There are no giveaways in this server.")
-        elif giveaway not in self.settings[server.id]:
+        elif message_id not in self.settings[server.id]:
             await self.bot.say(
-                "That's not a valid giveaway, to see all giveaways you can do {}giveaway list.".format(ctx.prefix))
-        elif not self.settings[server.id][giveaway]['started']:
+                "That's not a valid giveaway, to see all giveaways you can do {}giveaway list".format(ctx.prefix))
+        elif not self.settings[server.id][message_id]['started']:
             await self.bot.say("That giveaway's already stopped.")
         else:
-            self.settings[server.id][giveaway]['started'] = False
+            self.settings[server.id][message_id]['started'] = False
             self.save_settings()
-            await self.bot.say("You can now pick a winner with {}giveaway pick <amount> {}.".format(ctx.prefix, giveaway))
+            await self.bot.say("You can now pick a winner with {}giveaway pick <amount>".format(ctx.prefix))
 
     @giveaway.command(pass_context=True)
-    @checks.admin_or_permissions()
-    async def pick(self, ctx, amount: int):
+    @checks.mod_or_higher()
+    async def pick(self, ctx, amount: int, giveaway_id):
         """Picks <amount> of winners for the giveaway, which usually should be 1.
         Example:
         [p]giveaway pick 5 Minecraft account (This will pick 5 winners from all the people who entered the Minecraft account giveaway)"""
         server = ctx.message.server
         if server.id not in self.settings:
             return await self.bot.say("This server does not have any giveaways yet.")
-        embed = discord.Embed(title="Choose what giveaway to pick winners from", description="Reply with the number next to the giveaway's name")
-        index = 1
-        giveaways = {}
-        ids = []
-        for id, giveaway in self.settings[server.id].items():
-            embed.add_field(name=f"{index}) {giveaway['name']}", value=f"Entries: {giveaway['entries']}")
-            giveaways[index] = giveaway
-            ids.append(id)
-            index += 1
-        if index == 1:
-            return await self.bot.say(f"All giveaways are still running, you can stop one with {ctx.prefix}giveaway stop [giveaway name].")
-        await self.bot.say(embed=embed)
-        entry = await self.bot.wait_for_message(author=ctx.message.author)
-        entry = int(entry.content)
-        if entry < 1 or entry > index:
-            return await self.bot.say("Invalid Selection, exiting.")
-        elif entry >= 1 and entry <= index:
-            status = await self.bot.say("Picking winners.")
-            winnersIDs = []
-            winners = []
-            for i in range(amount):
-                winnersIDs.append(random.choice(giveaways[entry]['users']))
-            for winner in winnersIDs:
-                winner = discord.utils.get(server.members, id=winner)
-                while winner == None:
-                    winner = discord.utils.get(server.members,
-                                               id=random.choice(giveaways[entry]['users']))
-                winners.append(winner.mention)
-            del self.settings[server.id][ids[entry-1]]
-            self.save_settings()
-            if amount == 1:
-                await self.bot.edit_message(status,
-                                      "And thats a wrap! The winner is: {}! Congratulations, you won {}!".format(" ".join(winners),
-                                                                                               giveaway['name']))
-            else:
-                await self.bot.edit_message(status,
-                                      "And thats a wrap! The winners are: {}! Congratulations, you won {}!".format(" ".join(winners),
-                                                                                                 giveaway['name']))
+        giveaways = self.settings[server.id]
+        if giveaway_id not in giveaways:
+            return await self.bot.say("Sorry thats not a valid message ID!\n```\nHINT: The message ID will be found on the bot's message announcing the giveaway\n```")
+        giveaway = giveaways[giveaway_id]
+        status = await self.bot.say("Picking winners.")
+        winnersIDs = []
+        winners = []
+        for i in range(amount):
+            winnersIDs.append(random.choice(giveaway['users']))
+        for winner in winnersIDs:
+            winner = discord.utils.get(server.members, id=winner)
+            while winner == None:
+                winner = discord.utils.get(server.members,
+                                           id=random.choice(giveaway['users']))
+            winners.append(winner.mention)
+        del self.settings[server.id][giveaway_id]
+        self.save_settings()
+        if amount == 1:
+            await self.bot.edit_message(status,
+                                  "And thats a wrap! The winner is: {}! Congratulations, you won {}!".format(" ".join(winners),
+                                                                                           giveaway['name']))
+        else:
+            await self.bot.edit_message(status,
+                                  "And thats a wrap! The winners are: {}! Congratulations, you won {}!".format(" ".join(winners),
+                                                                                             giveaway['name']))
 
     async def on_reaction_add(self, reaction, user):
         """Enter a giveaway.
