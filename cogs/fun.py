@@ -2,6 +2,8 @@ import random
 from random import choice
 
 import discord
+import requests
+from bs4 import BeautifulSoup
 from discord.ext import commands
 
 
@@ -16,6 +18,16 @@ class Fun(commands.Cog):
         Pong!
         """
         await ctx.send("Pong!")
+
+    @commands.command()
+    async def topic(self, ctx):
+        """
+        Gets a random chat topic to keep the chat going.
+        """
+        website = requests.get('https://www.conversationstarters.com/generator.php').content
+        soup = BeautifulSoup(website, 'html.parser')
+        topic = soup.find(id="random").text
+        await ctx.send(topic)
 
     @commands.command(aliases=['r'])
     async def roll(self, ctx, upper_bound=20 #type: int
