@@ -32,6 +32,8 @@ def is_owner():
 def admin_or_permissions():
     return commands.has_permissions(administrator=True)
 
+def mod_or_permissions():
+    return commands.has_permissions(manage_messages=True)
 
 def admin():
     return admin_or_permissions()
