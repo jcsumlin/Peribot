@@ -223,12 +223,12 @@ class Star(commands.Cog):
         for past_message in msg_list:
             if str(message.id) == past_message["original_message"]:
                 msg = past_message
-        msg_list.remove(msg)
-        # msg["count"] += 1
-        msg_list.append(msg)
-        self.settings[str(guild.id)]["messages"] = msg_list
-        dataIO.save_json("data/star/settings.json", self.settings)
-        return msg["new_message"], msg["count"]
+                # msg_list.remove(msg)
+                # # msg["count"] += 1
+                # msg_list.append(msg)
+                # self.settings[str(guild.id)]["messages"] = msg_list
+                # dataIO.save_json("data/star/settings.json", self.settings)
+                return msg["new_message"], msg["count"]
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):
