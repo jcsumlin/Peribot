@@ -109,7 +109,7 @@ class Moderation(commands.Cog):
                 await ctx.send(
                     embed=easyembed(title="Error adding report to databse"))
             await user.send(embed=easyembed(
-                title=f"Hey there {user.name} the mods from {ctx.message.server.name} have warned you!",
+                title=f"Hey there {user.name} the mods from {ctx.message.guild.name} have warned you!",
                 description=f"Their reason is as follows: {reason}"))
             await ctx.send(embed=easyembed(
                 title="User has been warned in the DM's",
@@ -128,7 +128,7 @@ class Moderation(commands.Cog):
                 else:
                     users[f"{report.user_name} | {report.user_id}"] = users[
                                                                           f"{report.user_name} | {report.user_id}"] + 1
-            embed1 = discord.Embed(title=f":warning: Warned Users from {ctx.message.server.name} :warning: ")
+            embed1 = discord.Embed(title=f":warning: Warned Users from {ctx.message.guild.name} :warning: ")
             for user, number_of_reports in users.items():
                 embed1.add_field(name=user, value=str(number_of_reports))
             await ctx.send(embed=embed1)
