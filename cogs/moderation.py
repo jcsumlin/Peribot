@@ -97,7 +97,7 @@ class Moderation(commands.Cog):
                 embed=easyembed(title="Sorry that's not how this command works!",
                                 description="ex: !warn add [user id] Stop spamming please"))
         elif user_id is not None and reason is not None:
-            user = await self.bot.get_user_info(user_id)
+            user = await self.bot.fetch_user(int(user_id))
             try:
                 new_report = Report(date=datetime.utcnow(), server_id=str(ctx.message.guild.id),
                                     user_name=user.name, user_id=str(user_id),
@@ -146,7 +146,7 @@ class Moderation(commands.Cog):
             await ctx.send(
                 "That user has no warnings logged at this time.")
         else:
-            user = await self.bot.get_user_info(user_id)
+            user = await self.bot.fetch_user(int(user_id))
             embed1 = discord.Embed(title=f"Warnings for {user.name} are as follows:")
             for report in reports:
                 embed1.add_field(name=f"{report.date} by {report.mod_name}", value=report.reason)
@@ -168,7 +168,7 @@ class Moderation(commands.Cog):
             await ctx.send(
                 "That user has no warnings logged at this time.")
         else:
-            user = await self.bot.get_user_info(user_id)
+            user = await self.bot.fetch_user(int(user_id))
             try:
                 num_rows_deleted = self.session.query(Report).filter(
                     and_(
@@ -182,7 +182,7 @@ class Moderation(commands.Cog):
                     embed=easyembed(title="Error removing that user from the databsse!",
                                     color=discord.Color.red()))
                 return
-            user = await self.bot.get_user_info(user_id)
+            user = await self.bot.fetch_user(int(user_id))
             await ctx.send(
                 embed=easyembed(title=f"{user.name} has been removed from the database!",
                                 description=f"{num_rows_deleted} warning records were removed!",
