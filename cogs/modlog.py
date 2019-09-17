@@ -201,6 +201,8 @@ class Modlog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
+        if before.channel is None or after.channel is None:
+            return
         if self.is_module(before.channel.guild, 'voicechat'):
             await self.log(before.channel.guild, "`[{}]` :bangbang: **Voicechat Log**\n"
                                                  "```User: {}"
