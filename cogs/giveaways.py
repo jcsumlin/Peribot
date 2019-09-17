@@ -87,7 +87,7 @@ class Giveaways(commands.Cog):
         self.settings[str(guild.id)][str(message.id)] = settings
         self.save_settings()
         await message.add_reaction("✅")
-        await ctx.delete()
+        await ctx.message.delete()
 
     @giveaway.command()
     @checks.mod_or_higher()
