@@ -14,7 +14,7 @@ from create_databases import Base, Report
 from .utils.easyembed import embed as easyembed
 
 
-class reeeport:
+class Moderation(commands.Cog):
     """Report system for admins"""
 
     def __init__(self, bot):
@@ -24,7 +24,7 @@ class reeeport:
         DBSession = sessionmaker(bind=engine)
         self.session = DBSession()  # session.commit() to store data, and session.rollback() to discard changes
 
-    @commands.command(pass_context=True)
+    @commands.command()
     @commands.has_permissions(manage_messages=True)
     async def setreport(self, ctx):
         """
@@ -32,7 +32,7 @@ class reeeport:
         """
         try:
             channel = ctx.message.channel.id
-            server_id = ctx.message.server.id
+            server_id = str(ctx.message.server.id)
             with open('data/report/info.json', 'r+') as f:
                 data = json.load(f)
                 data[server_id] = str(channel)  # <--- add `id` value.
@@ -45,7 +45,7 @@ class reeeport:
             pass
 
 
-    @commands.command(pass_context=True)
+    @commands.command()
     async def report(self, ctx, server_id: int = None, *, message: str):
         """
         For users to report something going wrong.
@@ -109,12 +109,10 @@ class reeeport:
             except:
                 await self.bot.send_message(ctx.message.channel,
                                       embed=easyembed(title="Error adding report to databse"))
-            await self.bot.send_message(user,
-                                        embed=easyembed(
+            await user.send(embed=easyembed(
                                             title=f"Hey there {user.name} the mods from {ctx.message.server.name} have warned you!",
                                             description=f"Their reason is as follows: {reason}"))
-            await self.bot.send_message(ctx.message.channel,
-                                        embed=easyembed(
+            await ctx.send(embed=easyembed(
                                             title="User has been warned in the DM's",
                                             color=discord.Color.green()))
 
@@ -130,7 +128,7 @@ class reeeport:
                     users[f"{report.user_name} | {report.user_id}"] = 1
                 else:
                     users[f"{report.user_name} | {report.user_id}"] = users[f"{report.user_name} | {report.user_id}"] + 1
-            embed1 = discord.Embed(title=f"Warned Users from {ctx.message.server.name}")
+            embed1 = discord.Embed(title=f":warning: Warned Users from {ctx.message.server.name} :warning: ")
             for user, number_of_reports in users.items():
                 embed1.add_field(name=user, value=str(number_of_reports))
             await self.bot.send_message(ctx.message.channel, embed=embed1)
@@ -206,4 +204,4 @@ class reeeport:
 
 
 def setup(bot):
-    bot.add_cog(reeeport(bot))
+    bot.add_cog(Moderation(bot))

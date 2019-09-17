@@ -8,7 +8,7 @@ from loguru import logger
 from .utils.dataIO import dataIO, fileIO
 
 
-class Youtube:
+class Youtube(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -27,7 +27,7 @@ class Youtube:
     @commands.group('youtube', pass_context=True)
     async def youtube(self, ctx):
         if ctx.invoked_subcommand is None:
-            await self.bot.send_message(ctx.message.channel, "Thats not how you use this command, please do it like this. !youtube add [link]")
+            await ctx.send("Thats not how you use this command, please do it like this. !youtube add [link]")
             return
 
     @youtube.group(pass_context=True)
@@ -36,25 +36,25 @@ class Youtube:
         regex = re.findall(youtube_url_regex, link)
         if len(regex) > 0 and "youtube.com" in regex[0][0] or "youtu.be" in regex[0][0]:
             servers = await self.get_config()
-            if await self.server_in_config(servers, ctx.message.server.id):
-                if ctx.message.author.id not in servers[ctx.message.server.id]:
-                    servers[ctx.message.server.id][ctx.message.author.id] = []
-                if len(servers[ctx.message.server.id][ctx.message.author.id]) < 3 and regex[0][0] not in servers[ctx.message.server.id][ctx.message.author.id]:
-                    servers[ctx.message.server.id][ctx.message.author.id].append(regex[0][0])
-                    await self.bot.send_message(ctx.message.channel, "Added!")
+            if await self.server_in_config(servers, ctx.message.guild.id):
+                if ctx.message.author.id not in servers[ctx.message.guild.id]:
+                    servers[ctx.message.guild.id][ctx.message.author.id] = []
+                if len(servers[ctx.message.guild.id][ctx.message.author.id]) < 3 and regex[0][0] not in servers[ctx.message.guild.id][ctx.message.author.id]:
+                    servers[ctx.message.guild.id][ctx.message.author.id].append(regex[0][0])
+                    await ctx.send("Added!")
                 else:
-                    await self.bot.send_message(ctx.message.channel, "Sorry! Either you already added that link or you've hit your max of 3 links!")
+                    await ctx.send("Sorry! Either you already added that link or you've hit your max of 3 links!")
             else:
-                servers[ctx.message.server.id] = {ctx.message.author.id: [regex[0][0]]}
-                await self.bot.send_message(ctx.message.channel, "Added!")
+                servers[ctx.message.guild.id] = {ctx.message.author.id: [regex[0][0]]}
+                await ctx.send("Added!")
 
             await self.save_config(servers)
         else:
-            await self.bot.send_message(ctx.message.channel, "Sorry that doesn't seem to be a valid Youtube link!")
+            await ctx.send("Sorry that doesn't seem to be a valid Youtube link!")
 
     @youtube.group(pass_context=True)
     async def list(self, ctx):
-        server_object = ctx.message.server
+        server_object = ctx.message.guild
         server = await self.get_config()
         e = discord.Embed(title=f'{server_object.name}\'s Member Playlist', color=discord.Color.red())
         e.set_thumbnail(url="https://seeklogo.net/wp-content/uploads/2016/06/YouTube-icon.png")
@@ -65,22 +65,21 @@ class Youtube:
             else:
                 songs = "None"
             e.add_field(name=f"{user}'s songs:", value=songs)
-        await self.bot.send_message(ctx.message.channel, embed=e)
+        await ctx.send(embed=e)
 
     @youtube.group(pass_context=True)
     async def delete(self,ctx,  link):
         config = await self.get_config()
-        server_config = config[ctx.message.server.id]
+        server_config = config[ctx.message.guild.id]
         if ctx.message.author.id in server_config.keys():
             if link in server_config[ctx.message.author.id]:
                 server_config[ctx.message.author.id].remove(link)
                 await self.save_config(config)
-                await self.bot.send_message(ctx.message.channel, "Removed!")
+                await ctx.send("Removed!")
             else:
-                await self.bot.send_message(ctx.message.channel, "Hm I don't think that link was in there to begin with... try adding it?")
+                await ctx.send("Hm I don't think that link was in there to begin with... try adding it?")
         else:
-            await self.bot.send_message(ctx.message.channel,
-                                        "Doesn't look like you've added any youtube links.. try adding one!")
+            await ctx.send("Doesn't look like you've added any youtube links.. try adding one!")
 
 def check_folders():
     if not os.path.exists("data/youtube"):

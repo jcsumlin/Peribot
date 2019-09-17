@@ -8,13 +8,13 @@ def to_keycap(c):
     return '\N{KEYCAP TEN}' if c == 10 else str(c) + '\u20e3'
 
 
-class Polls:
+class Polls(commands.Cog):
     """Poll voting system."""
 
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(no_pm=True, pass_context=True)
+    @commands.command(no_pm=True, )
     async def poll(self, ctx, *, questions_and_choices: str):
         """
         delimit questions and answers by either | or ,
@@ -32,18 +32,18 @@ class Polls:
             questions_and_choices = shlex.split(questions_and_choices)
 
         if len(questions_and_choices) < 3:
-            return await self.bot.send_message(ctx.message.channel, 'Need at least 1 question with 2 choices.')
+            return await ctx.send('Need at least 1 question with 2 choices.')
         elif len(questions_and_choices) > 11:
-            return await self.bot.send_message(ctx.message.channel, 'You can only have up to 10 choices.')
+            return await ctx.send('You can only have up to 10 choices.')
 
-        # perms = ctx.channel.permissions_for(ctx.message.server.me)
+        # perms = ctx.channel.permissions_for(ctx.guild.me)
         # if not (perms.read_message_history or perms.add_reactions):
-        #     return await self.bot.send_message(ctx.message.channel, 'Need Read Message History and Add Reactions permissions.')
+        #     return await ctx.channel.send('Need Read Message History and Add Reactions permissions.')
 
         question = questions_and_choices[0]
         choices = [(to_keycap(e), v) for e, v in enumerate(questions_and_choices[1:], 1)]
         try:
-            await self.bot.delete_message(ctx.message)
+            await ctx.message.delete()
         except:
             pass
         answers = ""
@@ -51,33 +51,33 @@ class Polls:
         for answer in choices:
             answers += f"**{number})** {answer[1]}\n"
             number += 1
-        author = ctx.message.author.name.replace('_', '\_').replace('~', '\~').replace('|', '\|').replace('*', '\*')
+        author = ctx.author.name.replace('_', '\_').replace('~', '\~').replace('|', '\|').replace('*', '\*')
         e = discord.Embed(title=f':newspaper: {author} asks: {question}', color=discord.Color.green(), description=answers)
 
-        poll = await self.bot.send_message(ctx.message.channel, embed=e)
+        poll = await ctx.channel.send(embed=e)
         for emoji, _ in choices:
-            await self.bot.add_reaction(poll, emoji)
+            await poll.add_reaction(emoji)
 
-    @commands.command(no_pm=True, pass_context=True)
+    @commands.command(no_pm=True, )
     async def quickpoll(self, ctx, *, question: str):
         """
         Quick and easy yes/no poll, for multiple answers, see !quickpoll
         """
-        author = ctx.message.author.name.replace('_', '\_').replace('~', '\~').replace('|', '\|').replace('*', '\*')
+        author = ctx.author.name.replace('_', '\_').replace('~', '\~').replace('|', '\|').replace('*', '\*')
         message = "**{}** asks: {}".format(author, question)
         embed = discord.Embed(title=':newspaper: ' +message, color=discord.Color.green())
-        msg = await self.bot.send_message(ctx.message.channel, embed=embed)
+        msg = await ctx.channel.send(embed=embed)
         try:
-            await self.bot.delete_message(ctx.message)
+            await ctx.message.delete()
         except:
             pass
 
         yes_thumb = "👍"
         no_thumb = "👎"
         shrug_emoji = "🤷"
-        await self.bot.add_reaction(msg, yes_thumb)
-        await self.bot.add_reaction(msg, shrug_emoji)
-        await self.bot.add_reaction(msg, no_thumb)
+        await msg.add_reaction(yes_thumb)
+        await msg.add_reaction(shrug_emoji)
+        await msg.add_reaction(no_thumb)
 
 
 def setup(bot):

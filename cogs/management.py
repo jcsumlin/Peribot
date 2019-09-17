@@ -1,11 +1,9 @@
 import discord
-from discord.ext import commands
-from loguru import logger
 import git
+from discord.ext import commands
 
 
-
-class Management(object):
+class Management(commands.Cog):
 
     """
     Set of commands for Administration.
@@ -14,9 +12,8 @@ class Management(object):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name='setcolor', pass_context=True)
-    async def set_member_color(self, ctx, color: discord.Color):
-
+    @commands.command(name='setcolor', no_pm=True)
+    async def set_member_color(self, ctx, role: discord.Role, color: discord.Color):
         """
         Color the nickname of the participant. * Let there be bright colors and colors! *
         [!] In development.
@@ -26,50 +23,53 @@ class Management(object):
         For example:
         !setcolor #FF0000
         """
-        member = ctx.message.author
-
-        role_exists = f'PeriColored - {member.name}' in [x.name for x in member.roles]
-        logger.debug("Role exists?: " + str(role_exists))
-        server = ctx.message.server
         try:
-            if role_exists:
-                role = discord.utils.get(server.roles, name=f'PeriColored - {member.name}')
-                await self.bot.edit_role(server,role ,color=color)
-                await self.bot.send_message(ctx.message.channel,
-                                            '%s, Your color role was successfully changed (new color: %s).' % (
-                member.mention, color))
+            await role.edit(color=color)
+            if not role.is_default():
+                embed = discord.Embed(title=f"Changed the role color for {role.name} to {color}")
+                await ctx.send(embed=embed)
             else:
-                role = await self.bot.create_role(server=server, name=f'PeriColored - {member.name}',
-                                                   color=color)
-                await self.bot.move_role(server, role, int(member.top_role.position)+1)
-                await self.bot.add_roles(member, role)
-                await self.bot.send_message(ctx.message.channel,
-                    '%s, You have successfully added a role with color %s' % (member.mention, color))
-        except discord.errors.HTTPException as e:
-            await self.bot.send_message(ctx.message.channel,
-                f':x: Failed. \nYou may have entered the color incorrectly? \nCheck in case %s {e}' % color)
+                embed = discord.Embed(title="Peribot cannot affect the default roles.")
+                await ctx.send(embed=embed)
+        except discord.Forbidden:
+            embed = discord.Embed(title="Peribot does not have permissions to change roles." )
+            await ctx.send(embed=embed)
+        except discord.HTTPException:
+            embed = discord.Embed(title=f"Peribot failed to update {role.name}'s color" )
+            await ctx.send(embed=embed)
+        except discord.InvalidArgument:
+            embed = discord.Embed(title=f"Invalid Arguments!", description="!setcolor @Role [Hex Code or Generic Name]")
+            await ctx.send(embed=embed)
+        except discord.ext.commands.errors.BadArgument:
+            embed = discord.Embed(title=f"Invalid Arguments!", description="!setcolor @Role [Hex Code or Generic Name]")
+            await ctx.send(embed=embed)
 
 
-    @commands.command(name='gitpull', pass_context=True)
+    @commands.command(name='gitpull')
     async def git_pull(self, ctx):
-        if ctx.message.author.id == "204792579881959424":
+        if ctx.author.id == 204792579881959424:
             git_dir = "./"
             try:
                 g = git.cmd.Git(git_dir)
                 g.pull()
-                embed = discord.Embed(title="Successfully pulled from repository", color=0x00df00)
-                await self.bot.send_message(ctx.message.channel, embed=embed)
+                embed = discord.Embed(title=":white_check_mark: Successfully pulled from repository", color=0x00df00)
+                await ctx.channel.send(embed=embed)
             except Exception as e:
                 errno, strerror = e.args
                 embed = discord.Embed(title="Command Error!",
                                       description=f"Git Pull Error: {errno} - {strerror}",
                                       color=0xff0007)
-                await self.bot.send_message(ctx.message.channel, embed=embed)
+                await ctx.channel.send(embed=embed)
         else:
-            await self.bot.say("You don't have access to this command!")
+            await ctx.send("You don't have access to this command!")
+
+    @commands.command(name='mute')
+    @commands.has_permissions(manage_messages=True)
+    async def mute(self, ctx, user: discord.User):
+        pass
 
 
-    @commands.command(name='pin', pass_context=True)
+    @commands.command(name='pin')
     @commands.has_permissions(manage_messages=True)
     async def pin_message(self, ctx, *, message):
         """Copy your message in a stylish and modern frame, and then fix it!
@@ -84,13 +84,13 @@ class Management(object):
         embed = discord.Embed(color=0x71f442,
                               title='Pin it up!',
                               description=message)
-        embed.set_author(name=ctx.message.author.name, icon_url=ctx.message.author.avatar_url)
+        embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url)
         embed.set_footer(text=f'{ctx.prefix}{ctx.command}')
-        msg = await self.bot.say(embed=embed)
-        await self.bot.delete_message(ctx.message)
-        await self.bot.pin_message(msg)
+        msg = await ctx.send(embed=embed)
+        await ctx.message.delete()
+        await msg.pin()
 #
-#     @commands.command(name='resetmute', pass_context=True)
+#     @commands.command(name='resetmute', )
 #     @commands.has_permissions(manage_roles=True)
 #     async def resetmute(self, ctx):
 #         """Reset the settings of` !mute` and remove the role of PeriMute. * When peace times have arrived, without flooding! *
@@ -248,7 +248,7 @@ class Management(object):
 #     #     await ctx.send(embed=embed)
 #
 #
-#     @commands.command(name='cleanup', pass_context=True)
+#     @commands.command(name='cleanup', )
 #     @commands.has_permissions(manage_messages=True)
 #     async def cleanup(self, ctx, member: discord.Member, count: int):
 #
@@ -271,7 +271,7 @@ class Management(object):
 #
 #             await ctx.channel.purge(limit=count, check=is_member)
 #
-#     @commands.command(name='ban', pass_context=True)
+#     @commands.command(name='ban', )
 #     @commands.has_permissions(ban_members=True)
 #     async def ban(self, ctx, member: discord.Member, *, reason: str = 'N/A'):
 #
@@ -290,7 +290,7 @@ class Management(object):
 #
 #         embed = discord.Embed(timestamp=ctx.message.created_at, color=0x00ff00,
 #                               description=f'Пользователь {member.mention} забанен!\nПричина: {reason}.')
-#         embed.set_author(name=ctx.message.author.name, icon_url=ctx.message.author.avatar_url)
+#         embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url)
 #         embed.set_footer(text=f'{ctx.prefix}{ctx.command}')
 #
 #         await ctx.send(embed=embed)
@@ -328,7 +328,7 @@ class Management(object):
 #     #
 #     #     await ctx.send(embed=embed)
 #
-#     @commands.command(name='banlist', aliases=['bans'], pass_context=True)
+#     @commands.command(name='banlist', aliases=['bans'], )
 #     @commands.has_permissions(ban_members=True)
 #     async def banlist(self, ctx):
 #         """
@@ -345,12 +345,12 @@ class Management(object):
 #             embed = discord.Embed(timestamp=ctx.message.created_at,
 #                                   color=0xff0000,
 #                                   description=f'Banned users:\n{", ".join([user.user.name for user in bans])}')
-#         embed.set_author(name=ctx.message.author.name, icon_url=ctx.message.author.avatar_url)
+#         embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url)
 #         embed.set_footer(text=f'{ctx.prefix}{ctx.command}')
 #
 #         await ctx.send(embed=embed)
 #
-    @commands.command(name='kick', pass_context=True)
+    @commands.command(name='kick')
     @commands.has_permissions(kick_members=True)
     async def kick(self, ctx, member: discord.Member, *, reason: str = 'N/A'):
         """
@@ -359,15 +359,69 @@ class Management(object):
 
         """
         try:
-            await self.bot.kick(member=member, reason=reason)
+            await member.kick(reason=reason)
         except Exception as e:
-            await self.bot.send_message("error")
+            await ctx.send("error")
+            return
         embed = discord.Embed(timestamp=ctx.message.created_at, color=0x00ff00,
                               description=f'User {member.name} was kicked.\nReason: {reason}.')
-        embed.set_author(name=ctx.message.author.name, icon_url=ctx.message.author.avatar_url)
+        embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url)
         embed.set_footer(text=f'{ctx.prefix}{ctx.command}')
 
-        await self.bot.send_message(embed=embed)
+        await ctx.send(embed=embed)
+
+    @commands.command(name='ban')
+    @commands.has_permissions(ban_members=True)
+    async def ban(self, ctx, member: discord.Member, *, reason: str = 'N/A', delete: int = 0):
+        """
+        `:member` - The person you are banning @ them
+        `:reason` - Reason for kick
+
+        """
+        try:
+            await member.ban(reason=reason, delete_message_days=delete)
+        except discord.Forbidden:
+            embed = discord.Embed(title="Command Error!", description=f"I do not have permissions to do that", color=discord.Color.red())
+            await ctx.send(embed=embed)
+            return
+        except discord.HTTPException:
+            embed = discord.Embed(title="Command Error!", description=f"Banning failed. Try again", color=discord.Color.red())
+            await ctx.send(embed=embed)
+            return
+        embed = discord.Embed(timestamp=ctx.message.created_at, color=0x00ff00,
+                              description=f'User {member.name} was banned.\nReason: {reason}.\nMessages Deleted: {delete} days')
+        embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url)
+        embed.set_footer(text=f'{ctx.prefix}{ctx.command}')
+        await ctx.send(embed=embed)
+
+    @commands.command(name='unban')
+    @commands.has_permissions(ban_members=True)
+    async def unban(self, ctx, member: int, *, reason: str = 'N/A'):
+        """
+        `:member` - The person you are unbanning (their ID)
+        `:reason` - Reason for kick
+
+        """
+        for banentry in await ctx.guild.bans():
+            if member == banentry.user.id:
+                try:
+                    await ctx.guild.unban(banentry.user, reason=reason)
+                except discord.Forbidden:
+                    embed = discord.Embed(title="Command Error!", description=f"I do not have permissions to do that",
+                                          color=discord.Color.red())
+                    await ctx.send(embed=embed)
+                    return
+                except discord.HTTPException:
+                    embed = discord.Embed(title="Command Error!", description=f"Unbanning failed. Try again",
+                                          color=discord.Color.red())
+                    await ctx.send(embed=embed)
+                    return
+                embed = discord.Embed(timestamp=ctx.message.created_at, color=0x00ff00,
+                                      description=f'User {banentry.user.name} was unbanned.\nReason: {reason}.')
+                embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url)
+                embed.set_footer(text=f'{ctx.prefix}{ctx.command}')
+                await ctx.send(embed=embed)
+
 
 
 def setup(bot):
