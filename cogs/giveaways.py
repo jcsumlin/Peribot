@@ -86,7 +86,7 @@ class Giveaways(commands.Cog):
         message = await ctx.send(embed=embed)
         self.settings[str(guild.id)][str(message.id)] = settings
         self.save_settings()
-        await message.add_reaction(message, "✅")
+        await message.add_reaction("✅")
         await ctx.delete()
 
     @giveaway.command()
