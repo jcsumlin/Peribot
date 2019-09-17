@@ -42,7 +42,7 @@ class Star(commands.Cog):
     async def check_guild_emojis(self, guild, emoji):
         guild_emoji = None
         for emojis in guild.emojis:
-            if emojis.id in emoji:
+            if str(emojis.id) in emoji:
                 guild_emoji = emojis
         return guild_emoji
 
@@ -76,7 +76,7 @@ class Star(commands.Cog):
     @starboard.command(name="clear")
     async def clear_post_history(self, ctx):
         """Clears the database of previous starred messages"""
-        self.settings[ctx.guid_id]["messages"] = []
+        self.settings[str(ctx.guid.id)]["messages"] = []
         dataIO.save_json("data/star/settings.json", self.settings)
         await ctx.send("Done! I will no longer track starred messages older than right now.")
 
@@ -84,12 +84,12 @@ class Star(commands.Cog):
     async def toggle_channel_ignore(self, ctx, channel: discord.TextChannel = None):
         if channel is None:
             channel = ctx.channel
-        if channel.id in self.settings[str(ctx.guild.id)]["ignore"]:
+        if str(channel.id) in self.settings[str(ctx.guild.id)]["ignore"]:
             self.settings[str(ctx.guild.id)]["ignore"].remove(channel.id)
             await ctx.send("{} removed from the ignored channel list!".format(
                                             channel.mention))
         else:
-            self.settings[str(ctx.guild.id)]["ignore"].append(channel.id)
+            self.settings[str(ctx.guild.id)]["ignore"].append(str(channel.id))
             await ctx.send("{} added to the ignored channel list!".format(
                                             channel.mention))
         dataIO.save_json("data/star/settings.json", self.settings)
@@ -98,7 +98,7 @@ class Star(commands.Cog):
     async def set_emoji(self, ctx, emoji="⭐"):
         """Set the emoji for the starboard defaults to ⭐"""
         guild = ctx.guild
-        if guild.id not in self.settings:
+        if str(guild.id) not in self.settings:
             await ctx.send("I am not setup for the starboard on this server!\
                                          \nuse starboard set to set it up.")
             return
@@ -122,7 +122,7 @@ class Star(commands.Cog):
     async def set_channel(self, ctx, channel: discord.TextChannel = None):
         """Set the channel for the starboard"""
         guild = ctx.guild
-        if guild.id not in self.settings:
+        if str(guild.id) not in self.settings:
             await ctx.send("I am not setup for the starboard on this server!\
                                          \nuse starboard set to set it up.")
             return
@@ -137,7 +137,7 @@ class Star(commands.Cog):
     async def set_threshold(self, ctx, threshold: int = 0):
         """Set the threshold before posting to the starboard"""
         guild = ctx.guild
-        if guild.id not in self.settings:
+        if str(guild.id) not in self.settings:
             await ctx.send(
                                         "I am not setup for the starboard on this server!\
                                          \nuse starboard set to set it up.")
@@ -151,7 +151,7 @@ class Star(commands.Cog):
     async def add_role(self, ctx, role: discord.Role = None):
         """Add a role allowed to add messages to the starboard defaults to @everyone"""
         guild = ctx.guild
-        if guild.id not in self.settings:
+        if str(guild.id) not in self.settings:
             await ctx.send(
                                         "I am not setup for the starboard on this server!\
                                          \nuse starboard set to set it up.")
@@ -175,7 +175,7 @@ class Star(commands.Cog):
         """Remove a role allowed to add messages to the starboard"""
         guild = ctx.guild
         everyone_role = await self.get_everyone_role(guild)
-        if role.id in self.settings[str(guild.id)]["role"]:
+        if str(role.id) in self.settings[str(guild.id)]["role"]:
             self.settings[str(guild.id)]["role"].remove(role.id)
         if self.settings[str(guild.id)]["role"] == []:
             self.settings[str(guild.id)]["role"].append(everyone_role.id)
@@ -207,21 +207,21 @@ class Star(commands.Cog):
     async def check_is_added(self, guild, message):
         is_posted = False
         for past_message in self.settings[str(guild.id)]["messages"]:
-            if message.id == past_message["new_message"]:
+            if str(message.id) == past_message["new_message"]:
                 is_posted = True
         return is_posted
 
     async def get_count(self, guild, message):
         count = 0
         for past_message in list(self.settings[str(guild.id)]["messages"]):
-            if message.id == past_message["original_message"]:
+            if str(message.id) == past_message["original_message"]:
                 count = past_message["count"]
         return count
 
     async def get_posted_message(self, guild, message):
         msg_list = self.settings[str(guild.id)]["messages"]
         for past_message in msg_list:
-            if message.id == past_message["original_message"]:
+            if str(message.id) == past_message["original_message"]:
                 msg = past_message
         msg_list.remove(msg)
         # msg["count"] += 1
