@@ -1,17 +1,17 @@
-from discord.ext import commands
-from .utils.dataIO import dataIO
-from .utils.chat_formatting import escape_mass_mentions
-from .utils import checks
-from collections import defaultdict
-from string import ascii_letters
-from random import choice
-import discord
+import asyncio
 import os
 import re
+from collections import defaultdict
+from random import choice
+from string import ascii_letters
+
 import aiohttp
-import asyncio
+import discord
+from discord.ext import commands, tasks
 from loguru import logger
-import json
+
+from .utils.chat_formatting import escape_mass_mentions
+from .utils.dataIO import dataIO
 
 
 class StreamsError(Exception):
@@ -34,20 +34,37 @@ class OfflineStream(StreamsError):
     pass
 
 
-class Streams:
+class Streams(commands.Cog):
     """Streams
     Alerts for a variety of streaming services"""
 
+    async def cog_before_invoke(self, ctx):
+        if not os.path.exists("data/streams"):
+            print("Creating data/streams folder...")
+            os.makedirs("data/streams")
+        stream_files = (
+            "twitch.json",
+            "beam.json"
+        )
+        for filename in stream_files:
+            if not dataIO.is_valid_json("data/streams/" + filename):
+                logger.debug("Creating empty {}...".format(filename))
+                dataIO.save_json("data/streams/" + filename, [])
+        f = "data/streams/settings.json"
+        if not dataIO.is_valid_json(f):
+            logger.debug("Creating empty settings.json...")
+            dataIO.save_json(f, {})
+
     def __init__(self, bot):
         self.bot = bot
+        self.stream_checker.start()
         self.twitch_streams = dataIO.load_json("data/streams/twitch.json")
         self.mixer_streams = dataIO.load_json("data/streams/beam.json")
         settings = dataIO.load_json("data/streams/settings.json")
         self.settings = defaultdict(dict, settings)
         self.messages_cache = defaultdict(list)
 
-
-    @commands.command(pass_context=True)
+    @commands.command()
     async def twitch(self, ctx, stream: str):
         """Checks if twitch stream is online"""
         stream = escape_mass_mentions(stream)
@@ -57,20 +74,20 @@ class Streams:
             data = await self.fetch_twitch_ids(stream, raise_if_none=True)
             embed = await self.twitch_online(data[0]["_id"])
         except OfflineStream:
-            await self.bot.say(stream + " is offline.")
+            await ctx.send(stream + " is offline.")
         except StreamNotFound:
-            await self.bot.say("That stream doesn't exist.")
+            await ctx.send("That stream doesn't exist.")
         except APIError:
-            await self.bot.say("Error contacting the API.")
+            await ctx.send("Error contacting the API.")
         except InvalidCredentials:
-            await self.bot.say("Owner: Client-ID is invalid or not set. "
-                               "See `{}streamset twitchtoken`"
-                               "".format(ctx.prefix))
+            await ctx.send("Owner: Client-ID is invalid or not set. "
+                           "See `{}streamset twitchtoken`"
+                           "".format(ctx.prefix))
         else:
-            await self.bot.say(embed=embed)
+            await ctx.send(embed=embed)
 
     @commands.command()
-    async def mixer(self, stream: str):
+    async def mixer(self, ctx, stream: str):
         """Checks if mixer stream is online"""
         stream = escape_mass_mentions(stream)
         regex = r'^(https?\:\/\/)?(www\.)?(mixer\.com\/)'
@@ -78,41 +95,39 @@ class Streams:
         try:
             embed = await self.mixer_online(stream)
         except OfflineStream:
-            await self.bot.say(stream + " is offline.")
+            await ctx.send(stream + " is offline.")
         except StreamNotFound:
-            await self.bot.say("That stream doesn't exist.")
+            await ctx.send("That stream doesn't exist.")
         except APIError:
-            await self.bot.say("Error contacting the API.")
+            await ctx.send("Error contacting the API.")
         else:
-            await self.bot.say(embed=embed)
+            await ctx.send(embed=embed)
 
-
-
-    @commands.group(pass_context=True, no_pm=True)
+    @commands.group(no_pm=True)
     async def streamalert(self, ctx):
         """Adds/removes stream alerts from the current channel"""
         if ctx.invoked_subcommand is None:
             await self.bot.send_cmd_help(ctx)
 
-    @streamalert.command(name="twitch", pass_context=True)
+    @streamalert.command(name="twitch")
     async def twitch_alert(self, ctx, stream: str):
         """Adds/removes twitch alerts from the current channel"""
         stream = escape_mass_mentions(stream)
         regex = r'^(https?\:\/\/)?(www\.)?(twitch\.tv\/)'
         stream = re.sub(regex, '', stream)
-        channel = ctx.message.channel
+        channel = ctx.channel
         try:
             data = await self.fetch_twitch_ids(stream, raise_if_none=True)
         except StreamNotFound:
-            await self.bot.say("That stream doesn't exist.")
+            await ctx.send("That stream doesn't exist.")
             return
         except APIError:
-            await self.bot.say("Error contacting the API.")
+            await ctx.send("Error contacting the API.")
             return
         except InvalidCredentials:
-            await self.bot.say("Owner: Client-ID is invalid or not set. "
-                               "See `{}streamset twitchtoken`"
-                               "".format(ctx.prefix))
+            await ctx.send("Owner: Client-ID is invalid or not set. "
+                           "See `{}streamset twitchtoken`"
+                           "".format(ctx.prefix))
             return
 
         enabled = self.enable_or_disable_if_active(self.twitch_streams,
@@ -121,27 +136,27 @@ class Streams:
                                                    _id=data[0]["_id"])
 
         if enabled:
-            await self.bot.say("Alert activated. I will notify this channel "
-                               "when {} is live.".format(stream))
+            await ctx.send("Alert activated. I will notify this channel "
+                           "when {} is live.".format(stream))
         else:
-            await self.bot.say("Alert has been removed from this channel.")
+            await ctx.send("Alert has been removed from this channel.")
 
         dataIO.save_json("data/streams/twitch.json", self.twitch_streams)
 
-    @streamalert.command(name="mixer", pass_context=True)
+    @streamalert.command(name="mixer")
     async def mixer_alert(self, ctx, stream: str):
         """Adds/removes mixer alerts from the current channel"""
         stream = escape_mass_mentions(stream)
         regex = r'^(https?\:\/\/)?(www\.)?(mixer\.com\/)'
         stream = re.sub(regex, '', stream)
-        channel = ctx.message.channel
+        channel = ctx.channel
         try:
             await self.mixer_online(stream)
         except StreamNotFound:
-            await self.bot.say("That stream doesn't exist.")
+            await ctx.send("That stream doesn't exist.")
             return
         except APIError:
-            await self.bot.say("Error contacting the API.")
+            await ctx.send("Error contacting the API.")
             return
         except OfflineStream:
             pass
@@ -151,17 +166,17 @@ class Streams:
                                                    channel)
 
         if enabled:
-            await self.bot.say("Alert activated. I will notify this channel "
-                               "when {} is live.".format(stream))
+            await ctx.send("Alert activated. I will notify this channel "
+                           "when {} is live.".format(stream))
         else:
-            await self.bot.say("Alert has been removed from this channel.")
+            await ctx.send("Alert has been removed from this channel.")
 
         dataIO.save_json("data/streams/beam.json", self.mixer_streams)
 
-    @streamalert.command(name="stop", pass_context=True)
+    @streamalert.command(name="stop", )
     async def stop_alert(self, ctx):
         """Stops all streams alerts in the current channel"""
-        channel = ctx.message.channel
+        channel = ctx.channel
 
         streams = (
             self.twitch_streams,
@@ -183,10 +198,10 @@ class Streams:
         dataIO.save_json("data/streams/twitch.json", self.twitch_streams)
         dataIO.save_json("data/streams/beam.json", self.mixer_streams)
 
-        await self.bot.say("There will be no more stream alerts in this "
-                           "channel.")
+        await ctx.send("There will be no more stream alerts in this "
+                       "channel.")
 
-    @commands.group(pass_context=True)
+    @commands.group()
     async def streamset(self, ctx):
         """Stream settings"""
         if ctx.invoked_subcommand is None:
@@ -194,7 +209,7 @@ class Streams:
 
     @streamset.command()
     @commands.has_permissions(administrator=True)
-    async def twitchtoken(self, token : str):
+    async def twitchtoken(self, ctx, token: str):
         """Sets the Client ID for twitch
         To do this, follow these steps:
           1. Go to this page: https://dev.twitch.tv/dashboard/apps.
@@ -206,41 +221,40 @@ class Streams:
         """
         self.settings["TWITCH_TOKEN"] = token
         dataIO.save_json("data/streams/settings.json", self.settings)
-        await self.bot.say('Twitch Client-ID set.')
+        await ctx.send('Twitch Client-ID set.')
 
-    @streamset.command(pass_context=True, no_pm=True)
-    async def mention(self, ctx, *, mention_type : str):
+    @streamset.command(no_pm=True)
+    async def mention(self, ctx, *, mention_type: str):
         """Sets mentions for stream alerts
         Types: everyone, here, none"""
-        server = ctx.message.server
+        guild = ctx.guild
         mention_type = mention_type.lower()
 
         if mention_type in ("everyone", "here"):
-            self.settings[server.id]["MENTION"] = "@" + mention_type
-            await self.bot.say("When a stream is online @\u200b{} will be "
-                               "mentioned.".format(mention_type))
+            self.settings[guild.id]["MENTION"] = "@" + mention_type
+            await ctx.send("When a stream is online @\u200b{} will be "
+                           "mentioned.".format(mention_type))
         elif mention_type == "none":
-            self.settings[server.id]["MENTION"] = ""
-            await self.bot.say("Mentions disabled.")
+            self.settings[guild.id]["MENTION"] = ""
+            await ctx.send("Mentions disabled.")
         else:
             await self.bot.send_cmd_help(ctx)
 
         dataIO.save_json("data/streams/settings.json", self.settings)
 
-    @streamset.command(pass_context=True, no_pm=True)
+    @streamset.command(no_pm=True)
     async def autodelete(self, ctx):
         """Toggles automatic notification deletion for streams that go offline"""
-        server = ctx.message.server
-        settings = self.settings[server.id]
+        guild = ctx.guild
+        settings = self.settings[guild.id]
         current = settings.get("AUTODELETE", True)
         settings["AUTODELETE"] = not current
         if settings["AUTODELETE"]:
-            await self.bot.say("Notifications will be automatically deleted "
-                               "once the stream goes offline.")
+            await ctx.send("Notifications will be automatically deleted "
+                           "once the stream goes offline.")
 
         else:
-            await self.bot.say("Notifications won't be deleted anymore.")
-
+            await ctx.send("Notifications won't be deleted anymore.")
 
         dataIO.save_json("data/streams/settings.json", self.settings)
 
@@ -280,7 +294,6 @@ class Streams:
             raise StreamNotFound()
         else:
             raise APIError()
-
 
     async def fetch_twitch_ids(self, *streams, raise_if_none=False):
         def chunks(l):
@@ -355,7 +368,7 @@ class Streams:
         """Returns True if enabled or False if disabled"""
         for i, s in enumerate(streams):
             stream_id = s.get("ID")
-            if stream_id and _id:     # ID is available, matching by ID is
+            if stream_id and _id:  # ID is available, matching by ID is
                 if stream_id != _id:  # preferable
                     continue
             else:  # ID unavailable, matching by name
@@ -381,61 +394,57 @@ class Streams:
 
         return True
 
+    @tasks.loop(seconds=5.0)
     async def stream_checker(self):
+        await self.bot.wait_until_ready()
         CHECK_DELAY = 60
-
         try:
             await self._migration_twitch_v5()
         except InvalidCredentials:
-            print("Error during convertion of twitch usernames to IDs: "
+            print("Error during conversion of twitch usernames to IDs: "
                   "invalid token")
         except Exception as e:
-            print("Error during convertion of twitch usernames to IDs: "
+            print("Error during conversion of twitch usernames to IDs: "
                   "{}".format(e))
+        save = False
+        streams = ((self.twitch_streams, self.twitch_online),
+                   (self.mixer_streams, self.mixer_online))
 
-        while self == self.bot.get_cog("Streams"):
-            save = False
-
-            streams = ((self.twitch_streams,  self.twitch_online),
-                       (self.mixer_streams,    self.mixer_online))
-
-            for streams_list, parser in streams:
-                if parser == self.twitch_online:
-                    _type = "ID"
-                else:
-                    _type = "NAME"
-                for stream in streams_list:
-                    if _type not in stream:
-                        continue
-                    key = (parser, stream[_type])
-                    try:
-                        embed = await parser(stream[_type])
-                    except OfflineStream:
-                        if stream["ALREADY_ONLINE"]:
-                            stream["ALREADY_ONLINE"] = False
-                            save = True
-                            await self.delete_old_notifications(key)
-                    except:  # We don't want our task to die
-                        continue
-                    else:
-                        if stream["ALREADY_ONLINE"]:
-                            continue
+        for streams_list, parser in streams:
+            if parser == self.twitch_online:
+                _type = "ID"
+            else:
+                _type = "NAME"
+            for stream in streams_list:
+                if _type not in stream:
+                    continue
+                key = (parser, stream[_type])
+                try:
+                    embed = await parser(stream[_type])
+                except OfflineStream:
+                    if stream["ALREADY_ONLINE"]:
+                        stream["ALREADY_ONLINE"] = False
                         save = True
-                        stream["ALREADY_ONLINE"] = True
-                        messages_sent = []
-                        for channel_id in stream["CHANNELS"]:
-                            channel = self.bot.get_channel(channel_id)
-                            if channel is None:
-                                continue
-                            mention = self.settings.get(channel.server.id, {}).get("MENTION", "")
-                            can_speak = channel.permissions_for(channel.server.me).send_messages
-                            message = mention + " {} is live!".format(stream["NAME"])
-                            if channel and can_speak:
-                                m = await self.bot.send_message(channel, message, embed=embed)
-                                messages_sent.append(m)
-                        self.messages_cache[key] = messages_sent
-
-                    await asyncio.sleep(0.5)
+                        await self.delete_old_notifications(key)
+                except:  # We don't want our task to die
+                    continue
+                else:
+                    if stream["ALREADY_ONLINE"]:
+                        continue
+                    save = True
+                    stream["ALREADY_ONLINE"] = True
+                    messages_sent = []
+                    for channel_id in stream["CHANNELS"]:
+                        channel = self.bot.get_channel(channel_id)
+                        if channel is None:
+                            continue
+                        mention = self.settings.get(channel.guild.id, {}).get("MENTION", "")
+                        can_speak = channel.permissions_for(channel.guild.me).send_messages
+                        message = mention + " {} is live!".format(stream["NAME"])
+                        if channel and can_speak:
+                            m = await channel.send(message, embed=embed)
+                            messages_sent.append(m)
+                    self.messages_cache[key] = messages_sent
 
             if save:
                 dataIO.save_json("data/streams/twitch.json", self.twitch_streams)
@@ -446,8 +455,8 @@ class Streams:
     @commands.has_permissions(manage_messages=True)
     async def delete_old_notifications(self, key):
         for message in self.messages_cache[key]:
-            server = message.server
-            settings = self.settings.get(server.id, {})
+            guild = message.guild
+            settings = self.settings.get(guild.id, {})
             is_enabled = settings.get("AUTODELETE", True)
             try:
                 if is_enabled:
@@ -484,32 +493,7 @@ class Streams:
         dataIO.save_json("data/streams/twitch.json", self.twitch_streams)
 
 
-def check_folders():
-    if not os.path.exists("data/streams"):
-        print("Creating data/streams folder...")
-        os.makedirs("data/streams")
-
-
-def check_files():
-    stream_files = (
-        "twitch.json",
-        "beam.json"
-    )
-
-    for filename in stream_files:
-        if not dataIO.is_valid_json("data/streams/" + filename):
-            logger.debug("Creating empty {}...".format(filename))
-            dataIO.save_json("data/streams/" + filename, [])
-
-    f = "data/streams/settings.json"
-    if not dataIO.is_valid_json(f):
-        logger.debug("Creating empty settings.json...")
-        dataIO.save_json(f, {})
-
-
 def setup(bot):
-    check_folders()
-    check_files()
     n = Streams(bot)
     loop = asyncio.get_event_loop()
     loop.create_task(n.stream_checker())
