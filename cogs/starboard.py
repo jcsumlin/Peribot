@@ -250,7 +250,7 @@ class Star(commands.Cog):
                 channel = self.bot.get_channel(self.settings[guid_id]["channel"])
                 msg_id, count = await self.get_posted_message(guild, msg)
                 if msg_id is not None:
-                    msg_edit = await self.bot.get_message(channel, msg_id)
+                    msg_edit = await channel.fetch_message(id=int(msg_id))
                     await self.bot.edit_message(msg_edit,
                                                 new_content="{} **#{}**".format(reaction.emoji,
                                                                                 count - 1))
