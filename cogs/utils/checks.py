@@ -46,3 +46,5 @@ def is_in_guild(guild_id):
         return ctx.guild and ctx.guild.id == guild_id
     return commands.check(predicate)
 
+def mod_or_higher():
+    return commands.has_permissions(manage_messages=True)
