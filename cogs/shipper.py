@@ -1,13 +1,13 @@
 import discord
 from discord.ext import commands
 
-class Shipper:
+class Shipper(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
 
     @commands.command()
-    async def ship(self, user1 : discord.Member, user2 : discord.Member):
+    async def ship(self,ctx, user1 : discord.Member, user2 : discord.Member):
         """Creates a ship name for two users"""
         name1 = user1.name
         name2 = user2.name
@@ -18,7 +18,7 @@ class Shipper:
         name2 = name2[:-y]
         name2 = name2[::-1]
         message = "❤️ Your ship name is *{namex}{namey}* ❤️".format(namex=name1, namey=name2)
-        await self.bot.say(message)
+        await ctx.send(message)
 
 def setup(bot):
     bot.add_cog(Shipper(bot))

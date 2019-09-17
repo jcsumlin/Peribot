@@ -4,12 +4,13 @@ import requests
 from discord.ext import commands
 
 
-class Urban:
+class Urban(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    @commands.is_nsfw()
     @commands.command()
-    async def urban(self, *, search_terms: str, definition_number: int = 1):
+    async def urban(self,ctx, *, search_terms: str, definition_number: int = 1):
         """Urban Dictionary search
         Definition number must be between 1 and 10"""
 
@@ -43,13 +44,13 @@ class Urban:
                 msg = ("**Definition #{} out of {}:\n**{}\n\n"
                        "**Example:\n**{}".format(pos + 1, defs, definition,
                                                  example))
-                await self.bot.say(msg)
+                await ctx.send(msg)
             else:
-                await self.bot.say("Your search terms gave no results.")
+                await ctx.send("Your search terms gave no results.")
         except IndexError:
-            await self.bot.say("There is no definition #{}".format(pos + 1))
+            await ctx.send("There is no definition #{}".format(pos + 1))
         except:
-            await self.bot.say("Error.")
+            await ctx.send("Error.")
 
 
 

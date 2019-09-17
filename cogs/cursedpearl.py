@@ -7,39 +7,39 @@ from discord.ext import commands
 from .utils.dataIO import fileIO
 
 
-class CursedPearl:
+class CursedPearl(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.quotes = fileIO("data/cp/quotes/quotes.json", "load")
         self.author = fileIO("data/cp/quotes/author.json", "load")
 
 
-    def serverCheck(self, ctx):
-        if ctx.message.server.id == '515370084538253333':
+    def guildCheck(self, ctx):
+        if ctx.guild.id == 515370084538253333:
             return True
         else: return False
 
-    @commands.command(pass_context=True, no_pm=True)
+    @commands.command(no_pm=True)
     async def levels(self, ctx):
-        if self.serverCheck(ctx):
-            await self.bot.send_file(ctx.message.channel, "data/cp/card.png")
+        if self.guildCheck(ctx):
+            await ctx.send(file=discord.File("./data/cp/card.png"))
 
-    @commands.command(pass_context=True, no_pm=True)
+    @commands.command(no_pm=True)
     async def rank(self, ctx):
-        if self.serverCheck(ctx):
-            await self.bot.send_file(ctx.message.channel, "data/cp/card.png")
+        if self.guildCheck(ctx):
+            await ctx.send(file=discord.File("./data/cp/card.png"))
 
-    @commands.command(pass_context=True, no_pm=True)
+    @commands.command(no_pm=True)
     async def peridot(self, ctx):
-        if self.serverCheck(ctx):
+        if self.guildCheck(ctx):
             g = giphypop.Giphy("KZciiXBwyJ9RabyZyUHjQ8e4ZutZQ1Go")
             results = [x for x in g.search('Peridot')]
             embed = discord.Embed(color=0xe6e200)
             embed.set_image(url=random.choice(results).raw_data['images']['fixed_height_downsampled']['url'])
             embed.set_footer(text="This is a random gif from Giphy using the search term 'Peridot'")
-            await self.bot.say(embed=embed)
+            await ctx.send(embed=embed)
 
-    @commands.command(pass_context=True)
+    @commands.command()
     async def quote(self,ctx):
         index = random.randint(0,len(self.quotes) - 1)
         quote = self.quotes[index]
@@ -64,7 +64,7 @@ class CursedPearl:
             color = 0x3c796a
         embed = discord.Embed(title=quote, description=author, color=color)
         embed.set_thumbnail(url=thumbnail)
-        await self.bot.send_message(ctx.message.channel, embed=embed)
+        await ctx.channel.send(embed=embed)
 
 def setup(bot):
     bot.add_cog(CursedPearl(bot))

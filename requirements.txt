@@ -1,4 +1,4 @@
-discord.py==0.16.12
+discord.py==1.2.3
 loguru
 pip
 praw

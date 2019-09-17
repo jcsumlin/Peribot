@@ -4,11 +4,11 @@ from loguru import logger
 from .utils.dataIO import dataIO
 
 
-class Welcome():
+class Welcome(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.group(pass_context=True)
+    @commands.group()
     async def welcome(self, ctx):
         """
         Sets the channel where welcome messages are sent
@@ -16,59 +16,56 @@ class Welcome():
         :return:
         """
         if ctx.invoked_subcommand is None:
-            await self.bot.send_message(ctx.message.channel,
-                                        "That's not how you use this command!\n"
-                                        "```!welcome enable #channel [custom message | optional]\n"
-                                        "!welcome disable```\n"
-                                        "Note: Using [user] in your custom message will mention the user")
+            await ctx.send("That's not how you use this command!\n```!welcome enable #channel [custom message | optional]\n!welcome disable```\nNote: Using [user] in your custom message will mention the user")
 
-    @welcome.group(pass_context=True)
+    @welcome.group()
     @commands.has_permissions(administrator=True)
     async def enable(self, ctx, channel=None, *, message=":balloon: Hey! Listen! [user] is here! :100:"):
         if channel is None:
-            await self.bot.send_message(ctx.message.channel ,"Please specify a channel!\nEx: !welcome enable {0} Hey [user]! welcome to our server!\n\n Note: [user] will mention the user".format(ctx.message.channel.mention))
+            await ctx.send("Please specify a channel!\nEx: !welcome enable {0} Hey [user]! welcome to our guild!\n\n Note: [user] will mention the user".format(ctx.channel.mention))
         try:
-            server_id = ctx.message.server.id
+            guild_id = str(ctx.guild.id)
             channel_id = channel.replace("#", "").replace("<", "").replace(">", "")
             config = dataIO.load_json('data/welcome/info.json')
-            config[server_id] = {"channel": channel_id, "message": message}
+            config[guild_id] = {"channel": channel_id, "message": message}
             dataIO.save_json('data/welcome/info.json', config)
-            await self.bot.send_message(ctx.message.channel ,"Welcome channel set!")
+            await ctx.send("Welcome channel set!")
         except Exception as e:
             logger.error(e)
             pass
 
-    @welcome.group(pass_context=True)
+    @welcome.group()
     @commands.has_permissions(administrator=True)
     async def disable(self, ctx):
         try:
-            server_id = ctx.message.server.id
+            guild_id = ctx.guild.id
             data = dataIO.load_json('data/welcome/info.json')
-            if server_id not in data.keys():
-                await self.bot.send_message(ctx.message.channel, "Welcome message was never enabled! You can set it up using !welcome enable #channel")
+            if guild_id not in data.keys():
+                await ctx.channel.send("Welcome message was never enabled! You can set it up using !welcome enable #channel")
                 return
-            data[server_id] = {"channel": "", "message": data[server_id]['message']}
+            data[guild_id] = {"channel": "", "message": data[guild_id]['message']}
             dataIO.save_json('data/welcome/info.json', data)
-            await self.bot.send_message(ctx.message.channel, "Welcome message feature disabled!")
+            await ctx.channel.send("Welcome message feature disabled!")
         except Exception as e:
             logger.error(e)
             pass
 
+    @commands.Cog.listener()
     async def on_member_join(self, member):
-        server_id = member.server.id
+        guild_id = str(member.guild.id)
         data = dataIO.load_json('data/welcome/info.json')
-        if server_id not in data.keys():
+        if guild_id not in data.keys():
             return
-        channel = data[server_id]['channel']
+        channel = data[guild_id]['channel']
         if channel == "":
             return
-        message = data[server_id]['message'].replace('[user]', member.mention)
+        message = data[guild_id]['message'].replace('[user]', member.mention)
         try:
-            await self.bot.send_message(self.bot.get_channel(channel), message)
+            send_to_channel = self.bot.get_channel(int(channel))
+            if send_to_channel is not None:
+                await send_to_channel.send(message)
         except Exception as e:
-            await self.bot.send_message(member.server.owner,
-                                        "There is an error with a newcomer, please report this to the creator.\n {}".format(
-                                            e))
+            await member.guild.owner.send("There is an error with a newcomer, please report this to the creator.\n {}".format(e))
 
 
 def setup(bot):

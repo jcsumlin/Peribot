@@ -1,18 +1,32 @@
-import asyncio
 import os
 from datetime import datetime
 
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 from loguru import logger
 from pytz import timezone
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+
 
 from .utils.dataIO import dataIO, fileIO
 
 
-class Birthdays:
+class Birthdays(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.scheduler = AsyncIOScheduler(timezone='America/New_York')
+        self.scheduler.add_job(self.check_birthdays, 'interval', minutes=1, replace_existing=True, coalesce=True)
+        self.scheduler.start()
+
+    async def cog_before_invoke(self, ctx):
+        if not os.path.exists("data/birthday"):
+            logger.info("Creating data/birthday folder...")
+            os.makedirs("data/birthday")
+
+        f = "data/birthday/birthdays.json"
+        if not fileIO(f, "check"):
+            logger.info("Creating empty birthdays.json...")
+            fileIO(f, "save", {})
 
     async def get_config(self):
         return dataIO.load_json('data/birthday/birthdays.json')
@@ -20,142 +34,124 @@ class Birthdays:
     async def save_config(self, data):
         return dataIO.save_json('data/birthday/birthdays.json', data)
 
-    @commands.group(pass_context=True)
+    @commands.group()
     async def birthday(self, ctx):
         if ctx.invoked_subcommand is None:
             return
 
-    @birthday.group(pass_context=True)
+    @birthday.group()
     async def add(self, ctx, user: discord.User, birthday):
         birthday = birthday.split('/')
         birthdays = await self.get_config()
         if int(birthday[2]) >= datetime.now().year:
-            await self.bot.send_message(ctx.message.channel, "That's not a valid year silly")
+            await ctx.channel.send("That's not a valid year silly")
             return
-        if str(ctx.message.server.id) in birthdays.keys():
+        if str(ctx.guild.id) in birthdays.keys():
             birthday = datetime(year=int(birthday[2]), month=int(birthday[0]), day=int(birthday[1]))
-            for birthday_user in birthdays[ctx.message.server.id]['users']:
+            for birthday_user in birthdays[str(ctx.guild.id)]['users']:
                 if birthday_user['user_id'] == user.id:
-                    await self.bot.send_message(ctx.message.channel, "That User's birthday is already registered!")
+                    await ctx.channel.send("That User's birthday is already registered!")
                     return
-            birthdays[ctx.message.server.id]['users'].append({'user_id': user.id, 'birthday': str(birthday), 'COMPLETE': False})
+            birthdays[str(ctx.guild.id)]['users'].append({'user_id': user.id, 'birthday': str(birthday), 'COMPLETE': False})
             await self.save_config(birthdays)
-            await self.bot.send_message(ctx.message.channel,"Done!")
+            await ctx.send("Done!")
         else:
-            await self.bot.send_message(ctx.message.channel,"Birthdays not setup!")
+            await ctx.send("Birthdays not setup!")
 
-    @birthday.group(pass_context=True)
+    @birthday.group()
     async def list(self, ctx):
         birthdays = await self.get_config()
-        users = birthdays[ctx.message.server.id]['users']
-        embed = discord.Embed(title=f"{ctx.message.server.name}'s Birthday list for this month :birthday:")
+        users = birthdays[str(ctx.guild.id)]['users']
+        embed = discord.Embed(title=f"{ctx.guild.name}'s Birthday list for this month :birthday:")
         for user in users:
             birthday = datetime.strptime(user['birthday'], "%Y-%m-%d 00:00:00")
             now = datetime.now()
             if birthday.month == now.month:
-                user_name = discord.utils.get(ctx.message.server.members, id=user['user_id'])
+                user_name = discord.utils.get(ctx.guild.members, id=user['user_id'])
                 embed.add_field(name=user_name.name, value=birthday.strftime('%m/%d/%Y'))
-        await self.bot.send_message(ctx.message.channel, embed=embed)
+        await ctx.channel.send(embed=embed)
 
-    @birthday.group(pass_context=True)
+    @birthday.group()
     @commands.has_permissions(administrator=True)
     async def channel(self, ctx, channel):
         birthdays = await self.get_config()
         channel_id = channel.replace("#", "").replace("<", "").replace(">", "")
-        if ctx.message.server.id not in birthdays.keys():
-            birthdays[ctx.message.server.id] = {'channel': channel_id, 'users': []}
+        if str(ctx.guild.id) not in birthdays.keys():
+            birthdays[str(ctx.guild.id)] = {'channel': channel_id, 'users': []}
         else:
-            birthdays[ctx.message.server.id]['channel'] = channel_id
+            birthdays[str(ctx.guild.id)]['channel'] = channel_id
 
         await self.save_config(birthdays)
-        return await self.bot.send_message(ctx.message.channel, "Birthday Channel Set! :birthday:")
+        return await ctx.send("Birthday Channel Set! :birthday:")
 
-    @birthday.group(pass_context=True)
+    @birthday.group()
     @commands.has_permissions(administrator=True)
     async def disable(self, ctx):
         birthdays = await self.get_config()
-        if ctx.message.server.id in birthdays.keys():
-            birthdays[ctx.message.server.id]['channel'] = ""
+        if str(ctx.guild.id) in birthdays.keys():
+            birthdays[str(ctx.guild.id)]['channel'] = ""
             await self.save_config(birthdays)
-            return await self.bot.send_message(ctx.message.channel, ":x: Birthday Messages Disabled!")
+            return await ctx.channel.send(":x: Birthday Messages Disabled!")
         else:
-            return await self.bot.send_message(ctx.message.channel, ":interrobang: Birthday Message Channel Not Set For This Server!")
+            return await ctx.channel.send(":interrobang: Birthday Message Channel Not Set For This Server!")
 
-    @birthday.group(pass_context=True)
+    @birthday.group()
     @commands.has_permissions(administrator=True)
     async def role(self, ctx, role: discord.Role):
         birthdays = await self.get_config()
-        birthdays[ctx.message.server.id]['role_id'] = role.id
+        birthdays[str(ctx.guild.id)]['role_id'] = role.id
         await self.save_config(birthdays)
-        await self.bot.send_message(ctx.message.channel, "Birthday Role Set!")
+        await ctx.channel.send("Birthday Role Set!")
 
+    @tasks.loop(seconds=5.0)
     async def check_birthdays(self):
-        while True:
-            await asyncio.sleep(10)
-            birthdays = await self.get_config()
-            for key, value in birthdays.items():
-                if len(value['users']) == 0:
+        await self.bot.wait_until_ready()
+        birthdays = await self.get_config()
+        for key, value in birthdays.items():
+            if len(value['users']) == 0 or value['channel'] == '':
+                continue
+            for user in value['users']:
+                birthday = datetime.strptime(user['birthday'], "%Y-%m-%d 00:00:00")
+                eastern = timezone('US/Eastern')
+                now = datetime.now(eastern)
+                channel = self.bot.get_channel(int(value['channel']))
+                if channel is None:
                     continue
-                for user in value['users']:
-                    birthday = datetime.strptime(user['birthday'], "%Y-%m-%d 00:00:00")
-                    eastern = timezone('US/Eastern')
-                    now = datetime.now(eastern)
-                    channel = self.bot.get_channel(value['channel'])
-                    if channel is None:
-                        continue
-                    birthday_role = None
-                    if 'role_id' in value:
-                        birthday_role = discord.utils.find(lambda r: r.id == value['role_id'],
-                                                           channel.server.roles)
-                    member = discord.utils.find(lambda m: m.id == user['user_id'], channel.server.members)
-                    if member is None:
-                        logger.error('Could not find user')
-                        continue
-                    if birthday.month != now.month or birthday.day != now.day and user['COMPLETE']:
-                        user['COMPLETE'] = False
-                        if birthday_role:
-                            try:
-                                await self.bot.remove_roles(member, birthday_role)
-                            except discord.Forbidden:
-                                logger.error("Does Not have permissions to add roles to users!")
-                            except Exception:
-                                logger.error("Error removing role from user" + member.name)
-                        await self.save_config(birthdays)
-                    if birthday.month == now.month and birthday.day == now.day and not user['COMPLETE']:
-                        if birthday_role:
-                            try:
-                                await self.bot.add_roles(member, birthday_role)
-                            except discord.Forbidden:
-                                logger.error("Does Not have permissions to add roles to users!")
-                        years = now.year - birthday.year
-                        if 4 <= years <= 20 or 24 <= years <= 30:
-                            suffix = "th"
-                        else:
-                            suffix = ["st", "nd", "rd"][years % 10 - 1]
+                birthday_role = None
+                if 'role_id' in value:
+                    birthday_role = discord.utils.find(lambda r: r.id == value['role_id'],
+                                                       channel.guild.roles)
+                member = discord.utils.find(lambda m: m.id == user['user_id'], channel.guild.members)
+                if member is None:
+                    logger.error('Could not find user')
+                    continue
+                if birthday.month != now.month or birthday.day != now.day and user['COMPLETE']:
+                    user['COMPLETE'] = False
+                    if birthday_role:
+                        try:
+                            await self.bot.remove_roles(member, birthday_role)
+                        except discord.Forbidden:
+                            logger.error("Does Not have permissions to add roles to users!")
+                        except Exception:
+                            logger.error("Error removing role from user" + member.name)
+                    await self.save_config(birthdays)
+                if birthday.month == now.month and birthday.day == now.day and not user['COMPLETE']:
+                    if birthday_role:
+                        try:
+                            await member.add_role( birthday_role)
+                        except discord.Forbidden:
+                            logger.error("Does Not have permissions to add roles to users!")
+                    years = now.year - birthday.year
+                    if 4 <= years <= 20 or 24 <= years <= 30:
+                        suffix = "th"
+                    else:
+                        suffix = ["st", "nd", "rd"][years % 10 - 1]
 
-                        await self.bot.send_message(channel, f"Hey <@{user['user_id']}>! I just wanted to wish you the happiest of birthdays on your {years}{suffix} birthday! :birthday: :heart:")
-                        user['COMPLETE'] = True
-                        await self.save_config(birthdays)
-            await asyncio.sleep(1)
-
-
-def check_folders():
-    if not os.path.exists("data/birthday"):
-        logger.info("Creating data/birthday folder...")
-        os.makedirs("data/birthday")
-
-
-def check_files():
-    f = "data/birthday/birthdays.json"
-    if not fileIO(f, "check"):
-        logger.info("Creating empty birthdays.json...")
-        fileIO(f, "save", {})
+                    await channel.send(f"Hey <@{user['user_id']}>! I just wanted to wish you the happiest of birthdays on your {years}{suffix} birthday! :birthday: :heart:")
+                    user['COMPLETE'] = True
+                    await self.save_config(birthdays)
 
 
 def setup(bot):
-    check_folders()
-    check_files()
     n = Birthdays(bot)
-    loop = asyncio.get_event_loop()
-    loop.create_task(n.check_birthdays())
     bot.add_cog(n)
