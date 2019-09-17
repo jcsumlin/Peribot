@@ -338,7 +338,7 @@ class Star(commands.Cog):
                 else:
                     em.set_author(name=author.name, icon_url=author.avatar_url)
                 if reaction.message.attachments != []:
-                    em.set_image(url=reaction.message.attachments[0]["url"])
+                    em.set_image(url=reaction.message.attachments[0].url)
             em.set_footer(text='{} | {}'.format(channel.guild.name, channel.name))
             post_msg = await channel2.send("{} **#{}**".format(reaction.emoji, count),
                                                    embed=em)
