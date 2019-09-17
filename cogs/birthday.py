@@ -5,6 +5,8 @@ import discord
 from discord.ext import commands, tasks
 from loguru import logger
 from pytz import timezone
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+
 
 from .utils.dataIO import dataIO, fileIO
 
@@ -12,7 +14,9 @@ from .utils.dataIO import dataIO, fileIO
 class Birthdays(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.check_birthdays.start()
+        self.scheduler = AsyncIOScheduler(timezone='America/New_York')
+        self.scheduler.add_job(self.check_birthdays, 'interval', minutes=1, replace_existing=True, coalesce=True)
+        self.scheduler.start()
 
     async def cog_before_invoke(self, ctx):
         if not os.path.exists("data/birthday"):
@@ -101,6 +105,7 @@ class Birthdays(commands.Cog):
 
     @tasks.loop(seconds=5.0)
     async def check_birthdays(self):
+        await self.bot.wait_until_ready()
         birthdays = await self.get_config()
         for key, value in birthdays.items():
             if len(value['users']) == 0 or value['channel'] == '':
