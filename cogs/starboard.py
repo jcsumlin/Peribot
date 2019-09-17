@@ -221,7 +221,7 @@ class Star(commands.Cog):
     async def get_posted_message(self, guild, message):
         msg_list = self.settings[str(guild.id)]["messages"]
         for past_message in msg_list:
-            if str(message.id) == past_message["original_message"]:
+            if message.id == past_message["original_message"]:
                 msg = past_message
                 # msg_list.remove(msg)
                 # # msg["count"] += 1
@@ -229,6 +229,7 @@ class Star(commands.Cog):
                 # self.settings[str(guild.id)]["messages"] = msg_list
                 # dataIO.save_json("data/star/settings.json", self.settings)
                 return msg["new_message"], msg["count"]
+        return None, None
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):
@@ -270,6 +271,8 @@ class Star(commands.Cog):
                 return
             if threshold == 0:
                 count = 1
+            else:
+                count += 1
             # else:
             author = reaction.message.author
             channel = reaction.message.channel
