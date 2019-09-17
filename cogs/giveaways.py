@@ -41,7 +41,7 @@ class Giveaways(commands.Cog):
         setdict = False
         guild = ctx.message.guild
         if guild.id not in self.settings:
-            self.settings[guild.id] = {}
+            self.settings[str(guild.id)] = {}
         # Setting all of the settings.
         for setting in settings:
             if not setdict:
@@ -84,7 +84,7 @@ class Giveaways(commands.Cog):
         embed.add_field(name=f"Length:", value=f"{int(settings['length']) / 3600} Hours")
         embed.add_field(name=f"Sponsored by:", value=f"{ctx.message.author}")
         message = await ctx.send(embed=embed)
-        self.settings[guild.id][str(message.id)] = settings
+        self.settings[str(guild.id)][str(message.id)] = settings
         self.save_settings()
         await self.bot.add_reaction(message, "✅")
         await self.bot.delete_message(ctx.message)
@@ -98,13 +98,13 @@ class Giveaways(commands.Cog):
         guild = ctx.message.guild
         if guild.id not in self.settings:
             await ctx.send("There are no giveaways in this server.")
-        elif message_id not in self.settings[guild.id]:
+        elif message_id not in self.settings[str(guild.id)]:
             await ctx.send(
                 "That's not a valid giveaway, to see all giveaways you can do {}giveaway list".format(ctx.prefix))
-        elif not self.settings[guild.id][message_id]['started']:
+        elif not self.settings[str(guild.id)][message_id]['started']:
             await ctx.send("That giveaway's already stopped.")
         else:
-            self.settings[guild.id][message_id]['started'] = False
+            self.settings[str(guild.id)][message_id]['started'] = False
             self.save_settings()
             await ctx.send(
                 "You can now pick a winner with {}giveaway pick <amount> <message_id>".format(ctx.prefix))
@@ -118,7 +118,7 @@ class Giveaways(commands.Cog):
         guild = ctx.message.guild
         if guild.id not in self.settings:
             return await ctx.send("This server does not have any giveaways yet.")
-        giveaways = self.settings[guild.id]
+        giveaways = self.settings[str(guild.id)]
         if giveaway_id not in giveaways:
             return await ctx.send(
                 "Sorry thats not a valid message ID!\n```\nHINT: The message ID will be found on the bot's message announcing the giveaway\n```")
@@ -127,7 +127,7 @@ class Giveaways(commands.Cog):
             return await ctx.send(
                 "This giveaway has not ended yet! Please end it with `!giveaway stop <message_id>`")
         if len(giveaways[giveaway_id]['users']) == 0:
-            del self.settings[guild.id][giveaway_id]
+            del self.settings[str(guild.id)][giveaway_id]
             self.save_settings()
             return await ctx.send("This giveaway has no entries! I guess that means no one wins :(")
         status = await ctx.send("Picking winners.")
@@ -141,7 +141,7 @@ class Giveaways(commands.Cog):
                 winner = discord.utils.get(guild.members,
                                            id=random.choice(giveaway['users']))
             winners.append(winner.mention)
-        del self.settings[guild.id][giveaway_id]
+        del self.settings[str(guild.id)][giveaway_id]
         self.save_settings()
         if amount == 1:
             await self.bot.edit_message(status,
@@ -164,11 +164,11 @@ class Giveaways(commands.Cog):
         message_id = reaction.message.id
         if author_id == 608824312689983488 or author_id == 484461035315527700:
             return
-        if message_id in self.settings[guild.id]:
-            giveaway = self.settings[guild.id][message_id]
-            if author_id not in self.settings[guild.id][message_id]['users']:
-                self.settings[guild.id][message_id]['users'].append(author_id)
-                self.settings[guild.id][message_id]['entries'] =+ 1
+        if message_id in self.settings[str(guild.id)]:
+            giveaway = self.settings[str(guild.id)][message_id]
+            if author_id not in self.settings[str(guild.id)][message_id]['users']:
+                self.settings[str(guild.id)][message_id]['users'].append(author_id)
+                self.settings[str(guild.id)][message_id]['entries'] =+ 1
                 self.save_settings()
                 return await self.bot.send_message(user,
                                                    "You have successfully entered the {} giveaway, good luck!".format(
@@ -178,11 +178,11 @@ class Giveaways(commands.Cog):
     async def list(self, ctx):
         """Lists all giveaways running in this guild."""
         guild = ctx.message.guild
-        if guild.id not in self.settings or self.settings[guild.id] == {}:
+        if guild.id not in self.settings or self.settings[str(guild.id)] == {}:
             await ctx.send("This server has no giveaways running.")
         else:
             await ctx.send("This server has the following giveaways running:\n\t{}".format(
-                "\n\t".join(list(self.settings[guild.id].keys()))))
+                "\n\t".join(list(self.settings[str(guild.id)].keys()))))
 
     @giveaway.command()
     async def info(self, ctx, giveaway):
@@ -192,10 +192,10 @@ class Giveaways(commands.Cog):
         guild = ctx.message.guild
         if guild.id not in self.settings:
             await ctx.send("This server has no giveaways running.")
-        elif giveaway not in self.settings[guild.id]:
+        elif giveaway not in self.settings[str(guild.id)]:
             await ctx.send("That's not a valid giveaway running in this server.")
         else:
-            settings = self.settings[guild.id][giveaway]
+            settings = self.settings[str(guild.id)][giveaway]
             await ctx.send("Name: **{}**\nTime left: **{}**\nEntries: **{}**".format(settings['name'],
                                                                                          self.secondsToText(
                                                                                              settings['length']),
