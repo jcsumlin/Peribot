@@ -253,7 +253,7 @@ class Star(commands.Cog):
                     msg_edit = await channel.fetch_message(id=int(msg_id))
                     await self.bot.edit_message(msg_edit,
                                                 new_content="{} **#{}**".format(reaction.emoji,
-                                                                                count - 1))
+                                                                                count))
                     return
             if count < threshold and threshold != 0:
                 store = {"original_message": msg.id, "new_message": None, "count": count + 1}
