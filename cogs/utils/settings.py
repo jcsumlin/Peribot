@@ -1,11 +1,12 @@
-from .dataIO import dataIO
-from copy import deepcopy
-import discord
-import os
 import argparse
+import os
+from copy import deepcopy
 
+import discord
 
-default_path = "data/red/settings.json"
+from .dataIO import dataIO
+
+default_path = "data/settings/settings.json"
 
 
 class Settings:
@@ -226,74 +227,74 @@ class Settings:
         self.bot_settings["default"]["MOD_ROLE"] = value
 
     @property
-    def servers(self):
+    def guilds(self):
         ret = {}
-        server_ids = list(
+        guild_ids = list(
             filter(lambda x: str(x).isdigit(), self.bot_settings))
-        for server in server_ids:
-            ret.update({server: self.bot_settings[server]})
+        for guild in guild_ids:
+            ret.update({guild: self.bot_settings[guild]})
         return ret
 
-    def get_server(self, server):
-        if server is None:
+    def get_guild(self, guild):
+        if guild is None:
             return self.bot_settings["default"].copy()
-        assert isinstance(server, discord.Server)
-        return self.bot_settings.get(server.id,
+        assert isinstance(guild, discord.Guild)
+        return self.bot_settings.get(guild.id,
                                      self.bot_settings["default"]).copy()
 
-    def get_server_admin(self, server):
-        if server is None:
+    def get_guild_admin(self, guild):
+        if guild is None:
             return self.default_admin
-        assert isinstance(server, discord.Server)
-        if server.id not in self.bot_settings:
+        assert isinstance(guild, discord.Guild)
+        if guild.id not in self.bot_settings:
             return self.default_admin
-        return self.bot_settings[server.id].get("ADMIN_ROLE", "")
+        return self.bot_settings[guild.id].get("ADMIN_ROLE", "")
 
-    def set_server_admin(self, server, value):
-        if server is None:
+    def set_guild_admin(self, guild, value):
+        if guild is None:
             return
-        assert isinstance(server, discord.Server)
-        if server.id not in self.bot_settings:
-            self.add_server(server.id)
-        self.bot_settings[server.id]["ADMIN_ROLE"] = value
+        assert isinstance(guild, discord.Guild)
+        if guild.id not in self.bot_settings:
+            self.add_guild(guild.id)
+        self.bot_settings[guild.id]["ADMIN_ROLE"] = value
         self.save_settings()
 
-    def get_server_mod(self, server):
-        if server is None:
+    def get_guild_mod(self, guild):
+        if guild is None:
             return self.default_mod
-        assert isinstance(server, discord.Server)
-        if server.id not in self.bot_settings:
+        assert isinstance(guild, discord.Guild)
+        if guild.id not in self.bot_settings:
             return self.default_mod
-        return self.bot_settings[server.id].get("MOD_ROLE", "")
+        return self.bot_settings[guild.id].get("MOD_ROLE", "")
 
-    def set_server_mod(self, server, value):
-        if server is None:
+    def set_guild_mod(self, guild, value):
+        if guild is None:
             return
-        assert isinstance(server, discord.Server)
-        if server.id not in self.bot_settings:
-            self.add_server(server.id)
-        self.bot_settings[server.id]["MOD_ROLE"] = value
+        assert isinstance(guild, discord.Guild)
+        if guild.id not in self.bot_settings:
+            self.add_guild(guild.id)
+        self.bot_settings[guild.id]["MOD_ROLE"] = value
         self.save_settings()
 
-    def get_server_prefixes(self, server):
-        if server is None or server.id not in self.bot_settings:
+    def get_guild_prefixes(self, guild):
+        if guild is None or guild.id not in self.bot_settings:
             return self.prefixes
-        return self.bot_settings[server.id].get("PREFIXES", [])
+        return self.bot_settings[guild.id].get("PREFIXES", [])
 
-    def set_server_prefixes(self, server, prefixes):
-        if server is None:
+    def set_guild_prefixes(self, guild, prefixes):
+        if guild is None:
             return
-        assert isinstance(server, discord.Server)
-        if server.id not in self.bot_settings:
-            self.add_server(server.id)
-        self.bot_settings[server.id]["PREFIXES"] = prefixes
+        assert isinstance(guild, discord.Guild)
+        if guild.id not in self.bot_settings:
+            self.add_guild(guild.id)
+        self.bot_settings[guild.id]["PREFIXES"] = prefixes
         self.save_settings()
 
-    def get_prefixes(self, server):
-        """Returns server's prefixes if set, otherwise global ones"""
-        p = self.get_server_prefixes(server)
+    def get_prefixes(self, guild):
+        """Returns guild's prefixes if set, otherwise global ones"""
+        p = self.get_guild_prefixes(guild)
         return p if p else self.prefixes
 
-    def add_server(self, sid):
+    def add_guild(self, sid):
         self.bot_settings[sid] = self.bot_settings["default"].copy()
         self.save_settings()
