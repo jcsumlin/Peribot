@@ -40,7 +40,7 @@ class Giveaways(commands.Cog):
         settings = settings.split("; ")
         setdict = False
         guild = ctx.message.guild
-        if guild.id not in self.settings:
+        if str(guild.id) not in self.settings:
             self.settings[str(guild.id)] = {}
         # Setting all of the settings.
         for setting in settings:
@@ -48,7 +48,7 @@ class Giveaways(commands.Cog):
                 settings = {"name": "", "length": -1, 'entries': 0, "users": [], "started": True}
                 setdict = True
             if setting.startswith("name: "):
-                if setting[6:] in self.settings[ctx.message.guild.id]:
+                if setting[6:] in self.settings[str(ctx.message.guild.id)]:
                     await ctx.send("There's already a giveaway running with this name.")
                     return
                 else:
@@ -96,7 +96,7 @@ class Giveaways(commands.Cog):
         Example:
         [p]giveaway stop 620715054211268637"""
         guild = ctx.message.guild
-        if guild.id not in self.settings:
+        if str(guild.id) not in self.settings:
             await ctx.send("There are no giveaways in this server.")
         elif message_id not in self.settings[str(guild.id)]:
             await ctx.send(
@@ -116,7 +116,7 @@ class Giveaways(commands.Cog):
         Example:
         [p]giveaway pick 5 Minecraft account (This will pick 5 winners from all the people who entered the Minecraft account giveaway)"""
         guild = ctx.message.guild
-        if guild.id not in self.settings:
+        if str(guild.id) not in self.settings:
             return await ctx.send("This server does not have any giveaways yet.")
         giveaways = self.settings[str(guild.id)]
         if giveaway_id not in giveaways:
@@ -178,7 +178,7 @@ class Giveaways(commands.Cog):
     async def list(self, ctx):
         """Lists all giveaways running in this guild."""
         guild = ctx.message.guild
-        if guild.id not in self.settings or self.settings[str(guild.id)] == {}:
+        if str(guild.id) not in self.settings or self.settings[str(guild.id)] == {}:
             await ctx.send("This server has no giveaways running.")
         else:
             await ctx.send("This server has the following giveaways running:\n\t{}".format(
@@ -190,7 +190,7 @@ class Giveaways(commands.Cog):
         Example:
         [p]giveaway info Minecraft account"""
         guild = ctx.message.guild
-        if guild.id not in self.settings:
+        if str(guild.id) not in self.settings:
             await ctx.send("This server has no giveaways running.")
         elif giveaway not in self.settings[str(guild.id)]:
             await ctx.send("That's not a valid giveaway running in this server.")
