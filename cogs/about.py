@@ -15,22 +15,10 @@ class Help(commands.Cog):
         embed.add_field(name="!botboi", value="Love Peribot? Want your own bot? I have a Patreon with more info on how you can support my creations!")
         embed2 = discord.Embed(title="Meme Commands", color=0x93ff50)
         embed2.set_thumbnail(url="https://pa1.narvii.com/6507/d2f05279a966b21757f9c55b92ef71bc720dba64_128.gif")
-        embed2.add_field(name="!amethyst [text]", value="Generate memes with Amethyst's face!", inline=False)
-        embed2.add_field(name="!rogu [text]", value="Generate memes with Roguery in a box!", inline=False)
         embed2.add_field(name="!bigmoji :discord-emoji:", value="Returns a larger version of any emoji/reaction",
                         inline=False)
         embed2.add_field(name="!chikadance", value="(or !chika) returns random gif of Chika Dancing from ", inline=False)
         embed2.add_field(name="!xkcd [number]", value="Returns today's XLCD post or a specific XLCD comic using it's number", inline=False)
-        embed2.add_field(name="!penis [user]", value="Detects user's penis length (This is 100% accurate.)", inline=False)
-        embed2.add_field(name="!sukebe [user]", value="Detects user's Sukebe-ness. 157% accurate!", inline=False)
-        embed2.add_field(name="!trap",
-                         value="Returns either a gif of Star Wars Trap or Anime Trap... Are you a gambling man?", inline=False)
-        embed2.add_field(name="!trap add [link to gif]",
-                         value="Adds your own traps to the rotation!", inline=False)
-        embed2.add_field(name="!trap list",
-                         value="Returns a list of the current traps in the rotation", inline=False)
-        embed2.add_field(name="!trap remove [link]",
-                         value="Removes a specific trap from tbe rotation", inline=False)
         embed3 = discord.Embed(title="Custom Commands", color=0x93ff50)
         embed3.set_thumbnail(url="http://pa1.narvii.com/6520/ee53df0ba159bbebb84d3d7ed35bf89e8e978ac5_128.gif")
         embed3.add_field(name="!cc add [command-name] [result]",

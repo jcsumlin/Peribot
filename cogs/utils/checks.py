@@ -38,6 +38,8 @@ def mod_or_permissions():
 def admin():
     return admin_or_permissions()
 
+def mod_or_higher():
+    return commands.has_permissions(manage_messages=True)
 
 def is_in_guild(guild_id):
     async def predicate(ctx):
