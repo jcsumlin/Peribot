@@ -32,7 +32,7 @@ class Moderation(commands.Cog):
         """
         try:
             channel = ctx.message.channel.id
-            server_id = str(ctx.message.server.id)
+            server_id = str(ctx.message.guild.id)
             with open('data/report/info.json', 'r+') as f:
                 data = json.load(f)
                 data[server_id] = str(channel)  # <--- add `id` value.
@@ -99,7 +99,7 @@ class Moderation(commands.Cog):
         elif user_id is not None and reason is not None:
             user = await self.bot.get_user_info(user_id)
             try:
-                new_report = Report(date=datetime.utcnow(), server_id=str(ctx.message.server.id),
+                new_report = Report(date=datetime.utcnow(), server_id=str(ctx.message.guild.id),
                                     user_name=user.name, user_id=str(user_id),
                                     mod_name=str(ctx.message.author.name),
                                     mod_id=str(ctx.message.author.id), reason=reason)
@@ -117,7 +117,7 @@ class Moderation(commands.Cog):
 
     @warn.group(name="list")
     async def list(self, ctx):
-        reports = self.session.query(Report).filter(Report.server_id == str(ctx.message.server.id)).all()
+        reports = self.session.query(Report).filter(Report.server_id == str(ctx.message.guild.id)).all()
         users = {}
         if len(reports) == 0:
             await ctx.send("There have been no users warned on this server yet.")
@@ -141,7 +141,7 @@ class Moderation(commands.Cog):
             await ctx.send(embed=easy_embed)
             return
         reports = self.session.query(Report).filter(
-            and_(Report.server_id == str(ctx.message.server.id), Report.user_id == str(user_id))).all()
+            and_(Report.server_id == str(ctx.message.guild.id), Report.user_id == str(user_id))).all()
         if len(reports) == 0:
             await ctx.send(
                 "That user has no warnings logged at this time.")
@@ -161,7 +161,7 @@ class Moderation(commands.Cog):
             return
         reports = self.session.query(Report).filter(
             and_(
-                Report.server_id == str(ctx.message.server.id),
+                Report.server_id == str(ctx.message.guild.id),
                 Report.user_id == str(user_id)
             )).all()
         if len(reports) == 0:
@@ -172,7 +172,7 @@ class Moderation(commands.Cog):
             try:
                 num_rows_deleted = self.session.query(Report).filter(
                     and_(
-                        Report.server_id == str(ctx.message.server.id),
+                        Report.server_id == str(ctx.message.guild.id),
                         Report.user_id == str(user_id)
                     )).delete()
                 self.session.commit()
