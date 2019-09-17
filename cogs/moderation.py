@@ -130,7 +130,7 @@ class Moderation(commands.Cog):
                                                                           f"{report.user_name} | {report.user_id}"] + 1
             embed1 = discord.Embed(title=f":warning: Warned Users from {ctx.message.guild.name} :warning: ")
             for user, number_of_reports in users.items():
-                embed1.add_field(name=user, value=str(number_of_reports))
+                embed1.add_field(name=user, value=str(number_of_reports), inline=True)
             await ctx.send(embed=embed1)
 
     @warn.group(name="reason")
