@@ -9,11 +9,9 @@ from loguru import logger
 #          https://github.com/Rapptz/RoboDanny/tree/async
 #
 
-def is_bot_owner_check(ctx):
-    _id = ctx.author.id
-    onwer_id = 204792579881959424
-    logger.info(_id == onwer_id or _id in onwer_id)
-    return _id == onwer_id
+def is_bot_owner_check():
+    return commands.is_owner()
+
 
 def is_owner():
     return commands.has_role('administrator')
