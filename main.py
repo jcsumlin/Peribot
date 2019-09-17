@@ -8,7 +8,7 @@ from configparser import *
 from discord.ext import commands
 from loguru import logger
 
-from cogs.utils.checks import is_owner
+from cogs.utils.checks import is_bot_owner_check
 
 #initiate logger test
 logger.add(f"file_{str(time.strftime('%Y%m%d-%H%M%S'))}.log", rotation="500 MB")
@@ -42,7 +42,7 @@ async def on_ready():
 
 
 @bot.command()
-@is_owner()
+@is_bot_owner_check()
 async def load(ctx, extension):
     try:
         bot.load_extension('cogs.' + extension)
@@ -53,7 +53,7 @@ async def load(ctx, extension):
 
 
 @bot.command()
-@is_owner()
+@is_bot_owner_check()
 async def reload(ctx, extension):
     try:
         bot.unload_extension('cogs.' + extension)
@@ -65,7 +65,7 @@ async def reload(ctx, extension):
 
 
 @bot.command()
-@is_owner()
+@is_bot_owner_check()
 async def unload(ctx, extension):
     try:
         bot.unload_extension('cogs.' + extension)
