@@ -179,7 +179,7 @@ class Moderation(commands.Cog):
             except:
                 self.session.rollback()
                 await ctx.send(
-                    embed=easyembed(title="Error removing that user from the databse!",
+                    embed=easyembed(title="Error removing that user from the databsse!",
                                     color=discord.Color.red()))
                 return
             user = await self.bot.get_user_info(user_id)
