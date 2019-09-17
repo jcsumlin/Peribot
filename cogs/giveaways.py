@@ -159,6 +159,8 @@ class Giveaways(commands.Cog):
         """Enter a giveaway.
         Example:
         [p]giveaway enter Minecraft account."""
+        if reaction.emoji != "✅":
+            return
         guild = reaction.message.guild
         author_id = user.id
         message_id = reaction.message.id
