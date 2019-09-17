@@ -71,7 +71,7 @@ class Moderation(commands.Cog):
             em = discord.Embed(title="Report Case", description=message)
             em.add_field(name="author", value=member)
             em.set_footer(text=f"#{ctx.message.channel}")
-            report_channel = await self.bot.get_channel(id=int(channel))
+            report_channel = self.bot.get_channel(id=int(channel))
             await report_channel.send(embed=em)
             await report_channel.send("@here")
             # await self.bot.send_message(self.bot.get_channel(id=channel), '@here')
