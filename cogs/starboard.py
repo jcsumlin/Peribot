@@ -246,6 +246,7 @@ class Star(commands.Cog):
         react = self.settings[guid_id]["emoji"]
         if react in str(reaction.emoji):
             threshold = self.settings[guid_id]["threshold"]
+            count = await self.get_count(guild, msg)
             if await self.check_is_posted(guild, msg):
                 channel = self.bot.get_channel(self.settings[guid_id]["channel"])
                 msg_id, count = await self.get_posted_message(guild, msg)
