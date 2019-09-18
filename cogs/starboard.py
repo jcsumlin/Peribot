@@ -248,11 +248,11 @@ class Star(commands.Cog):
             threshold = self.settings[guid_id]["threshold"]
             count = await self.get_count(guild, msg)
             if await self.check_is_posted(guild, msg):
-                channel = self.bot.get_channel(self.settings[guid_id]["channel"])
+                channel = reaction.message.guild.get_channel(int(self.settings[guid_id]["channel"]))
                 msg_id, count = await self.get_posted_message(guild, msg)
                 if msg_id is not None:
                     msg_edit = await channel.fetch_message(id=int(msg_id))
-                    await msg_edit.edit(content=f"{count} **#{reaction.emoji}**")
+                    await msg_edit.edit(content=f"{reaction.emoji} **#{count}**")
                     return
             if count < threshold and threshold != 0:
                 store = {"original_message": msg.id, "new_message": None, "count": count + 1}
@@ -360,9 +360,9 @@ class Star(commands.Cog):
             return
         threshold = self.settings[guid_id]["threshold"]
         if await self.check_is_posted(guild, msg):
-            count = await self.get_count(guild, msg)
             channel = self.bot.get_channel(int(self.settings[guid_id]["channel"]))
             msg_id, count = await self.get_posted_message(guild, msg)
+            count -= 1
             if msg_id is not None and channel is not None:
                 msg = await channel.fetch_message(id=int(msg_id))
                 count -= 1
@@ -376,9 +376,8 @@ class Star(commands.Cog):
                         await self.save_settings()
                         await msg.delete()
                 else:
-                    new_msg = await msg.edit(content="{} **#{}**".format(reaction.emoji,
-                                                                          count))
-                    store = {"original_message": reaction.message.id, "new_message": new_msg.id, "count": count}
+                    await msg.edit(content=f"{reaction.emoji} **#{count}**")
+                    store = {"original_message": reaction.message.id, "new_message": msg.id, "count": count}
                     has_message = None
                     for message in self.settings[guid_id]["messages"]:
                         if reaction.message.id == message["original_message"]:
