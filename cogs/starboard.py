@@ -199,20 +199,38 @@ class Star(commands.Cog):
         return has_role
 
     async def check_is_posted(self, guild, message):
+        """
+        Check if message is in the starboard
+        :param guild: Discord server
+        :param message: message that was stared
+        :return:
+        """
         is_posted = False
         for past_message in self.settings[str(guild.id)]["messages"]:
-            if int(message.id) == past_message["original_message"]:
+            if int(message.id) == past_message["original_message"] and past_message["new_message"] is not None:
                 is_posted = True
         return is_posted
 
     async def check_is_added(self, guild, message):
+        """
+        Check if message is being tracked
+        :param guild: 
+        :param message: 
+        :return: 
+        """
         is_posted = False
         for past_message in self.settings[str(guild.id)]["messages"]:
-            if str(message.id) == past_message["new_message"]:
+            if str(message.id) == past_message["original_message"]:
                 is_posted = True
         return is_posted
 
     async def get_count(self, guild, message):
+        """
+        get the number of stars on this message as stored in file
+        :param guild:
+        :param message:
+        :return:
+        """
         count = 0
         for past_message in list(self.settings[str(guild.id)]["messages"]):
             if int(message.id) == past_message["original_message"]:
@@ -220,6 +238,13 @@ class Star(commands.Cog):
         return count
 
     async def get_posted_message(self, guild, message):
+        """
+        Get the message ID and count of the starboard embed or return None
+        Also increment the count and save the count
+        :param guild: Discord Server
+        :param message: Message that was reacted to
+        :return:
+        """
         msg_list = self.settings[str(guild.id)]["messages"]
         for past_message in msg_list:
             if int(message.id) == past_message["original_message"]:
@@ -246,16 +271,16 @@ class Star(commands.Cog):
         react = self.settings[guid_id]["emoji"]
         if react in str(reaction.emoji):
             threshold = self.settings[guid_id]["threshold"]
-            count = await self.get_count(guild, msg)
-            if await self.check_is_posted(guild, msg):
+            count = await self.get_count(guild, msg) + 1 # add one here in case its not posted to starboard
+            if await self.check_is_posted(guild, msg): # check if stared message is in starboard
                 channel = reaction.message.guild.get_channel(int(self.settings[guid_id]["channel"]))
-                msg_id, count = await self.get_posted_message(guild, msg)
+                msg_id, count = await self.get_posted_message(guild, msg) # Count has been incremented
                 if msg_id is not None:
                     msg_edit = await channel.fetch_message(id=int(msg_id))
                     await msg_edit.edit(content=f"{reaction.emoji} **#{count}**")
                     return
             if count < threshold and threshold != 0:
-                store = {"original_message": msg.id, "new_message": None, "count": count + 1}
+                store = {"original_message": msg.id, "new_message": None, "count": count}
                 has_message = None
                 for message in self.settings[guid_id]["messages"]:
                     if msg.id == message["original_message"]:
@@ -268,13 +293,9 @@ class Star(commands.Cog):
                     self.settings[guid_id]["messages"].append(store)
                     await self.save_settings()
                 return
-            if threshold == 0:
-                count = 1
-            else:
-                count += 1
             author = reaction.message.author
             channel = reaction.message.channel
-            channel2 = self.bot.get_channel(int(self.settings[guid_id]["channel"]))
+            starboard_channel = self.bot.get_channel(int(self.settings[guid_id]["channel"]))
             if reaction.message.embeds != []:
                 embed = reaction.message.embeds[0]  # .to_dict()
                 # print(embed)
@@ -338,7 +359,7 @@ class Star(commands.Cog):
                 if reaction.message.attachments != []:
                     em.set_image(url=reaction.message.attachments[0].url)
             em.set_footer(text='{} | {}'.format(channel.guild.name, channel.name))
-            post_msg = await channel2.send("{} **#{}**".format(reaction.emoji, count),
+            post_msg = await starboard_channel.send("{} **#{}**".format(reaction.emoji, count),
                                                    embed=em)
             past_message_list = self.settings[guid_id]["messages"]
             past_message_list.append({"original_message": msg.id, "new_message": post_msg.id, "count": count})
@@ -362,17 +383,19 @@ class Star(commands.Cog):
         if await self.check_is_posted(guild, msg):
             channel = self.bot.get_channel(int(self.settings[guid_id]["channel"]))
             msg_id, count = await self.get_posted_message(guild, msg)
-            count -= 1
+            count -= 1 # counter the increment done by self.get_posted_message
             if msg_id is not None and channel is not None:
-                msg = await channel.fetch_message(id=int(msg_id))
+                msg = await channel.fetch_message(id=int(msg_id)) # get message from starboard
                 count -= 1
-                if count <= threshold:
+                if count < threshold: # this should remove the message from starboard but keep it in the file
                     has_message = None
-                    for message in self.settings[guid_id]["messages"]:
+                    for message in self.settings[guid_id]["messages"]: # find msg stored in list
                         if reaction.message.id == message["original_message"]:
                             has_message = message
                     if has_message is not None:
                         self.settings[guid_id]["messages"].remove(has_message)
+                        store = {"original_message": reaction.message.id, "new_message": None, "count": count}
+                        self.settings[guid_id]["messages"].append(store)
                         await self.save_settings()
                         await msg.delete()
                 else:
