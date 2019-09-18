@@ -79,7 +79,7 @@ class Star(commands.Cog):
     @starboard.command(name="clear")
     async def clear_post_history(self, ctx):
         """Clears the database of previous starred messages"""
-        self.settings[str(ctx.guid.id)]["messages"] = []
+        self.settings[str(ctx.guild.id)]["messages"] = []
         await self.save_settings()
         await ctx.send("Done! I will no longer track starred messages older than right now.")
 
