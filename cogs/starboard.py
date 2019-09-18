@@ -13,6 +13,9 @@ class Star(commands.Cog):
         self.bot = bot
         self.settings = dataIO.load_json("data/star/settings.json")
 
+    async def save_settings(self):
+        return dataIO.save_json("data/star/settings.json", self.settings)
+
     async def cog_before_invoke(self, ctx):
         if not os.path.exists('data/star'):
             os.mkdir('data/star')
@@ -70,14 +73,14 @@ class Star(commands.Cog):
                                     "threshold": 0,
                                     "messages": [],
                                     "ignore": []}
-        dataIO.save_json("data/star/settings.json", self.settings)
+        await self.save_settings()
         await ctx.send("Starboard set to {}".format(channel.mention))
 
     @starboard.command(name="clear")
     async def clear_post_history(self, ctx):
         """Clears the database of previous starred messages"""
         self.settings[str(ctx.guid.id)]["messages"] = []
-        dataIO.save_json("data/star/settings.json", self.settings)
+        await self.save_settings()
         await ctx.send("Done! I will no longer track starred messages older than right now.")
 
     @starboard.command(name="ignore")
@@ -92,7 +95,7 @@ class Star(commands.Cog):
             self.settings[str(ctx.guild.id)]["ignore"].append(str(channel.id))
             await ctx.send("{} added to the ignored channel list!".format(
                                             channel.mention))
-        dataIO.save_json("data/star/settings.json", self.settings)
+        await self.save_settings()
 
     @starboard.command(name="emoji")
     async def set_emoji(self, ctx, emoji="⭐"):
@@ -112,7 +115,7 @@ class Star(commands.Cog):
                 is_guild_emoji = True
                 emoji = ":" + emoji.name + ":" + emoji.id
         self.settings[str(guild.id)]["emoji"] = emoji
-        dataIO.save_json("data/star/settings.json", self.settings)
+        await self.save_settings()
         if is_guild_emoji:
             await ctx.send("Starboard emoji set to <{}>.".format(emoji))
         else:
@@ -129,9 +132,8 @@ class Star(commands.Cog):
         if channel is None:
             channel = ctx.channel
         self.settings[str(guild.id)]["channel"] = channel.id
-        dataIO.save_json("data/star/settings.json", self.settings)
-        await ctx.send(
-                                    "Starboard channel set to {}.".format(channel.mention))
+        await self.save_settings()
+        await ctx.send(f"Starboard channel set to {channel.mention}.")
 
     @starboard.command(name="threshold")
     async def set_threshold(self, ctx, threshold: int = 0):
@@ -143,9 +145,8 @@ class Star(commands.Cog):
                                          \nuse starboard set to set it up.")
             return
         self.settings[str(guild.id)]["threshold"] = threshold
-        dataIO.save_json("data/star/settings.json", self.settings)
-        await ctx.send(
-                                    "Starboard threshold set to {}.".format(threshold))
+        await self.save_settings()
+        await ctx.send(f"Starboard threshold set to {threshold}.")
 
     @_roles.command(name="add")
     async def add_role(self, ctx, role: discord.Role = None):
@@ -166,7 +167,7 @@ class Star(commands.Cog):
         if everyone_role.id in self.settings[str(guild.id)]["role"] and role != everyone_role:
             self.settings[str(guild.id)]["role"].remove(everyone_role.id)
         self.settings[str(guild.id)]["role"].append(role.id)
-        dataIO.save_json("data/star/settings.json", self.settings)
+        await self.save_settings()
         await ctx.send(
                                     "Starboard role set to {}.".format(role.name))
 
@@ -179,7 +180,7 @@ class Star(commands.Cog):
             self.settings[str(guild.id)]["role"].remove(role.id)
         if self.settings[str(guild.id)]["role"] == []:
             self.settings[str(guild.id)]["role"].append(everyone_role.id)
-        dataIO.save_json("data/star/settings.json", self.settings)
+        await self.save_settings()
         await ctx.send(
                                     "{} removed from starboard.".format(role.name))
 
@@ -200,7 +201,7 @@ class Star(commands.Cog):
     async def check_is_posted(self, guild, message):
         is_posted = False
         for past_message in self.settings[str(guild.id)]["messages"]:
-            if message.id == past_message["original_message"]:
+            if int(message.id) == past_message["original_message"]:
                 is_posted = True
         return is_posted
 
@@ -214,21 +215,21 @@ class Star(commands.Cog):
     async def get_count(self, guild, message):
         count = 0
         for past_message in list(self.settings[str(guild.id)]["messages"]):
-            if str(message.id) == past_message["original_message"]:
+            if int(message.id) == past_message["original_message"]:
                 count = past_message["count"]
         return count
 
     async def get_posted_message(self, guild, message):
         msg_list = self.settings[str(guild.id)]["messages"]
         for past_message in msg_list:
-            if message.id == past_message["original_message"]:
+            if int(message.id) == past_message["original_message"]:
                 msg = past_message
-                # msg_list.remove(msg)
-                # # msg["count"] += 1
-                # msg_list.append(msg)
-                # self.settings[str(guild.id)]["messages"] = msg_list
-                # dataIO.save_json("data/star/settings.json", self.settings)
-                return msg["new_message"], msg["count"]
+                msg_list.remove(msg)
+                msg["count"] += 1
+                msg_list.append(msg)
+                self.settings[str(guild.id)]["messages"] = msg_list
+                await self.save_settings()
+                return past_message["new_message"], past_message["count"]
         return None, None
 
     @commands.Cog.listener()
@@ -245,15 +246,12 @@ class Star(commands.Cog):
         react = self.settings[guid_id]["emoji"]
         if react in str(reaction.emoji):
             threshold = self.settings[guid_id]["threshold"]
-            count = await self.get_count(guild, msg)
             if await self.check_is_posted(guild, msg):
                 channel = self.bot.get_channel(self.settings[guid_id]["channel"])
                 msg_id, count = await self.get_posted_message(guild, msg)
                 if msg_id is not None:
                     msg_edit = await channel.fetch_message(id=int(msg_id))
-                    await self.bot.edit_message(msg_edit,
-                                                new_content="{} **#{}**".format(reaction.emoji,
-                                                                                count))
+                    await msg_edit.edit(content=f"{count} **#{reaction.emoji}**")
                     return
             if count < threshold and threshold != 0:
                 store = {"original_message": msg.id, "new_message": None, "count": count + 1}
@@ -264,10 +262,10 @@ class Star(commands.Cog):
                 if has_message is not None:
                     self.settings[guid_id]["messages"].remove(has_message)
                     self.settings[guid_id]["messages"].append(store)
-                    dataIO.save_json("data/star/settings.json", self.settings)
+                    await self.save_settings()
                 else:
                     self.settings[guid_id]["messages"].append(store)
-                    dataIO.save_json("data/star/settings.json", self.settings)
+                    await self.save_settings()
                 return
             if threshold == 0:
                 count = 1
@@ -345,7 +343,7 @@ class Star(commands.Cog):
             past_message_list = self.settings[guid_id]["messages"]
             past_message_list.append(
                 {"original_message": msg.id, "new_message": post_msg.id, "count": count})
-            dataIO.save_json("data/star/settings.json", self.settings)
+            await self.save_settings()
         else:
             return
 
@@ -376,7 +374,7 @@ class Star(commands.Cog):
                             has_message = message
                     if has_message is not None:
                         self.settings[guid_id]["messages"].remove(has_message)
-                        dataIO.save_json("data/star/settings.json", self.settings)
+                        await self.save_settings()
                         await msg.delete()
                 else:
                     new_msg = await msg.edit(content="{} **#{}**".format(reaction.emoji,
@@ -389,7 +387,7 @@ class Star(commands.Cog):
                     if has_message is not None:
                         self.settings[guid_id]["messages"].remove(has_message)
                         self.settings[guid_id]["messages"].append(store)
-                        dataIO.save_json("data/star/settings.json", self.settings)
+                        await self.save_settings()
 
 
 def setup(bot):
