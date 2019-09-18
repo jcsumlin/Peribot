@@ -367,50 +367,50 @@ class Star(commands.Cog):
         else:
             return
 
-    @commands.Cog.listener()
-    async def on_reaction_remove(self, reaction, user):
-        guild = reaction.message.guild
-        msg = reaction.message
-        guid_id = str(guild.id)
-        if guid_id not in self.settings:
-            return # server not setup
-        if str(msg.channel.id) in self.settings[guid_id]["ignore"]:
-            return # ignored channel
-        react = self.settings[guid_id]["emoji"]
-        if react not in str(reaction.emoji):
-            return
-        threshold = self.settings[guid_id]["threshold"]
-        if await self.check_is_posted(guild, msg):
-            starboard_channel = self.bot.get_channel(int(self.settings[guid_id]["channel"]))
-            starboard_msg_id, count = await self.get_posted_message(guild, msg)
-            count -= 1 # counter the increment done by self.get_posted_message
-            if starboard_msg_id is not None and starboard_channel is not None: # msg is in the starboard
-                msg = await starboard_channel.fetch_message(id=int(starboard_msg_id)) # get message from starboard
-                count -= 1
-                if count < threshold: # this should remove the message from starboard but keep it in the file
-                    has_message = None
-                    for message in self.settings[guid_id]["messages"]: # find msg stored in list
-                        if reaction.message.id == message["original_message"]:
-                            has_message = message
-                            break
-                    if has_message is not None:
-                        self.settings[guid_id]["messages"].remove(has_message)
-                        message['count'] = count
-                        message['new_message'] = None
-                        self.settings[guid_id]["messages"].append(message)
-                        await self.save_settings()
-                        await msg.delete()
-                else:
-                    await msg.edit(content=f"{reaction.emoji} **#{count}**")
-                    store = {"original_message": reaction.message.id, "new_message": msg.id, "count": count}
-                    has_message = None
-                    for message in self.settings[guid_id]["messages"]:
-                        if reaction.message.id == message["original_message"]:
-                            has_message = message
-                    if has_message is not None:
-                        self.settings[guid_id]["messages"].remove(has_message)
-                        self.settings[guid_id]["messages"].append(store)
-                        await self.save_settings()
+    # @commands.Cog.listener()
+    # async def on_reaction_remove(self, reaction, user):
+    #     guild = reaction.message.guild
+    #     msg = reaction.message
+    #     guid_id = str(guild.id)
+    #     if guid_id not in self.settings:
+    #         return # server not setup
+    #     if str(msg.channel.id) in self.settings[guid_id]["ignore"]:
+    #         return # ignored channel
+    #     react = self.settings[guid_id]["emoji"]
+    #     if react not in str(reaction.emoji):
+    #         return
+    #     threshold = self.settings[guid_id]["threshold"]
+    #     if await self.check_is_posted(guild, msg):
+    #         starboard_channel = self.bot.get_channel(int(self.settings[guid_id]["channel"]))
+    #         starboard_msg_id, count = await self.get_posted_message(guild, msg)
+    #         count -= 1 # counter the increment done by self.get_posted_message
+    #         if starboard_msg_id is not None and starboard_channel is not None: # msg is in the starboard
+    #             msg = await starboard_channel.fetch_message(id=int(starboard_msg_id)) # get message from starboard
+    #             count -= 1
+    #             if count < threshold: # this should remove the message from starboard but keep it in the file
+    #                 has_message = None
+    #                 for message in self.settings[guid_id]["messages"]: # find msg stored in list
+    #                     if reaction.message.id == message["original_message"]:
+    #                         has_message = message
+    #                         break
+    #                 if has_message is not None:
+    #                     self.settings[guid_id]["messages"].remove(has_message)
+    #                     message['count'] = count
+    #                     message['new_message'] = None
+    #                     self.settings[guid_id]["messages"].append(message)
+    #                     await self.save_settings()
+    #                     await msg.delete()
+    #             else:
+    #                 await msg.edit(content=f"{reaction.emoji} **#{count}**")
+    #                 store = {"original_message": reaction.message.id, "new_message": msg.id, "count": count}
+    #                 has_message = None
+    #                 for message in self.settings[guid_id]["messages"]:
+    #                     if reaction.message.id == message["original_message"]:
+    #                         has_message = message
+    #                 if has_message is not None:
+    #                     self.settings[guid_id]["messages"].remove(has_message)
+    #                     self.settings[guid_id]["messages"].append(store)
+    #                     await self.save_settings()
 
 
 def setup(bot):
