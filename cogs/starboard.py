@@ -272,7 +272,6 @@ class Star(commands.Cog):
                 count = 1
             else:
                 count += 1
-            # else:
             author = reaction.message.author
             channel = reaction.message.channel
             channel2 = self.bot.get_channel(int(self.settings[guid_id]["channel"]))
@@ -342,8 +341,7 @@ class Star(commands.Cog):
             post_msg = await channel2.send("{} **#{}**".format(reaction.emoji, count),
                                                    embed=em)
             past_message_list = self.settings[guid_id]["messages"]
-            past_message_list.append(
-                {"original_message": msg.id, "new_message": post_msg.id, "count": count})
+            past_message_list.append({"original_message": msg.id, "new_message": post_msg.id, "count": count})
             await self.save_settings()
         else:
             return
