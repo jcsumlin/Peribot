@@ -130,7 +130,7 @@ class Moderation(commands.Cog):
                     users[f"{report.user_name} | {report.user_id}"] = users[
                                                                           f"{report.user_name} | {report.user_id}"] + 1
             embed1 = discord.Embed(title=f":warning: Warned Users from {ctx.message.guild.name} :warning:", color=discord.Color.orange())
-            embed1.set_image(url="https://media.discordapp.net/attachments/564994079532908544/623917350454034479/New_Composition_2019-09-18_12-24-37.png")
+            embed1.set_thumbnail(url="https://media.discordapp.net/attachments/564994079532908544/623917350454034479/New_Composition_2019-09-18_12-24-37.png")
             for user, number_of_reports in users.items():
                 embed1.add_field(name=user, value=str(number_of_reports), inline=False)
             await ctx.send(embed=embed1)
