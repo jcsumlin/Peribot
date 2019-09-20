@@ -11,6 +11,8 @@ from sqlalchemy.orm import sessionmaker
 
 # declaration for User class is in here
 from .utils.easyembed import embed as easyembed
+from create_databases import Base, Report
+
 
 
 class Moderation(commands.Cog):
