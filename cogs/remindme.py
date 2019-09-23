@@ -118,6 +118,9 @@ class RemindMe(commands.Cog):
             if reminder["FUTURE"] <= int(time.time()):
                 try:
                     user = await self.bot.fetch_user(int(reminder["ID"]))
+                    if user is None:
+                        logger.debug(f"Could not find user with id {reminder['ID']}, continuing")
+                        return
                     embed = discord.Embed(title="You asked me to remind you this", description=reminder["TEXT"], color=discord.Color.blue())
                     await user.send(embed=embed)
                 except (discord.errors.Forbidden, discord.errors.NotFound):
