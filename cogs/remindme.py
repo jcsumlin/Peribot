@@ -117,7 +117,7 @@ class RemindMe(commands.Cog):
         for reminder in self.reminders:
             if reminder["FUTURE"] <= int(time.time()):
                 try:
-                    user = self.bot.get_user(int(reminder["ID"]))
+                    user = await self.bot.fetch_user(int(reminder["ID"]))
                     await user.send("You asked me to remind you this:\n{}".format(reminder["TEXT"]))
                 except (discord.errors.Forbidden, discord.errors.NotFound):
                     to_remove.append(reminder)
