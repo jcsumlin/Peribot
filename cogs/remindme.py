@@ -19,6 +19,10 @@ class RemindMe(commands.Cog):
         self.remindeveryone = fileIO("data/remindme/remindeveryone.json", "load")
         self.units = {"minute" : 60, "hour" : 3600, "day" : 86400, "week": 604800, "month": 2592000}
 
+    def cog_unload(self):
+        self.check_reminders.cancel()
+        self.check_remindeveryone.cancel()
+
     async def cog_before_invoke(self, ctx):
         if not os.path.exists("data/remindme"):
             logger.info("Creating data/remindme folder...")
@@ -117,7 +121,9 @@ class RemindMe(commands.Cog):
                     await user.send("You asked me to remind you this:\n{}".format(reminder["TEXT"]))
                 except (discord.errors.Forbidden, discord.errors.NotFound):
                     to_remove.append(reminder)
+                    logger.debug(f"User ID {reminder['ID']} could not be found, skipping")
                 except discord.errors.HTTPException:
+                    logger.debug(f"discord.errors.HTTPException on User ID {reminder['ID']}'s reminder")
                     pass
                 else:
                     to_remove.append(reminder)
@@ -125,6 +131,10 @@ class RemindMe(commands.Cog):
             self.reminders.remove(reminder)
         if to_remove:
             fileIO("data/remindme/reminders.json", "save", self.reminders)
+
+    @check_reminders.before_loop
+    async def before_check_reminders(self):
+        await self.bot.wait_until_ready()
 
     @tasks.loop(seconds=5.0)
     async def check_remindeveryone(self):
@@ -148,6 +158,9 @@ class RemindMe(commands.Cog):
         if to_remove:
             fileIO("data/remindme/remindeveryone.json", "save", self.remindeveryone)
 
+    @check_remindeveryone.before_loop
+    async def before_check_remindeveryone(self):
+        await self.bot.wait_until_ready()
 
 def setup(bot):
     n = RemindMe(bot)
