@@ -1,6 +1,8 @@
 import discord
 import git
 from discord.ext import commands
+from discord.ext.commands import CommandNotFound
+
 
 
 class Management(commands.Cog):
@@ -11,6 +13,12 @@ class Management(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+
+    @commands.Cog.listener()
+    async def on_command_error(ctx, error):
+        if isinstance(error, CommandNotFound):
+            return
+        raise error
 
     @commands.command(name='setcolor', no_pm=True)
     async def set_member_color(self, ctx, role: discord.Role, color: discord.Color):
