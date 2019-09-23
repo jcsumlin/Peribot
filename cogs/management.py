@@ -15,7 +15,7 @@ class Management(commands.Cog):
         self.bot = bot
 
     @commands.Cog.listener()
-    async def on_command_error(ctx, error):
+    async def on_command_error(self, ctx, error):
         if isinstance(error, CommandNotFound):
             return
         raise error
@@ -52,7 +52,7 @@ class Management(commands.Cog):
             embed = discord.Embed(title=f"Invalid Arguments!", description="!setcolor @Role [Hex Code or Generic Name]")
             await ctx.send(embed=embed)
 
-    @commands.command(name='setnick')
+    @commands.command(name='nick', aliases=["setnick"])
     async def nick(self, ctx, user: discord.Member, *, nick):
         if ctx.author.id == 309089769663496194 or ctx.author.id == 204792579881959424:
             await user.edit(nick=nick, reason="Jeep made me do it")
