@@ -15,7 +15,7 @@ class Management(commands.Cog):
         self.bot = bot
 
     @commands.Cog.listener()
-    async def on_command_error(self, ctx, error):
+    async def on_error(self, ctx, error):
         if isinstance(error, CommandNotFound):
             return
         raise error
