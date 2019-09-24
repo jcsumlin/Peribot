@@ -53,7 +53,7 @@ class Management(commands.Cog):
             await ctx.send(embed=embed)
 
     @commands.command(name='nick', aliases=["setnick"])
-    @commands.cooldown(1, 86400, commands.BucketType.user)
+    @commands.cooldown(1, 21600, commands.BucketType.user)
     async def nick(self, ctx, user: discord.Member, *, nick):
         if ctx.author.id == 309089769663496194 or ctx.author.id == 204792579881959424:
             await user.edit(nick=nick, reason="Jeep made me do it")
