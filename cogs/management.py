@@ -2,6 +2,9 @@ import discord
 import git
 from discord.ext import commands
 from discord.ext.commands import CommandNotFound
+from discord.ext.commands.errors import BadArgument
+import asyncio
+from .utils.database import Database
 
 
 
@@ -13,6 +16,7 @@ class Management(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.database = Database()
 
     @commands.Cog.listener()
     async def on_error(self, ctx, error):
@@ -20,8 +24,16 @@ class Management(commands.Cog):
             return
         raise error
 
-    @commands.command(name='setcolor', no_pm=True)
-    async def set_member_color(self, ctx, role: discord.Role, color: discord.Color):
+    @commands.Cog.listener()
+    async def on_command_error(self, ctx, exception):
+        if isinstance(exception, BadArgument):
+            embed = discord.Embed(title=f"Error: {exception}", color=discord.Color.red())
+            message = await ctx.send(embed=embed)
+            await asyncio.sleep(5)
+            await message.delete()
+
+    @commands.command(name='setcolor', no_pm=True, aliases=["rolecolor", "color"])
+    async def set_role_color(self, ctx, role: discord.Role, color: discord.Color):
         """
         Color the nickname of the participant. * Let there be bright colors and colors! *
         [!] In development.
@@ -32,10 +44,14 @@ class Management(commands.Cog):
         !setcolor #FF0000
         """
         try:
-            await role.edit(color=color)
             if not role.is_default():
-                embed = discord.Embed(title=f"Changed the role color for {role.name} to {color}")
+                await role.edit(color=color)
+                embed = discord.Embed(title=f"Changed the role color for {role.name} to {color}", color=color)
                 await ctx.send(embed=embed)
+                await self.database.audit_record(ctx.guild.id,
+                                                 ctx.guild.name,
+                                                 ctx.message.content,
+                                                 ctx.message.author.id)
             else:
                 embed = discord.Embed(title="Peribot cannot affect the default roles.")
                 await ctx.send(embed=embed)
@@ -46,10 +62,10 @@ class Management(commands.Cog):
             embed = discord.Embed(title=f"Peribot failed to update {role.name}'s color" )
             await ctx.send(embed=embed)
         except discord.InvalidArgument:
-            embed = discord.Embed(title=f"Invalid Arguments!", description="!setcolor @Role [Hex Code or Generic Name]")
+            embed = discord.Embed(title=f"Invalid Arguments!", description=f"{ctx.prefix}setcolor @Role [Hex Code or Generic Name]")
             await ctx.send(embed=embed)
         except discord.ext.commands.errors.BadArgument:
-            embed = discord.Embed(title=f"Invalid Arguments!", description="!setcolor @Role [Hex Code or Generic Name]")
+            embed = discord.Embed(title=f"Invalid Arguments!", description=f"{ctx.prefix}setcolor @Role [Hex Code or Generic Name]")
             await ctx.send(embed=embed)
 
     @commands.command(name='nick', aliases=["setnick"])
@@ -57,6 +73,10 @@ class Management(commands.Cog):
     async def nick(self, ctx, user: discord.Member, *, nick):
         if ctx.author.id == 309089769663496194 or ctx.author.id == 204792579881959424:
             await user.edit(nick=nick, reason="Jeep made me do it")
+            await self.database.audit_record(ctx.guild.id,
+                                             ctx.guild.name,
+                                             ctx.message.content,
+                                             ctx.message.author.id)
 
     @commands.command(name='gitpull')
     async def git_pull(self, ctx):
@@ -67,6 +87,10 @@ class Management(commands.Cog):
                 g.pull()
                 embed = discord.Embed(title=":white_check_mark: Successfully pulled from repository", color=0x00df00)
                 await ctx.channel.send(embed=embed)
+                await self.database.audit_record(ctx.guild.id,
+                                                 ctx.guild.name,
+                                                 ctx.message.content,
+                                                 ctx.message.author.id)
             except Exception as e:
                 errno, strerror = e.args
                 embed = discord.Embed(title="Command Error!",
@@ -94,7 +118,7 @@ class Management(commands.Cog):
         !pin This text was written by the ancient Elves in the name of Discord!
         ```
         """
-        embed = discord.Embed(color=0x71f442,
+        embed = discord.Embed(color=ctx.message.author.top_role.color,
                               title='Pin it up!',
                               description=message)
         embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url)
@@ -102,6 +126,10 @@ class Management(commands.Cog):
         msg = await ctx.send(embed=embed)
         await ctx.message.delete()
         await msg.pin()
+        await self.database.audit_record(ctx.guild.id,
+                                         ctx.guild.name,
+                                         ctx.message.content,
+                                         ctx.message.author.id)
 #
 #     @commands.command(name='resetmute', )
 #     @commands.has_permissions(manage_roles=True)
@@ -380,8 +408,11 @@ class Management(commands.Cog):
                               description=f'User {member.name} was kicked.\nReason: {reason}.')
         embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url)
         embed.set_footer(text=f'{ctx.prefix}{ctx.command}')
-
         await ctx.send(embed=embed)
+        await self.database.audit_record(ctx.guild.id,
+                                         ctx.guild.name,
+                                         ctx.message.content,
+                                         ctx.message.author.id)
 
     @commands.command(name='ban')
     @commands.has_permissions(ban_members=True)
@@ -406,6 +437,10 @@ class Management(commands.Cog):
         embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url)
         embed.set_footer(text=f'{ctx.prefix}{ctx.command}')
         await ctx.send(embed=embed)
+        await self.database.audit_record(ctx.guild.id,
+                                         ctx.guild.name,
+                                         ctx.message.content,
+                                         ctx.message.author.id)
 
     @commands.command(name='unban')
     @commands.has_permissions(ban_members=True)
@@ -434,6 +469,10 @@ class Management(commands.Cog):
                 embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url)
                 embed.set_footer(text=f'{ctx.prefix}{ctx.command}')
                 await ctx.send(embed=embed)
+                await self.database.audit_record(ctx.guild.id,
+                                                 ctx.guild.name,
+                                                 ctx.message.content,
+                                                 ctx.message.author.id)
 
 
 
