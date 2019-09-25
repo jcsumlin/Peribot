@@ -8,6 +8,7 @@ from loguru import logger
 
 from .utils.chat_formatting import pagify, box
 from .utils.dataIO import dataIO
+from .utils.database import Database
 
 
 class CustomCommands(commands.Cog):
@@ -18,6 +19,7 @@ class CustomCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.file_path = "data/customcom/commands.json"
+        self.database = Database()
         self.c_commands = dataIO.load_json(self.file_path)
         self.config = configparser.ConfigParser()
         self.config.read('../auth.ini')
@@ -44,7 +46,7 @@ class CustomCommands(commands.Cog):
             await ctx.send(embed=e)
 
 
-    @customcom.command(name="add", )
+    @customcom.command(name="add")
     async def cc_add(self, ctx, command : str, *, text):
         """Adds a custom command
 
@@ -64,47 +66,44 @@ class CustomCommands(commands.Cog):
         if command in self.bot.commands:
             await ctx.send("That command is already a standard command.")
             return
-        if guild_id not in self.c_commands:
-            self.c_commands[guild_id] = {}
-        cmdlist = self.c_commands[guild_id]
-        if command not in cmdlist:
-            cmdlist[command] = text
-            self.c_commands[guild_id] = cmdlist
-            dataIO.save_json(self.file_path, self.c_commands)
+        try:
+            await self.database.add_custom_command(ctx.guild.id,
+                                                   command,
+                                                   text,
+                                                   ctx.message.author.id)
             await ctx.send("Custom command successfully added.")
-        else:
+        except ValueError:
             await ctx.send("This command already exists. Use "
-                               "`{}customcom edit` to edit it."
-                               "".format(ctx.prefix))
+                           "`{}customcom edit` to edit it."
+                           "".format(ctx.prefix))
+        finally:
+            await self.database.audit_record(ctx.guild.id,
+                                             ctx.guild.name,
+                                             ctx.message.content,
+                                             ctx.message.author.id)
 
-    @customcom.command(name="edit", )
+    @customcom.command(name="edit")
     async def cc_edit(self, ctx, command : str, *, text):
         """Edits a custom command
 
         Example:
         [p]customcom edit yourcommand Text you want
         """
-        guild = ctx.guild
-        guild_id = str(guild.id)
         command = command.lower()
         if "!" in command:
             command = command.replace('!', '')
         if '!' in text:
             text = text.replace('!', '')
-        if guild_id in self.c_commands:
-            cmdlist = self.c_commands[guild_id]
-            if command in cmdlist:
-                cmdlist[command] = text
-                self.c_commands[guild_id] = cmdlist
-                dataIO.save_json(self.file_path, self.c_commands)
+        edit = await self.database.edit_custom_command(ctx.guild.id, command, text)
+        if edit:
                 await ctx.send("Custom command successfully edited.")
-            else:
-                await ctx.send("That command doesn't exist. Use "
-                                   "`{}customcom add` to add it."
-                                   "".format(ctx.prefix))
+                await self.database.audit_record(ctx.guild.id,
+                                                 ctx.guild.name,
+                                                 ctx.message.content,
+                                                 ctx.message.author.id)
         else:
-            await ctx.send("There are no custom commands in this server."
-                               " Use `{}customcom add` to start adding some."
+            await ctx.send("That command doesn't exist. Use "
+                               "`{}customcom add` to add it."
                                "".format(ctx.prefix))
 
     @customcom.command(name="delete", )
@@ -124,6 +123,10 @@ class CustomCommands(commands.Cog):
                 self.c_commands[guild_id] = cmdlist
                 dataIO.save_json(self.file_path, self.c_commands)
                 await ctx.send("Custom command successfully deleted.")
+                await self.database.audit_record(ctx.guild.id,
+                                                 ctx.guild.name,
+                                                 ctx.message.content,
+                                                 ctx.message.author.id)
             else:
                 await ctx.send("That command doesn't exist.")
         else:
@@ -160,25 +163,17 @@ class CustomCommands(commands.Cog):
             return
         if len(message.content) < 2 or isinstance(message.channel, discord.DMChannel):
             return
-
-        guild = message.guild
-        guild_id = str(guild.id)
         prefix = self.get_prefix(message)
 
         if not prefix:
             return
 
-        if guild_id in self.c_commands:
-            cmdlist = self.c_commands[guild_id]
-            cmd = message.content[len(prefix):]
-            if cmd in cmdlist:
-                cmd = cmdlist[cmd]
-                cmd = self.format_cc(cmd, message)
-                await message.channel.send(cmd)
-            elif cmd.lower() in cmdlist:
-                cmd = cmdlist[cmd.lower()]
-                cmd = self.format_cc(cmd, message)
-                await message.channel.send(cmd)
+        cmd = message.content[len(prefix):]
+        cmd = await self.database.get_custom_command(message.guild.id, cmd)
+        if cmd is None:
+            return
+        cmd = self.format_cc(cmd, message)
+        await message.channel.send(cmd)
 
     def get_prefix(self, message):
         try:
