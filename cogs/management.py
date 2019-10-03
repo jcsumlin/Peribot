@@ -1,6 +1,8 @@
 import discord
 import git
 from discord.ext import commands
+from discord.ext.commands import CommandNotFound
+
 
 
 class Management(commands.Cog):
@@ -11,6 +13,12 @@ class Management(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+
+    @commands.Cog.listener()
+    async def on_error(self, ctx, error):
+        if isinstance(error, CommandNotFound):
+            return
+        raise error
 
     @commands.command(name='setcolor', no_pm=True)
     async def set_member_color(self, ctx, role: discord.Role, color: discord.Color):
@@ -44,6 +52,11 @@ class Management(commands.Cog):
             embed = discord.Embed(title=f"Invalid Arguments!", description="!setcolor @Role [Hex Code or Generic Name]")
             await ctx.send(embed=embed)
 
+    @commands.command(name='nick', aliases=["setnick"])
+    @commands.cooldown(1, 21600, commands.BucketType.user)
+    async def nick(self, ctx, user: discord.Member, *, nick):
+        if ctx.author.id == 309089769663496194 or ctx.author.id == 204792579881959424:
+            await user.edit(nick=nick, reason="Jeep made me do it")
 
     @commands.command(name='gitpull')
     async def git_pull(self, ctx):
