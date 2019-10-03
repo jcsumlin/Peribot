@@ -18,6 +18,7 @@ class Birthdays(commands.Cog):
         if not os.path.exists("data/birthday"):
             logger.info("Creating data/birthday folder...")
             os.makedirs("data/birthday")
+            os.makedirs("data/birthday")
 
         f = "data/birthday/birthdays.json"
         if not fileIO(f, "check"):
@@ -35,7 +36,7 @@ class Birthdays(commands.Cog):
         if ctx.invoked_subcommand is None:
             return
 
-    @birthday.group()
+    @birthday.command(name="add")
     async def add(self, ctx, user: discord.User, birthday):
         birthday = birthday.split('/')
         birthdays = await self.get_config()
@@ -54,7 +55,7 @@ class Birthdays(commands.Cog):
         else:
             await ctx.send("Birthdays not setup!")
 
-    @birthday.group()
+    @birthday.command(name="list")
     async def list(self, ctx):
         birthdays = await self.get_config()
         users = birthdays[str(ctx.guild.id)]['users']
@@ -67,7 +68,7 @@ class Birthdays(commands.Cog):
                 embed.add_field(name=user_name.name, value=birthday.strftime('%m/%d/%Y'))
         await ctx.channel.send(embed=embed)
 
-    @birthday.group()
+    @birthday.command(name="channel")
     @commands.has_permissions(administrator=True)
     async def channel(self, ctx, channel):
         birthdays = await self.get_config()
@@ -80,7 +81,7 @@ class Birthdays(commands.Cog):
         await self.save_config(birthdays)
         return await ctx.send("Birthday Channel Set! :birthday:")
 
-    @birthday.group()
+    @birthday.command(name="disable")
     @commands.has_permissions(administrator=True)
     async def disable(self, ctx):
         birthdays = await self.get_config()
@@ -91,7 +92,7 @@ class Birthdays(commands.Cog):
         else:
             return await ctx.channel.send(":interrobang: Birthday Message Channel Not Set For This Server!")
 
-    @birthday.group()
+    @birthday.command(name="role")
     @commands.has_permissions(administrator=True)
     async def role(self, ctx, role: discord.Role):
         birthdays = await self.get_config()
