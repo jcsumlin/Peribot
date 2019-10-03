@@ -24,7 +24,7 @@ class Birthdays(commands.Cog):
             os.makedirs("data/birthday")
 
         f = "data/birthday/birthdays.json"
-        if not fileIO(f, "check"):
+        if not dataIO.is_valid_json(f):
             logger.info("Creating empty birthdays.json...")
             fileIO(f, "save", {})
 
