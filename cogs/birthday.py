@@ -14,9 +14,6 @@ from .utils.dataIO import dataIO, fileIO
 class Birthdays(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.scheduler = AsyncIOScheduler(timezone='America/New_York')
-        self.scheduler.add_job(self.check_birthdays, 'interval', minutes=1, replace_existing=True, coalesce=True)
-        self.scheduler.start()
 
     async def cog_before_invoke(self, ctx):
         if not os.path.exists("data/birthday"):
@@ -122,7 +119,7 @@ class Birthdays(commands.Cog):
                 if 'role_id' in value:
                     birthday_role = discord.utils.find(lambda r: r.id == value['role_id'],
                                                        channel.guild.roles)
-                member = discord.utils.find(lambda m: m.id == user['user_id'], channel.guild.members)
+                member = discord.utils.find(lambda m: m.id == int(user['user_id']), channel.guild.members)
                 if member is None:
                     logger.error('Could not find user')
                     continue
@@ -154,5 +151,4 @@ class Birthdays(commands.Cog):
 
 
 def setup(bot):
-    n = Birthdays(bot)
-    bot.add_cog(n)
+    bot.add_cog(Birthdays(bot))
