@@ -8,7 +8,7 @@ class Help(commands.Cog):
 
     @commands.command('help', aliases=["phelp"])
     async def help(self, ctx):
-        embed = discord.Embed(title="Modular Discord bot made by J_C___#8947", color=0x93ff50)
+        embed = discord.Embed(title="A modular Discord bot made by J_C___#8947", color=0x93ff50)
         embed.set_author(name="Peribot", url="http://www.patreon.com/botboi")
         embed.set_thumbnail(url="https://pa1.narvii.com/6363/a99a0f938da2c75791c1cfd8a93173eaf6c54b6a_128.gif")
         embed.add_field(name="!source", value="Interested in my source code? This will return my GitHub repository.")
@@ -122,11 +122,11 @@ class Help(commands.Cog):
         role_count = len(guild.roles)
         emoji_count = len(guild.emojis)
         print("Done with calculations")
-        em = discord.Embed(title="", color=0xea7938)
+        em = discord.Embed(title="", color=discord.Color.green())
         em.add_field(name='Name', value=guild.name)
         em.add_field(name='Owner', value=guild.owner.nick, inline=False)
         em.add_field(name='Members', value=str(guild.member_count))
-        em.add_field(name='Currently Online', value=online)
+        em.add_field(name='Currently Online', value=str(online))
         em.add_field(name='Text Channels', value=str(channel_count))
         em.add_field(name='Region', value=guild.region)
         em.add_field(name='Verification Level', value=str(guild.verification_level))

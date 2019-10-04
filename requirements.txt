@@ -9,3 +9,5 @@ psaw
 GitPython
 sqlalchemy
 tmdbv3api
+alembic
+youtube_dl

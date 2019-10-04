@@ -4,6 +4,8 @@ import discord
 from discord.ext import commands
 
 from .utils.dataIO import dataIO
+from .utils.database import Database
+from .utils.genericResponseBuilder import commandSuccess, commandError
 
 
 class Star(commands.Cog):
@@ -11,25 +13,16 @@ class Star(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.database = Database()
         self.settings = dataIO.load_json("data/star/settings.json")
-
-    async def save_settings(self):
-        return dataIO.save_json("data/star/settings.json", self.settings)
-
-    async def cog_before_invoke(self, ctx):
-        if not os.path.exists('data/star'):
-            os.mkdir('data/star')
-        data = {}
-        f = 'data/star/settings.json'
-        if not os.path.exists(f):
-            dataIO.save_json(f, data)
 
     @commands.group()
     @commands.has_permissions(manage_channels=True)
     async def starboard(self, ctx):
         """Commands for managing the starboard"""
         if ctx.invoked_subcommand is None:
-            await ctx.send("Thats not how you use this command. Use !help starboard for more info")
+            await commandError(ctx, "Thats not how you use this command.\n"
+                                    "")
 
     @starboard.group(name="role", aliases=["roles"])
     async def _roles(self, ctx):
@@ -67,14 +60,24 @@ class Star(commands.Cog):
 
         if role is None:
             role = await self.get_everyone_role(guild)
+
+        await self.database.post_starboard_settings(ctx.guild.id,
+                                              True,
+                                              channel.id,
+                                              emoji,
+                                              0)
         self.settings[guild_id] = {"emoji": emoji,
-                                    "channel": str(channel.id),
-                                    "role": [str(role.id)],
+                                    "channel": channel.id,
+                                    "role": [role.id],
                                     "threshold": 0,
                                     "messages": [],
                                     "ignore": []}
         await self.save_settings()
         await ctx.send("Starboard set to {}".format(channel.mention))
+        await self.database.audit_record(ctx.guild.id,
+                                         ctx.guild.name,
+                                         ctx.message.content,
+                                         ctx.message.author.id)
 
     @starboard.command(name="clear")
     async def clear_post_history(self, ctx):
@@ -82,6 +85,10 @@ class Star(commands.Cog):
         self.settings[str(ctx.guild.id)]["messages"] = []
         await self.save_settings()
         await ctx.send("Done! I will no longer track starred messages older than right now.")
+        await self.database.audit_record(ctx.guild.id,
+                                         ctx.guild.name,
+                                         ctx.message.content,
+                                         ctx.message.author.id)
 
     @starboard.command(name="ignore")
     async def toggle_channel_ignore(self, ctx, channel: discord.TextChannel = None):
@@ -96,6 +103,10 @@ class Star(commands.Cog):
             await ctx.send("{} added to the ignored channel list!".format(
                                             channel.mention))
         await self.save_settings()
+        await self.database.audit_record(ctx.guild.id,
+                                         ctx.guild.name,
+                                         ctx.message.content,
+                                         ctx.message.author.id)
 
     @starboard.command(name="emoji")
     async def set_emoji(self, ctx, emoji="⭐"):
@@ -120,6 +131,10 @@ class Star(commands.Cog):
             await ctx.send("Starboard emoji set to <{}>.".format(emoji))
         else:
             await ctx.send("Starboard emoji set to {}.".format(emoji))
+        await self.database.audit_record(ctx.guild.id,
+                                         ctx.guild.name,
+                                         ctx.message.content,
+                                         ctx.message.author.id)
 
     @starboard.command(name="channel")
     async def set_channel(self, ctx, channel: discord.TextChannel = None):
@@ -134,6 +149,10 @@ class Star(commands.Cog):
         self.settings[str(guild.id)]["channel"] = channel.id
         await self.save_settings()
         await ctx.send(f"Starboard channel set to {channel.mention}.")
+        await self.database.audit_record(ctx.guild.id,
+                                         ctx.guild.name,
+                                         ctx.message.content,
+                                         ctx.message.author.id)
 
     @starboard.command(name="threshold")
     async def set_threshold(self, ctx, threshold: int = 0):
@@ -147,6 +166,10 @@ class Star(commands.Cog):
         self.settings[str(guild.id)]["threshold"] = threshold
         await self.save_settings()
         await ctx.send(f"Starboard threshold set to {threshold}.")
+        await self.database.audit_record(ctx.guild.id,
+                                         ctx.guild.name,
+                                         ctx.message.content,
+                                         ctx.message.author.id)
 
     @_roles.command(name="add")
     async def add_role(self, ctx, role: discord.Role = None):
@@ -170,6 +193,10 @@ class Star(commands.Cog):
         await self.save_settings()
         await ctx.send(
                                     "Starboard role set to {}.".format(role.name))
+        await self.database.audit_record(ctx.guild.id,
+                                         ctx.guild.name,
+                                         ctx.message.content,
+                                         ctx.message.author.id)
 
     @_roles.command(name="remove", aliases=["del", "rem"])
     async def remove_role(self, ctx, role: discord.Role):
@@ -183,6 +210,10 @@ class Star(commands.Cog):
         await self.save_settings()
         await ctx.send(
                                     "{} removed from starboard.".format(role.name))
+        await self.database.audit_record(ctx.guild.id,
+                                         ctx.guild.name,
+                                         ctx.message.content,
+                                         ctx.message.author.id)
 
     async def check_roles(self, user, author, guild):
         """Checks if the user is allowed to add to the starboard
@@ -279,7 +310,7 @@ class Star(commands.Cog):
                     msg_edit = await channel.fetch_message(id=int(msg_id))
                     await msg_edit.edit(content=f"{reaction.emoji} **#{count}**")
                     return
-            if count < threshold and threshold != 0:
+            if count < threshold:
                 store = {"original_message": msg.id, "new_message": None, "count": count}
                 has_message = None
                 for message in self.settings[guid_id]["messages"]:
@@ -367,50 +398,55 @@ class Star(commands.Cog):
         else:
             return
 
-    # @commands.Cog.listener()
-    # async def on_reaction_remove(self, reaction, user):
-    #     guild = reaction.message.guild
-    #     msg = reaction.message
-    #     guid_id = str(guild.id)
-    #     if guid_id not in self.settings:
-    #         return # server not setup
-    #     if str(msg.channel.id) in self.settings[guid_id]["ignore"]:
-    #         return # ignored channel
-    #     react = self.settings[guid_id]["emoji"]
-    #     if react not in str(reaction.emoji):
-    #         return
-    #     threshold = self.settings[guid_id]["threshold"]
-    #     if await self.check_is_posted(guild, msg):
-    #         starboard_channel = self.bot.get_channel(int(self.settings[guid_id]["channel"]))
-    #         starboard_msg_id, count = await self.get_posted_message(guild, msg)
-    #         count -= 1 # counter the increment done by self.get_posted_message
-    #         if starboard_msg_id is not None and starboard_channel is not None: # msg is in the starboard
-    #             msg = await starboard_channel.fetch_message(id=int(starboard_msg_id)) # get message from starboard
-    #             count -= 1
-    #             if count < threshold: # this should remove the message from starboard but keep it in the file
-    #                 has_message = None
-    #                 for message in self.settings[guid_id]["messages"]: # find msg stored in list
-    #                     if reaction.message.id == message["original_message"]:
-    #                         has_message = message
-    #                         break
-    #                 if has_message is not None:
-    #                     self.settings[guid_id]["messages"].remove(has_message)
-    #                     message['count'] = count
-    #                     message['new_message'] = None
-    #                     self.settings[guid_id]["messages"].append(message)
-    #                     await self.save_settings()
-    #                     await msg.delete()
-    #             else:
-    #                 await msg.edit(content=f"{reaction.emoji} **#{count}**")
-    #                 store = {"original_message": reaction.message.id, "new_message": msg.id, "count": count}
-    #                 has_message = None
-    #                 for message in self.settings[guid_id]["messages"]:
-    #                     if reaction.message.id == message["original_message"]:
-    #                         has_message = message
-    #                 if has_message is not None:
-    #                     self.settings[guid_id]["messages"].remove(has_message)
-    #                     self.settings[guid_id]["messages"].append(store)
-    #                     await self.save_settings()
+    @commands.Cog.listener()
+    async def on_reaction_remove(self, reaction, user):
+        guild = reaction.message.guild
+        msg = reaction.message
+        guid_id = str(guild.id)
+        if guid_id not in self.settings:
+            return # server not setup
+        if str(msg.channel.id) in self.settings[guid_id]["ignore"]:
+            return # ignored channel
+        react = self.settings[guid_id]["emoji"]
+        if react not in str(reaction.emoji):
+            return
+        threshold = self.settings[guid_id]["threshold"]
+        has_message = None
+        for message in self.settings[guid_id]["messages"]:  # find msg stored in list
+            if reaction.message.id == message["original_message"]:
+                has_message = message
+                break
+        if await self.check_is_posted(guild, msg) and has_message is not None:
+            starboard_channel = self.bot.get_channel(int(self.settings[guid_id]["channel"]))
+            starboard_msg_id, count = await self.get_posted_message(guild, msg)
+            count -= 1 # counter the increment done by self.get_posted_message
+            if starboard_msg_id is not None and starboard_channel is not None: # msg is in the starboard
+                msg = await starboard_channel.fetch_message(id=int(starboard_msg_id)) # get message from starboard
+                count -= 1
+                if count < threshold: # this should remove the message from starboard but keep it in the file
+                    has_message = None
+                    for message in self.settings[guid_id]["messages"]: # find msg stored in list
+                        if reaction.message.id == message["original_message"]:
+                            has_message = message
+                            break
+                    if has_message is not None:
+                        self.settings[guid_id]["messages"].remove(has_message)
+                        message['count'] = count
+                        message['new_message'] = None
+                        self.settings[guid_id]["messages"].append(message)
+                        await self.save_settings()
+                        await msg.delete()
+                else:
+                    await msg.edit(content=f"{reaction.emoji} **#{count}**")
+                    store = {"original_message": reaction.message.id, "new_message": msg.id, "count": count}
+                    has_message = None
+                    for message in self.settings[guid_id]["messages"]:
+                        if reaction.message.id == message["original_message"]:
+                            has_message = message
+                    if has_message is not None:
+                        self.settings[guid_id]["messages"].remove(has_message)
+                        self.settings[guid_id]["messages"].append(store)
+                        await self.save_settings()
 
 
 def setup(bot):

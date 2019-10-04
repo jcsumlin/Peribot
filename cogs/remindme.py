@@ -4,7 +4,7 @@ import time
 import discord
 from discord.ext import tasks, commands
 from loguru import logger
-
+from .utils.database import Database
 from .utils.dataIO import fileIO
 
 
@@ -15,27 +15,11 @@ class RemindMe(commands.Cog):
         self.bot = bot
         self.check_reminders.start()
         self.check_remindeveryone.start()
-        self.reminders = fileIO("data/remindme/reminders.json", "load")
-        self.remindeveryone = fileIO("data/remindme/remindeveryone.json", "load")
         self.units = {"minute" : 60, "hour" : 3600, "day" : 86400, "week": 604800, "month": 2592000}
 
     def cog_unload(self):
         self.check_reminders.cancel()
         self.check_remindeveryone.cancel()
-
-    async def cog_before_invoke(self, ctx):
-        if not os.path.exists("data/remindme"):
-            logger.info("Creating data/remindme folder...")
-            os.makedirs("data/remindme")
-
-        f = "data/remindme/reminders.json"
-        if not fileIO(f, "check"):
-            logger.info("Creating empty reminders.json...")
-            fileIO(f, "save", [])
-        f = "data/remindme/remindeveryone.json"
-        if not fileIO(f, "check"):
-            logger.info("Creating empty remindeveryone.json...")
-            fileIO(f, "save", [])
 
     @commands.command()
     async def remindme(self, ctx,  quantity : int, time_unit : str, *, text : str):
@@ -64,6 +48,10 @@ class RemindMe(commands.Cog):
         logger.info("{} ({}) set a reminder.".format(author.name, author.id))
         await ctx.send("I will remind you that in {} {}.".format(str(quantity), time_unit + s))
         fileIO("data/remindme/reminders.json", "save", self.reminders)
+        await self.database.audit_record(ctx.guild.id,
+                                         ctx.guild.name,
+                                         ctx.message.content,
+                                         ctx.message.author.id)
 
     @commands.has_role("RemindHere")
     @commands.command(aliases=["re"])
@@ -92,6 +80,10 @@ class RemindMe(commands.Cog):
         self.remindeveryone.append({"ID": channel.id, "FUTURE": future, "TEXT": text, 'AUTHOR': ctx.author.id})
         await ctx.send("I will remind everyone here of that in {} {}.".format(str(quantity), time_unit + s))
         fileIO("data/remindme/remindeveryone.json", "save", self.remindeveryone)
+        await self.database.audit_record(ctx.guild.id,
+                                         ctx.guild.name,
+                                         ctx.message.content,
+                                         ctx.message.author.id)
 
     @commands.command()
     async def forgetme(self, ctx):
