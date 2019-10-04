@@ -14,6 +14,12 @@ class Hiatus(commands.Cog):
 
         self.tmdb = TMDb()
         self.tmdb.api_key = config.get('TMDB', 'api_key')
+        self.StevenUniverseServerIDs = [593887030216228973]
+        self.StarVsServerIDs = [
+            448695150135345152,
+            452307445059026946,
+            606970684136226846
+        ]
 
     @commands.command(name='hiatus',
                     description="How long has this Hiatus been going on for?",
@@ -29,7 +35,7 @@ class Hiatus(commands.Cog):
         # days = re.search('\d{1,3}\s', str(datetime.now() - date_of_last_episode)).group(0)
         # msg = "Days since last episode:\n\n" + "[" + days + "Days]"
 
-        if ctx.guild.id == 593887030216228973:
+        if ctx.guild.id in self.StevenUniverseServerIDs:
             season = Season()
             latest_season = False
             season_number = 1
@@ -51,7 +57,7 @@ class Hiatus(commands.Cog):
             embed.add_field(name=f"Days Since Season The Movie", value=f"{(b-a).days} Days", inline=False)
             return await ctx.channel.send(embed=embed)
 
-        if ctx.guild.id == 448695150135345152:
+        if ctx.guild.id in self.StarVsServerIDs:
             season = Season()
             latest_season = False
             season_number = 1
