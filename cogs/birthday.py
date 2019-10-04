@@ -28,6 +28,7 @@ class Birthdays(commands.Cog):
             await commandError(ctx, f"Thats not how this command is used!\n\n"
                                     f"**{ctx.prefix}birthday add [birthday]**\n\tThis will add your birthday. Please add it in MM/DD/YYYY format!\n"
                                     f"**{ctx.prefix}birthday list**\n\tThis will list all the birthdays for this month.\n"
+                                    f"**{ctx.prefix}birthday clear**\n\tThis will purge your birthday from my database.\n"
                                     f"**{ctx.prefix}birthday channel [channel]**\n\t(Admins only) This will set the channel where Peribot wishes everyone a happy birthday!\n"
                                     f"**{ctx.prefix}birthday disable**\n\t(Admins only) This will disable the birthday functionality in your server.\n"
                                     f"**{ctx.prefix}birthday role @[role]**\n\t(Admins only | Optional) This will give a user a role of your choosing on their special day.")
@@ -49,19 +50,25 @@ class Birthdays(commands.Cog):
             return
         birthday = datetime(year=int(birthday[2]), month=int(birthday[0]), day=int(birthday[1]))
         await self.database.add_birthday(server_id=ctx.guild.id, user_id=user.id, birthday=birthday)
-        await ctx.send("Done!")
+        await commandSuccess(ctx, "Your birthday has been added!")
+
+    @birthday.group()
+    async def clear(self, ctx):
+        try:
+            await self.database.delete_birthday(user_id=ctx.author.id)
+            await commandSuccess(ctx, "Your birthday data was successfully removed from my database!")
+        except ValueError:
+            await commandError(ctx, "Coundn't find your birthday record in my database, are you sure you registered it with me?")
 
     @birthday.group()
     async def list(self, ctx):
-        birthdays = await self.get_config()
-        users = birthdays[str(ctx.guild.id)]['users']
-        embed = discord.Embed(title=f"{ctx.guild.name}'s Birthday list for this month :birthday:")
-        for user in users:
-            birthday = datetime.strptime(user['birthday'], "%Y-%m-%d 00:00:00")
-            now = datetime.now()
-            if birthday.month == now.month:
-                user_name = discord.utils.get(ctx.guild.members, id=user['user_id'])
-                embed.add_field(name=user_name.name, value=birthday.strftime('%m/%d/%Y'))
+        birthdays = await self.database.get_months_bdays()
+        settings = await self.database.get_birthday_settings(ctx.guild.id)
+        embed = discord.Embed(title=f"{ctx.guild.name}'s Birthday list for this month :birthday:",
+                              description=f"Users will be pinged on their birthday in <#{settings.channel_id}>.\n You can use **{ctx.prefix}birthday clear** to remove your birthday from my records")
+        for user in birthdays:
+            member = discord.utils.find(lambda m: m.id == user.user_id, ctx.guild.members)
+            embed.add_field(name=member.name, value=user.birthday.strftime('%m/%d/%Y'))
         await ctx.channel.send(embed=embed)
 
     @birthday.group()
@@ -104,7 +111,7 @@ class Birthdays(commands.Cog):
     #     await self.save_config(birthdays)
     #     await ctx.channel.send("Birthday Role Set!")
 
-    @tasks.loop(seconds=5.0)
+    @tasks.loop(seconds=30.0)
     async def check_birthdays(self):
         await self.bot.wait_until_ready()
         birthdays = await self.database.get_todays_birthdays()
