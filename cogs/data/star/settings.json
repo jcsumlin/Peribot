@@ -14,5 +14,220 @@
             "271905541092147200"
         ],
         "threshold" : 0
+    },
+    "448695150135345152" : {
+        "channel" : "488937712439787551",
+        "emoji" : "\u2b50",
+        "ignore" : [],
+        "messages" : [
+            {
+                "count" : 1,
+                "new_message" : 623696711939784714,
+                "original_message" : 623696647813332992
+            },
+            {
+                "count" : 2,
+                "new_message" : 623696839790559254,
+                "original_message" : 623696770366570497
+            },
+            {
+                "count" : 3,
+                "new_message" : 623696838725337099,
+                "original_message" : 623696770366570497
+            },
+            {
+                "count" : 3,
+                "new_message" : 623696839228522499,
+                "original_message" : 623696770366570497
+            },
+            {
+                "count" : 1,
+                "new_message" : 623697272122638346,
+                "original_message" : 623697257459351555
+            },
+            {
+                "count" : 1,
+                "new_message" : 623697792891879435,
+                "original_message" : 623697784423448596
+            },
+            {
+                "count" : 1,
+                "new_message" : 623698056503885836,
+                "original_message" : 623698039416029185
+            },
+            {
+                "count" : 2,
+                "new_message" : 623698389195816971,
+                "original_message" : 623698309835522048
+            },
+            {
+                "count" : 4,
+                "new_message" : 623698321311006740,
+                "original_message" : 623698296745099303
+            },
+            {
+                "count" : 3,
+                "new_message" : 623698388499824640,
+                "original_message" : 623698309835522048
+            },
+            {
+                "count" : 4,
+                "new_message" : 623698904847876096,
+                "original_message" : 623698834845073439
+            },
+            {
+                "count" : 7,
+                "new_message" : 623698781187342345,
+                "original_message" : 623698768029548566
+            },
+            {
+                "count" : 3,
+                "new_message" : 623699669188608031,
+                "original_message" : 623699470692909063
+            },
+            {
+                "count" : 13,
+                "new_message" : 623700890066616330,
+                "original_message" : 623700816011853865
+            },
+            {
+                "count" : 3,
+                "new_message" : 623701521804296192,
+                "original_message" : 623701512887074817
+            },
+            {
+                "count" : 3,
+                "new_message" : 623703025743036436,
+                "original_message" : 623703009653686272
+            },
+            {
+                "count" : 4,
+                "new_message" : 623704144019980299,
+                "original_message" : 623704137850159135
+            },
+            {
+                "count" : 1,
+                "new_message" : 623704402569592833,
+                "original_message" : 623704226333196308
+            }
+        ],
+        "role" : [
+            "448695150135345152"
+        ],
+        "threshold" : 0
+    },
+    "515370084538253333" : {
+        "channel" : "515371155373293588",
+        "emoji" : "\u2b50",
+        "ignore" : [
+            "515383632806805514",
+            "590625714437357570"
+        ],
+        "messages" : [
+            {
+                "count" : 1,
+                "new_message" : null,
+                "original_message" : 623498375722958878
+            },
+            {
+                "count" : 1,
+                "new_message" : null,
+                "original_message" : 623499174909968385
+            },
+            {
+                "count" : 1,
+                "new_message" : null,
+                "original_message" : 623465274645020703
+            },
+            {
+                "count" : 1,
+                "new_message" : null,
+                "original_message" : 623393752165384193
+            },
+            {
+                "count" : 5,
+                "new_message" : null,
+                "original_message" : 623539197021519892
+            },
+            {
+                "count" : 6,
+                "new_message" : 623556580012720131,
+                "original_message" : 623539197021519892
+            },
+            {
+                "count" : 6,
+                "new_message" : 623558736866181130,
+                "original_message" : 623539197021519892
+            },
+            {
+                "count" : 6,
+                "new_message" : 623572868051107907,
+                "original_message" : 623539197021519892
+            },
+            {
+                "count" : 6,
+                "new_message" : 623573057553956864,
+                "original_message" : 623539197021519892
+            },
+            {
+                "count" : 6,
+                "new_message" : 623598138325729282,
+                "original_message" : 623539197021519892
+            },
+            {
+                "count" : 6,
+                "new_message" : 623598227459145748,
+                "original_message" : 623539197021519892
+            },
+            {
+                "count" : 6,
+                "new_message" : 623615649066909696,
+                "original_message" : 623539197021519892
+            },
+            {
+                "count" : 6,
+                "new_message" : 623615707590033408,
+                "original_message" : 623539197021519892
+            },
+            {
+                "count" : 6,
+                "new_message" : 623615721691152418,
+                "original_message" : 623539197021519892
+            },
+            {
+                "count" : 6,
+                "new_message" : 623615728897228802,
+                "original_message" : 623539197021519892
+            },
+            {
+                "count" : 6,
+                "new_message" : 623615735570104340,
+                "original_message" : 623539197021519892
+            },
+            {
+                "count" : 6,
+                "new_message" : 623615739915665428,
+                "original_message" : 623539197021519892
+            },
+            {
+                "count" : 1,
+                "new_message" : null,
+                "original_message" : 623660170626465802
+            },
+            {
+                "count" : 1,
+                "new_message" : null,
+                "original_message" : 623663440128507905
+            },
+            {
+                "count" : 2,
+                "new_message" : null,
+                "original_message" : 623662266713112606
+            }
+        ],
+        "role" : [
+            "515370084538253333"
+        ],
+        "threshold" : 5
     }
 }

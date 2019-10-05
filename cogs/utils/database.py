@@ -1,4 +1,4 @@
-from create_databases import AuditLog, ServerSettings, Base, CustomCommands, Warnings, StarBoardSettings, BirthdaySettings, Birthdays
+from create_databases import AuditLog, ServerSettings, Base, CustomCommands, Warnings, StarBoardSettings, BirthdaySettings, Birthdays, StarBoardMessages, StarBoardIgnoredChannels, StarboardAllowedRoles
 from sqlalchemy import create_engine, and_
 from sqlalchemy.orm import sessionmaker
 import os
@@ -9,7 +9,7 @@ from loguru import logger
 
 class Database:
     def __init__(self):
-        engine = create_engine("sqlite:///peribot.db", echo=True)
+        engine = create_engine("sqlite:///peribot.db")
         Base.metadata.bind = engine
         DBSession = sessionmaker(bind=engine)
         self.session = DBSession()
@@ -128,9 +128,9 @@ class Database:
                                      channel_id=channel_id,
                                      emoji=emoji,
                                      threshold=threshold)
-        # role =
-        # self.session.add(settings)
-        # self.session.commit()
+
+        self.session.add(settings)
+        self.session.commit()
 
     async def birthday_exists(self, ctx):
         user = self.session.query(Birthdays).filter_by(user_id=ctx.author.id).one_or_none()
@@ -229,3 +229,53 @@ class Database:
                 raise ValueError("Invalid ID")
             self.session.commit()
 
+    async def clear_starboard(self, id: int):
+        try:
+            stmt = StarBoardMessages.__table__.delete().where(StarBoardMessages.server_id == id)
+            self.session.execute(stmt)
+            self.session.commit()
+            return True
+        except Exception as e:
+            logger.error(e)
+            return False
+
+    async def get_ignored_starboard_channels(self, server_id: int):
+        list_of_channels = []
+        channels = self.session.query(StarBoardIgnoredChannels).filter_by(server_id=server_id).all()
+        for channel in channels:
+            list_of_channels.append(channel.channel_id)
+        return list_of_channels
+
+    async def delete_starboard_ignored_channel(self, server_id, channel_id):
+        res = self.session.query(StarBoardIgnoredChannels)\
+            .filter_by(server_id=server_id)\
+            .filter_by(channel_id=channel_id).delete()
+        if res == 1:
+            return True
+        return False
+
+    async def add_starboard_ignored_channel(self, server_id, channel_id):
+        channel = StarBoardIgnoredChannels(server_id=server_id,
+                                 channel_id=channel_id)
+        self.session.add(channel)
+        self.session.commit()
+        return True
+
+    async def get_starboard_settings(self, server_id):
+        settings = self.session.query(StarBoardSettings).filter_by(server_id=server_id).one_or_none()
+        return settings
+
+    async def update_starboard_settings(self, server_id, emoji):
+        settings = self.session.query(StarBoardSettings).filter_by(server_id=server_id).one_or_none()
+        if settings is not None:
+            settings.emoji = emoji
+            self.session.commit()
+            return True
+        return False
+
+    async def get_starboard_roles(self, server_id):
+        list_of_roles = []
+        roles = self.session.query(StarboardAllowedRoles).filter_by(server_id=server_id).all()
+        for role in roles:
+            list_of_roles.append(role.role_id)
+        return list_of_roles

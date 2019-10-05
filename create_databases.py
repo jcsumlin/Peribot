@@ -189,6 +189,12 @@ class StarBoardMessages(Base):
     original_message_id = Column(Integer)
     count = Column(Integer)
 
+class StarboardAllowedRoles(Base):
+    __tablename__ = 'starbaord_roles'
+    id = Column(Integer, autoincrement=True, primary_key=True)
+    server_id = Column(Integer, ForeignKey('starboard_settings.server_id'))
+    role_id = Column(Integer)
+
 
 if __name__ == '__main__':
     # Create an engine that stores data in the local directory's

@@ -6,7 +6,7 @@ from discord.ext import commands
 from .utils.dataIO import dataIO
 from .utils.database import Database
 from .utils.genericResponseBuilder import commandSuccess, commandError
-
+from loguru import logger
 
 class Star(commands.Cog):
     """Quote board"""
@@ -22,7 +22,13 @@ class Star(commands.Cog):
         """Commands for managing the starboard"""
         if ctx.invoked_subcommand is None:
             await commandError(ctx, "Thats not how you use this command.\n"
-                                    "")
+                                    f"**{ctx.prefix}starboard setup [channel] [emoji | :star:] [allowed role | @everyone]**\nSets up Starboard. Optional parameters with defaults are displayed with a pipe \"|\" character\n"
+                                    f"**{ctx.prefix}starboard ignore [channel]**\nTells the Starboard to ignore a specific channel\n"
+                                    f"**{ctx.prefix}starboard emoji [emoji]**\nSets the emoji that the Starboard tracks\n"
+                                    f"**{ctx.prefix}starboard channel [channel]**\nSets the channel where the starboard is housed\n"
+                                    f"**{ctx.prefix}starboard threshold [integer]**\nSets the threshold of reactions needed to be posted on the starboard\n"
+                                    f"**{ctx.prefix}starboard add [role]**\nAdd a role that's allowed to make it on the starboard\n"
+                                    f"**{ctx.prefix}starboard remove [role]**\nRemoves a role from the allowed roles list\n")
 
     @starboard.group(name="role", aliases=["roles"])
     async def _roles(self, ctx):
@@ -47,7 +53,6 @@ class Star(commands.Cog):
                               role: discord.Role = None):
         """Sets the starboard channel, emoji and role"""
         guild = ctx.guild
-        guild_id = str(guild.id)
         if channel is None:
             channel = ctx.channel
         if "<" in emoji and ">" in emoji:
@@ -60,19 +65,13 @@ class Star(commands.Cog):
 
         if role is None:
             role = await self.get_everyone_role(guild)
-
+        if await self.database.get_starboard_settings(ctx.guild.id) is not None:
+            return await commandError(ctx, f'Starboard already setup!\nUse **{ctx.prefix}starboard channel #[channel]** to reassign the channel for the starboard.')
         await self.database.post_starboard_settings(ctx.guild.id,
                                               True,
                                               channel.id,
                                               emoji,
                                               0)
-        self.settings[guild_id] = {"emoji": emoji,
-                                    "channel": channel.id,
-                                    "role": [role.id],
-                                    "threshold": 0,
-                                    "messages": [],
-                                    "ignore": []}
-        await self.save_settings()
         await ctx.send("Starboard set to {}".format(channel.mention))
         await self.database.audit_record(ctx.guild.id,
                                          ctx.guild.name,
@@ -82,37 +81,44 @@ class Star(commands.Cog):
     @starboard.command(name="clear")
     async def clear_post_history(self, ctx):
         """Clears the database of previous starred messages"""
-        self.settings[str(ctx.guild.id)]["messages"] = []
-        await self.save_settings()
-        await ctx.send("Done! I will no longer track starred messages older than right now.")
-        await self.database.audit_record(ctx.guild.id,
-                                         ctx.guild.name,
-                                         ctx.message.content,
-                                         ctx.message.author.id)
+
+        if await self.database.clear_starboard(ctx.guild.id):
+            await commandSuccess(ctx, "Done! I will no longer track starred messages older than right now.")
+            await self.database.audit_record(ctx.guild.id,
+                                             ctx.guild.name,
+                                             ctx.message.content,
+                                             ctx.message.author.id)
+        else:
+            await commandError(ctx, "Could not clear starboard!")
 
     @starboard.command(name="ignore")
     async def toggle_channel_ignore(self, ctx, channel: discord.TextChannel = None):
         if channel is None:
             channel = ctx.channel
-        if str(channel.id) in self.settings[str(ctx.guild.id)]["ignore"]:
-            self.settings[str(ctx.guild.id)]["ignore"].remove(channel.id)
-            await ctx.send("{} removed from the ignored channel list!".format(
-                                            channel.mention))
+        channels = await self.database.get_ignored_starboard_channels(ctx.guild.id)
+        if channel.id in channels:
+            if await self.database.delete_starboard_ignored_channel(ctx.guild.id, channel.id):
+                await commandSuccess(ctx,"{} removed from the ignored channel list!".format(
+                                                channel.mention))
+                await self.database.audit_record(ctx.guild.id,
+                                                 ctx.guild.name,
+                                                 ctx.message.content,
+                                                 ctx.message.author.id)
         else:
-            self.settings[str(ctx.guild.id)]["ignore"].append(str(channel.id))
-            await ctx.send("{} added to the ignored channel list!".format(
-                                            channel.mention))
-        await self.save_settings()
-        await self.database.audit_record(ctx.guild.id,
-                                         ctx.guild.name,
-                                         ctx.message.content,
-                                         ctx.message.author.id)
+            if await self.database.add_starboard_ignored_channel(ctx.guild.id, channel.id):
+                await commandSuccess(ctx, "{} added to the ignored channel list!".format(
+                                                channel.mention))
+                await self.database.audit_record(ctx.guild.id,
+                                                 ctx.guild.name,
+                                                 ctx.message.content,
+                                                 ctx.message.author.id)
 
     @starboard.command(name="emoji")
     async def set_emoji(self, ctx, emoji="⭐"):
         """Set the emoji for the starboard defaults to ⭐"""
         guild = ctx.guild
-        if str(guild.id) not in self.settings:
+        starboard_settings = await self.database.get_starboard_settings(ctx.guild.id)
+        if starboard_settings is None:
             await ctx.send("I am not setup for the starboard on this server!\
                                          \nuse starboard set to set it up.")
             return
@@ -125,12 +131,11 @@ class Star(commands.Cog):
             else:
                 is_guild_emoji = True
                 emoji = ":" + emoji.name + ":" + emoji.id
-        self.settings[str(guild.id)]["emoji"] = emoji
-        await self.save_settings()
+        await self.database.update_starboard_settings(server_id=guild.id, emoji=emoji)
         if is_guild_emoji:
-            await ctx.send("Starboard emoji set to <{}>.".format(emoji))
+            await commandSuccess(ctx, "Starboard emoji set to <{}>.".format(emoji))
         else:
-            await ctx.send("Starboard emoji set to {}.".format(emoji))
+            await commandSuccess(ctx, "Starboard emoji set to {}.".format(emoji))
         await self.database.audit_record(ctx.guild.id,
                                          ctx.guild.name,
                                          ctx.message.content,
@@ -220,8 +225,9 @@ class Star(commands.Cog):
            Allows bot owner to always add messages for testing
            disallows users from adding their own messages"""
         has_role = False
+        roles = await self.database.get_starboard_roles(guild.id)
         for role in user.roles:
-            if str(role.id) in self.settings[str(guild.id)]["role"]:
+            if str(role.id) in roles:
                 has_role = True
         if user is author:
             has_role = False
@@ -295,16 +301,18 @@ class Star(commands.Cog):
         guid_id = str(guild.id)
         if guid_id not in self.settings:
             return
-        if str(msg.channel.id) in self.settings[guid_id]["ignore"]:
+        starboard_settings = await self.database.get_starboard_settings(guild.id)
+        ignored_channels = await self.database.get_ignored_starboard_channels(guild.id)
+        if msg.channel.id in ignored_channels:
             return
         if not await self.check_roles(user, msg.author, guild):
             return
-        react = self.settings[guid_id]["emoji"]
+        react = starboard_settings.emoji
         if react in str(reaction.emoji):
-            threshold = self.settings[guid_id]["threshold"]
+            threshold = starboard_settings.threshold
             count = await self.get_count(guild, msg) + 1 # add one here in case its not posted to starboard
             if await self.check_is_posted(guild, msg): # check if stared message is in starboard
-                channel = reaction.message.guild.get_channel(int(self.settings[guid_id]["channel"]))
+                channel = reaction.message.guild.get_channel(int(starboard_settings.channel_id))
                 msg_id, count = await self.get_posted_message(guild, msg) # Count has been incremented
                 if msg_id is not None:
                     msg_edit = await channel.fetch_message(id=int(msg_id))

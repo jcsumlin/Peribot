@@ -4,7 +4,11 @@ import discord
 import giphypop
 from discord.ext import commands
 
-from .utils.dataIO import fileIO
+from .utils.dataIO import fileIO, dataIO
+from loguru import logger
+from ftplib import FTP, all_errors
+import os
+import requests
 
 
 class CursedPearl(commands.Cog):
@@ -18,6 +22,30 @@ class CursedPearl(commands.Cog):
         if ctx.guild.id == 515370084538253333:
             return True
         else: return False
+
+    @commands.command(no_pm=True)
+    async def whitelist(self, ctx, username):
+        logger.warn(f"{username} being added to whitelist by {ctx.message.author.id}")
+        with FTP('107.172.93.98')  as ftp:# connect to host, default port
+            ftp.login(user="J_C.736421", passwd="johnsummy")  # user anonymous, passwd anonymous@
+            file_copy = "whitelist.json"
+            file_orig = '/whitelist.json'
+            with open(file_copy, 'w') as fp:
+                res = ftp.retrlines('RETR ' + file_orig, fp.write)
+
+                if not res.startswith("226-File successfully transferred"):
+                    print('Download failed')
+                    if os.path.isfile(file_copy):
+                        os.remove(file_copy)
+        if os.path.isfile(file_copy):
+            whitelist = dataIO.load_json('whitelist.json')
+            username = "awefawefaoiwenfaoiwenf"
+            uuid = requests.get(f"http://tools.glowingmines.eu/convertor/nick/{username}").json()
+            if "error" in uuid:
+                return ctx.send("Invalid username please try again")
+            new_user = {'uuid': uuid, 'name': username}
+            whitelist.append(new_user)
+            os.remove(file_copy)
 
     @commands.command(no_pm=True)
     async def levels(self, ctx):
