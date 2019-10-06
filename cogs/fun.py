@@ -94,6 +94,8 @@ class Fun(commands.Cog):
     async def on_message(self, message):
         if message.content.lower() == "f":
             await message.add_reaction(u"\U0001F1EB")
+        if message.content.lower() == "press x to doubt":
+            await message.add_reaction(u"\U0001F1FD")
 
 
 def setup(bot):
