@@ -92,8 +92,9 @@ class Fun(commands.Cog):
 
     @commands.command()
     async def uwu(self, ctx, *, message):
+        uwus = ['UwU', 'Uwu', 'uwU', 'ÚwÚ', 'uwu', '☆w☆' '✧w✧', '♥w♥', '︠uw ︠u', '(uwu)', 'OwO', 'owo', 'Owo', 'owO']
         res = message.replace("r", "w").replace("l", "w")
-        await ctx.send(res)
+        await ctx.send(res + ' ' + random.choice(uwus))
 
 
     @commands.Cog.listener()
