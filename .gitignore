@@ -1,5 +1,7 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
+cogs/__pycache__/
+cogs/utils/__pycache_/
 *.py[cod]
 *$py.class
 
@@ -103,3 +105,10 @@ venv.bak/
 # mypy
 .mypy_cache/
 config.json
+
+# data
+cogs/data/
+*.ini
+*.db
+*.db-journal
+.idea
