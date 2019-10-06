@@ -90,10 +90,18 @@ class Fun(commands.Cog):
         embed.set_image(url="https://i.imgur.com/X6pMtG4.gif")
         await ctx.channel.send(embed=embed)
 
+    @commands.command()
+    async def uwu(self, ctx, *, message):
+        res = message.replace("r", "w").replace("l", "w")
+        await ctx.send(res)
+
+
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.content.lower() == "f":
             await message.add_reaction(u"\U0001F1EB")
+        if message.content.lower() == "press x to doubt":
+            await message.add_reaction(u"\U0001F1FD")
 
 
 def setup(bot):
