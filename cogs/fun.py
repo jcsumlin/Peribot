@@ -90,6 +90,12 @@ class Fun(commands.Cog):
         embed.set_image(url="https://i.imgur.com/X6pMtG4.gif")
         await ctx.channel.send(embed=embed)
 
+    @commands.command()
+    async def uwu(self, ctx, *, message):
+        res = message.replace("r", "w").replace("l", "w")
+        await ctx.send(res)
+
+
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.content.lower() == "f":
