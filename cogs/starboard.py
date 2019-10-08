@@ -207,7 +207,7 @@ class Star(commands.Cog):
         """
         is_posted = False
         for past_message in self.settings[str(guild.id)]["messages"]:
-            if int(message.id) == past_message["original_message"] and past_message["new_message"] is not None:
+            if int(message.id) == past_message["original_message"] and past_message["new_message"] is not "":
                 is_posted = True
         return is_posted
 
