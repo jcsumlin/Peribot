@@ -264,14 +264,13 @@ class Star(commands.Cog):
         guid_id = str(guild.id)
         if guid_id not in self.settings:
             return
-        if str(msg.channel.id) in self.settings[guid_id]["ignore"]:
+        if str(msg.channel.id) in self.settings[str(guild.id)]["ignore"]:
             return
         if not await self.check_roles(user, msg.author, guild):
             return
         react = self.settings[guid_id]["emoji"]
         if react in str(reaction.emoji):
             threshold = self.settings[guid_id]["threshold"]
-            count = await self.get_count(guild, msg) + 1 # add one here in case its not posted to starboard
             if await self.check_is_posted(guild, msg): # check if stared message is in starboard
                 channel = reaction.message.guild.get_channel(int(self.settings[guid_id]["channel"]))
                 msg_id, count = await self.get_posted_message(guild, msg) # Count has been incremented
@@ -279,7 +278,8 @@ class Star(commands.Cog):
                     msg_edit = await channel.fetch_message(id=int(msg_id))
                     await msg_edit.edit(content=f"{reaction.emoji} **#{count}**")
                     return
-            if count < threshold and threshold != 0:
+            count = await self.get_count(guild, msg) + 1  # add one here in case its not posted to starboard
+            if count < threshold != 0:
                 store = {"original_message": msg.id, "new_message": None, "count": count}
                 has_message = None
                 for message in self.settings[guid_id]["messages"]:
@@ -362,6 +362,13 @@ class Star(commands.Cog):
             post_msg = await starboard_channel.send("{} **#{}**".format(reaction.emoji, count),
                                                    embed=em)
             past_message_list = self.settings[guid_id]["messages"]
+            for past_message in list(self.settings[str(guild.id)]["messages"]):
+                if int(msg.id) == past_message["original_message"]:
+                    past_message["new_message"] = post_msg.id
+                    past_message["count"] = count
+                    await self.save_settings()
+                    return
+
             past_message_list.append({"original_message": msg.id, "new_message": post_msg.id, "count": count})
             await self.save_settings()
         else:
