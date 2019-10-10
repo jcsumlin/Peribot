@@ -29,7 +29,7 @@ class Hiatus(commands.Cog):
         # days = re.search('\d{1,3}\s', str(datetime.now() - date_of_last_episode)).group(0)
         # msg = "Days since last episode:\n\n" + "[" + days + "Days]"
 
-        if ctx.guild.id == 593887030216228973:
+        if ctx.guild.id == 515370084538253333:
             season = Season()
             latest_season = False
             season_number = 1
