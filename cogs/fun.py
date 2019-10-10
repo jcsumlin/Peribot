@@ -92,10 +92,12 @@ class Fun(commands.Cog):
 
     @commands.command()
     async def uwu(self, ctx, *, message):
-        uwus = ['UwU', 'Uwu', 'uwU', 'ÚwÚ', 'uwu', '☆w☆' '✧w✧', '♥w♥', '︠uw ︠u', '(uwu)', 'OwO', 'owo', 'Owo', 'owO']
-        res = message.replace("r", "w").replace("l", "w")
+        uwus = ['UwU', 'Uwu', 'uwU', 'ÚwÚ', 'uwu', '☆w☆', '✧w✧', '♥w♥', '︠uw ︠u', '(uwu)', 'OwO', 'owo', 'Owo', 'owO']
+        res = message.replace("r", "w").replace("l", "w").replace("L", "W").replace("R", "W")
+        res = res.replace("the ", "da ").replace("The ", "Da ").replace("THE ", "DA ")
+        res = res.replace("th", "d").replace("TH", "D")
+        res = res.replace("\n", " " + random.choice(uwus) + "\n")
         await ctx.send(res + ' ' + random.choice(uwus))
-
 
     @commands.Cog.listener()
     async def on_message(self, message):
