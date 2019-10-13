@@ -204,19 +204,17 @@ class Star(commands.Cog):
     @_roles.command(name="remove", aliases=["del", "rem"])
     async def remove_role(self, ctx, role: discord.Role):
         """Remove a role allowed to add messages to the starboard"""
-        guild = ctx.guild
-        everyone_role = await self.get_everyone_role(guild)
-        if str(role.id) in self.settings[str(guild.id)]["role"]:
-            self.settings[str(guild.id)]["role"].remove(role.id)
-        if self.settings[str(guild.id)]["role"] == []:
-            self.settings[str(guild.id)]["role"].append(everyone_role.id)
-        await self.save_settings()
-        await ctx.send(
-                                    "{} removed from starboard.".format(role.name))
-        await self.database.audit_record(ctx.guild.id,
-                                         ctx.guild.name,
-                                         ctx.message.content,
-                                         ctx.message.author.id)
+        try:
+            if await self.database.starboard_remove_role(ctx.guild.id, role.id) is False:
+                return await ctx.send(f"{role.name} was not in your list of  allowed roles.\nYou can add it with `{ctx.prefix}starboard [remove|del|rem] #[role]`")
+            else:
+                await ctx.send(f"{role.name} removed from starboard.")
+                await self.database.audit_record(ctx.guild.id,
+                                                 ctx.guild.name,
+                                                 ctx.message.content,
+                                                 ctx.message.author.id)
+        except ValueError:
+            return await ctx.send(f"Failed to remove {role.name} from the list of users allowed to make it on the starboard.")
 
     async def check_roles(self, user, author, guild):
         """Checks if the user is allowed to add to the starboard
@@ -282,14 +280,10 @@ class Star(commands.Cog):
         """
 
         message = await self.database.get_one_starboard_message(guild.id, message.id)
-
-                msg = past_message
-                msg_list.remove(msg)
-                msg["count"] += 1
-                msg_list.append(msg)
-                self.settings[str(guild.id)]["messages"] = msg_list
-                await self.save_settings()
-                return past_message["new_message"], past_message["count"]
+        if message is not None:
+            msg = await self.database.update_starboard_message(message.id, count=(message.count+1))
+            if msg is False:
+                return msg.starboard_message_id, msg.count
         return None, None
 
     @commands.Cog.listener()

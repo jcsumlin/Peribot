@@ -314,3 +314,14 @@ class Database:
             return message
         else:
             return False
+
+    def starboard_remove_role(self, guild_id:id, role_id):
+        try:
+            role = self.session.query(StarboardAllowedRoles).filter_by(server_id=guild_id).filter_by(role_id=role_id).one_or_none()
+            if role is None:
+                return False
+            role.delete()
+            self.session.commit()
+            return True
+        except Exception as e:
+            raise ValueError("Could not remove role")
