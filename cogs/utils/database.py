@@ -1,10 +1,12 @@
-from create_databases import AuditLog, ServerSettings, Base, CustomCommands, Warnings, StarBoardSettings, BirthdaySettings, Birthdays, StarBoardMessages, StarBoardIgnoredChannels, StarboardAllowedRoles
-from sqlalchemy import create_engine, and_
-from sqlalchemy.orm import sessionmaker
-import os
-import discord
 from datetime import datetime
+
+import discord
 from loguru import logger
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
+from create_databases import AuditLog, ServerSettings, Base, CustomCommands, Warnings, StarBoardSettings, \
+    BirthdaySettings, Birthdays, StarBoardMessages, StarBoardIgnoredChannels, StarboardAllowedRoles
 
 
 class Database:
@@ -279,3 +281,36 @@ class Database:
         for role in roles:
             list_of_roles.append(role.role_id)
         return list_of_roles
+
+    async def get_starboard_messages(self, guild_id):
+        messages = self.session.query(StarBoardMessages).filter_by(server_id=guild_id).all()
+        return messages
+
+    async def get_one_starboard_message(self, guild_id, original_message_id):
+        message = self.session.query(StarBoardMessages)\
+            .filter_by(server_id=guild_id)\
+            .filter_by(original_message_id=original_message_id).one_or_none()
+        return message
+
+    async def update_starboard_message(self, original_message_id, starboard_message_id=None, count=None):
+        """
+        Updates the message data based on the origional_message_id
+        :param original_message_id: The ID used to fetch the message that will be updated
+        :param starboard_message_id: The message ID found on the starboard if it is preset
+        :param count: Number of votes
+        :return:
+        """
+        was_updated = False
+        message = self.session.query(StarBoardMessages).filter_by(original_message_id=original_message_id).one_or_none()
+        if starboard_message_id is not None:
+            message.starboard_message_id = starboard_message_id
+            self.session.commit()
+            was_updated = True
+        if count is not None:
+            message.count = count
+            self.session.commit()
+            was_updated = True
+        if was_updated:
+            return message
+        else:
+            return False

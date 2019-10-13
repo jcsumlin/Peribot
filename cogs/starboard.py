@@ -1,12 +1,10 @@
-import os
-
 import discord
 from discord.ext import commands
 
 from .utils.dataIO import dataIO
 from .utils.database import Database
 from .utils.genericResponseBuilder import commandSuccess, commandError
-from loguru import logger
+
 
 class Star(commands.Cog):
     """Quote board"""
@@ -237,15 +235,15 @@ class Star(commands.Cog):
 
     async def check_is_posted(self, guild, message):
         """
-        Check if message is in the starboard
+        Check if message is being tracked and on the starboard
         :param guild: Discord server
         :param message: message that was stared
         :return:
         """
         is_posted = False
-        for past_message in self.settings[str(guild.id)]["messages"]:
-            if int(message.id) == past_message["original_message"] and past_message["new_message"] is not None:
-                is_posted = True
+        message = await self.database.get_one_starboard_message(guild.id, message.id)
+        if message is not None and message.starboard_message_id is not None:
+            is_posted = True
         return is_posted
 
     async def check_is_added(self, guild, message):
@@ -255,11 +253,11 @@ class Star(commands.Cog):
         :param message: 
         :return: 
         """
-        is_posted = False
-        for past_message in self.settings[str(guild.id)]["messages"]:
-            if str(message.id) == past_message["original_message"]:
-                is_posted = True
-        return is_posted
+        is_tracked = False
+        message = await self.database.get_one_starboard_message(guild.id, message.id)
+        if message is not None:
+            is_tracked = True
+        return is_tracked
 
     async def get_count(self, guild, message):
         """
@@ -269,9 +267,9 @@ class Star(commands.Cog):
         :return:
         """
         count = 0
-        for past_message in list(self.settings[str(guild.id)]["messages"]):
-            if int(message.id) == past_message["original_message"]:
-                count = past_message["count"]
+        message = await self.database.get_one_starboard_message(guild.id, message.id)
+        if message is not None:
+            count = message.count
         return count
 
     async def get_posted_message(self, guild, message):
@@ -282,9 +280,9 @@ class Star(commands.Cog):
         :param message: Message that was reacted to
         :return:
         """
-        msg_list = self.settings[str(guild.id)]["messages"]
-        for past_message in msg_list:
-            if int(message.id) == past_message["original_message"]:
+
+        message = await self.database.get_one_starboard_message(guild.id, message.id)
+
                 msg = past_message
                 msg_list.remove(msg)
                 msg["count"] += 1
