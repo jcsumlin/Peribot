@@ -178,19 +178,17 @@ class Star(commands.Cog):
     async def add_role(self, ctx, role: discord.Role = None):
         """Add a role allowed to add messages to the starboard defaults to @everyone"""
         guild = ctx.guild
-        if str(guild.id) not in self.settings:
-            await ctx.send(
-                                        "I am not setup for the starboard on this server!\
+        settings = await self.database.get_starboard_settings(guild.id)
+        if settings is None:
+            return await ctx.send("I am not setup for the starboard on this server!\
                                          \nuse starboard set to set it up.")
-            return
         everyone_role = await self.get_everyone_role(guild)
         if role is None:
             role = everyone_role
-        if role.id in self.settings[str(guild.id)]["role"]:
-            await ctx.send(
-                                        "{} can already add to the starboard!".format(role.name))
-            return
-        if everyone_role.id in self.settings[str(guild.id)]["role"] and role != everyone_role:
+        roles = await self.database.get_starboard_roles(guild.id)
+        if role.id in roles:
+            return await ctx.send(f"{role.name} can already add to the starboard!")
+        if everyone_role.id in roles and role != everyone_role:
             self.settings[str(guild.id)]["role"].remove(everyone_role.id)
         self.settings[str(guild.id)]["role"].append(role.id)
         await self.save_settings()
