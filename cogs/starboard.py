@@ -70,7 +70,7 @@ class Star(commands.Cog):
                                               channel.id,
                                               emoji,
                                               0)
-        await ctx.send("Starboard set to {}".format(channel.mention))
+        await ctx.send(f"Starboard set to {channel.mention}")
         await self.database.audit_record(ctx.guild.id,
                                          ctx.guild.name,
                                          ctx.message.content,
@@ -96,16 +96,14 @@ class Star(commands.Cog):
         channels = await self.database.get_ignored_starboard_channels(ctx.guild.id)
         if channel.id in channels:
             if await self.database.delete_starboard_ignored_channel(ctx.guild.id, channel.id):
-                await commandSuccess(ctx,"{} removed from the ignored channel list!".format(
-                                                channel.mention))
+                await commandSuccess(ctx, f"{channel.mention} removed from the ignored channel list!")
                 await self.database.audit_record(ctx.guild.id,
                                                  ctx.guild.name,
                                                  ctx.message.content,
                                                  ctx.message.author.id)
         else:
             if await self.database.add_starboard_ignored_channel(ctx.guild.id, channel.id):
-                await commandSuccess(ctx, "{} added to the ignored channel list!".format(
-                                                channel.mention))
+                await commandSuccess(ctx, f"{channel.mention} added to the ignored channel list!")
                 await self.database.audit_record(ctx.guild.id,
                                                  ctx.guild.name,
                                                  ctx.message.content,
@@ -117,9 +115,8 @@ class Star(commands.Cog):
         guild = ctx.guild
         starboard_settings = await self.database.get_starboard_settings(ctx.guild.id)
         if starboard_settings is None:
-            await ctx.send("I am not setup for the starboard on this server!\
-                                         \nuse starboard set to set it up.")
-            return
+            return await commandError(ctx, f"I am not setup for the starboard on this server!\
+                                         \nuse **{ctx.prefix}starboard set** to set it up.")
         is_guild_emoji = False
         if "<" in emoji and ">" in emoji:
             emoji = await self.check_guild_emojis(guild, emoji)
@@ -131,9 +128,9 @@ class Star(commands.Cog):
                 emoji = ":" + emoji.name + ":" + emoji.id
         await self.database.update_starboard_settings(server_id=guild.id, emoji=emoji)
         if is_guild_emoji:
-            await commandSuccess(ctx, "Starboard emoji set to <{}>.".format(emoji))
+            await commandSuccess(ctx, f"Starboard emoji set to <{emoji}>.")
         else:
-            await commandSuccess(ctx, "Starboard emoji set to {}.".format(emoji))
+            await commandSuccess(ctx, f"Starboard emoji set to {emoji}.")
         await self.database.audit_record(ctx.guild.id,
                                          ctx.guild.name,
                                          ctx.message.content,
@@ -144,9 +141,8 @@ class Star(commands.Cog):
         """Set the channel for the starboard"""
         guild = ctx.guild
         if str(guild.id) not in self.settings:
-            await ctx.send("I am not setup for the starboard on this server!\
-                                         \nuse starboard set to set it up.")
-            return
+            return await commandError(ctx, f"I am not setup for the starboard on this server!\
+                                                     \nuse **{ctx.prefix}starboard set** to set it up.")
         if channel is None:
             channel = ctx.channel
         self.settings[str(guild.id)]["channel"] = channel.id
@@ -162,10 +158,8 @@ class Star(commands.Cog):
         """Set the threshold before posting to the starboard"""
         guild = ctx.guild
         if str(guild.id) not in self.settings:
-            await ctx.send(
-                                        "I am not setup for the starboard on this server!\
-                                         \nuse starboard set to set it up.")
-            return
+            return await commandError(ctx, f"I am not setup for the starboard on this server!\
+                                                     \nuse **{ctx.prefix}starboard set** to set it up.")
         self.settings[str(guild.id)]["threshold"] = threshold
         await self.save_settings()
         await ctx.send(f"Starboard threshold set to {threshold}.")
@@ -178,24 +172,20 @@ class Star(commands.Cog):
     async def add_role(self, ctx, role: discord.Role = None):
         """Add a role allowed to add messages to the starboard defaults to @everyone"""
         guild = ctx.guild
-        if str(guild.id) not in self.settings:
-            await ctx.send(
-                                        "I am not setup for the starboard on this server!\
-                                         \nuse starboard set to set it up.")
-            return
+        settings = await self.database.get_starboard_settings(guild.id)
+        if settings is None or settings.enabled is False:
+            return await commandError(ctx, f"I am not setup for the starboard on this server!\
+                                                     \nuse **{ctx.prefix}starboard set** to set it up.")
+        roles = await self.database.get_starboard_roles(guild.id)
         everyone_role = await self.get_everyone_role(guild)
         if role is None:
             role = everyone_role
-        if role.id in self.settings[str(guild.id)]["role"]:
-            await ctx.send(
-                                        "{} can already add to the starboard!".format(role.name))
-            return
-        if everyone_role.id in self.settings[str(guild.id)]["role"] and role != everyone_role:
-            self.settings[str(guild.id)]["role"].remove(everyone_role.id)
-        self.settings[str(guild.id)]["role"].append(role.id)
-        await self.save_settings()
-        await ctx.send(
-                                    "Starboard role set to {}.".format(role.name))
+        if role.id in roles:
+            return await ctx.send(f"{role.name} can already add to the starboard!")
+        if everyone_role.id in roles and role != everyone_role:
+            await self.database.delete_starboard_role(guild.id, everyone_role.id)
+        await self.database.post_starboard_role(guild.id, role.id)
+        await ctx.send(f"{role.name} can now post to the Starboard")
         await self.database.audit_record(ctx.guild.id,
                                          ctx.guild.name,
                                          ctx.message.content,
@@ -280,23 +270,17 @@ class Star(commands.Cog):
         :param message: Message that was reacted to
         :return:
         """
-
         message = await self.database.get_one_starboard_message(guild.id, message.id)
-
-                msg = past_message
-                msg_list.remove(msg)
-                msg["count"] += 1
-                msg_list.append(msg)
-                self.settings[str(guild.id)]["messages"] = msg_list
-                await self.save_settings()
-                return past_message["new_message"], past_message["count"]
+        updated_message = await self.database.update_starboard_message(message.id, count=(message.count+1))
+        if updated_message is not False:
+            return updated_message.starboard_message_id, updated_message.count
         return None, None
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):
         guild = reaction.message.guild
         msg = reaction.message
-        guid_id = str(guild.id)
+        guid_id = guild.id
         if guid_id not in self.settings:
             return
         starboard_settings = await self.database.get_starboard_settings(guild.id)
@@ -316,23 +300,20 @@ class Star(commands.Cog):
                     msg_edit = await channel.fetch_message(id=int(msg_id))
                     await msg_edit.edit(content=f"{reaction.emoji} **#{count}**")
                     return
-            if count < threshold:
-                store = {"original_message": msg.id, "new_message": None, "count": count}
-                has_message = None
-                for message in self.settings[guid_id]["messages"]:
-                    if msg.id == message["original_message"]:
-                        has_message = message
-                if has_message is not None:
-                    self.settings[guid_id]["messages"].remove(has_message)
-                    self.settings[guid_id]["messages"].append(store)
-                    await self.save_settings()
-                else:
-                    self.settings[guid_id]["messages"].append(store)
-                    await self.save_settings()
-                return
+            else:
+                if count < threshold:
+                    message = await self.database.get_one_starboard_message(guild.id, msg.id)
+                    if message is not None:
+                        await self.database.update_starboard_message(msg.id, count=count)
+                    else:
+                        await self.database.post_starboard_message(guild_id=guild.id,
+                                                                   original_message_id=msg.id,
+                                                                   starboard_message_id=message.starboard_message_id,
+                                                                   count=count)
+                    return
             author = reaction.message.author
             channel = reaction.message.channel
-            starboard_channel = self.bot.get_channel(int(self.settings[guid_id]["channel"]))
+            starboard_channel = self.bot.get_channel(starboard_settings.channel_id)
             if reaction.message.embeds != []:
                 embed = reaction.message.embeds[0]  # .to_dict()
                 # print(embed)
@@ -398,9 +379,8 @@ class Star(commands.Cog):
             em.set_footer(text='{} | {}'.format(channel.guild.name, channel.name))
             post_msg = await starboard_channel.send("{} **#{}**".format(reaction.emoji, count),
                                                    embed=em)
-            past_message_list = self.settings[guid_id]["messages"]
-            past_message_list.append({"original_message": msg.id, "new_message": post_msg.id, "count": count})
-            await self.save_settings()
+            await self.database.post_starboard_message(guild_id=guild.id, original_message_id=msg.id,
+                                                       starboard_message_id=post_msg.id, count=count)
         else:
             return
 

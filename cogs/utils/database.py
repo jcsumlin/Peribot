@@ -282,6 +282,20 @@ class Database:
             list_of_roles.append(role.role_id)
         return list_of_roles
 
+    async def delete_starboard_role(self, server_id, role_id):
+        role = self.session.query(StarboardAllowedRoles).filter_by(server_id=server_id).filter_by(role_id=role_id).one_or_none()
+        if role is not None:
+            role.delete()
+            self.session.commit()
+            return True
+        return False
+
+    async def post_starboard_role(self, server_id, role_id):
+        role = StarboardAllowedRoles(server_id=server_id,
+                                     role_id=role_id)
+        self.session.add(role)
+        self.session.commit()
+
     async def get_starboard_messages(self, guild_id):
         messages = self.session.query(StarBoardMessages).filter_by(server_id=guild_id).all()
         return messages
@@ -314,3 +328,15 @@ class Database:
             return message
         else:
             return False
+
+
+    async def post_starboard_message(self, guild_id, original_message_id, starboard_message_id=None, count=0):
+        if await self.get_one_starboard_message(guild_id,original_message_id) is None:
+            message = StarBoardMessages(server_id=guild_id,
+                                        starboard_message_id=starboard_message_id,
+                                        original_message_id=original_message_id,
+                                        count=count)
+            return message
+        else:
+            return False
+
