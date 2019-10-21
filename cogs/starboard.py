@@ -1,7 +1,6 @@
 import discord
 from discord.ext import commands
 
-from .utils.dataIO import dataIO
 from .utils.database import Database
 from .utils.genericResponseBuilder import commandSuccess, commandError
 
@@ -12,7 +11,6 @@ class Star(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.database = Database()
-        self.settings = dataIO.load_json("data/star/settings.json")
 
     @commands.group()
     @commands.has_permissions(manage_channels=True)
@@ -284,9 +282,9 @@ class Star(commands.Cog):
         guild = reaction.message.guild
         msg = reaction.message
         guid_id = guild.id
-        if guid_id not in self.settings:
-            return
         starboard_settings = await self.database.get_starboard_settings(guild.id)
+        if starboard_settings is None:
+            return
         ignored_channels = await self.database.get_ignored_starboard_channels(guild.id)
         if msg.channel.id in ignored_channels:
             return
