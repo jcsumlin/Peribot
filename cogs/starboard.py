@@ -56,8 +56,7 @@ class Star(commands.Cog):
         if "<" in emoji and ">" in emoji:
             emoji = await self.check_guild_emojis(guild, emoji)
             if emoji is None:
-                await ctx.send("That emoji is not on this server!")
-                return
+                return await commandError(ctx, "That emoji is not on this server!")
             else:
                 emoji = ":" + emoji.name + ":" + emoji.id
 
@@ -70,22 +69,22 @@ class Star(commands.Cog):
                                               channel.id,
                                               emoji,
                                               0)
-        await ctx.send(f"Starboard set to {channel.mention}")
         await self.database.audit_record(ctx.guild.id,
                                          ctx.guild.name,
                                          ctx.message.content,
                                          ctx.message.author.id)
+        await commandSuccess(ctx, f"Starboard set to {channel.mention}")
 
     @starboard.command(name="clear")
     async def clear_post_history(self, ctx):
         """Clears the database of previous starred messages"""
 
         if await self.database.clear_starboard(ctx.guild.id):
-            await commandSuccess(ctx, "Done! I will no longer track starred messages older than right now.")
             await self.database.audit_record(ctx.guild.id,
                                              ctx.guild.name,
                                              ctx.message.content,
                                              ctx.message.author.id)
+            await commandSuccess(ctx, "Done! I will no longer track starred messages older than right now.")
         else:
             await commandError(ctx, "Could not clear starboard!")
 
@@ -96,18 +95,18 @@ class Star(commands.Cog):
         channels = await self.database.get_ignored_starboard_channels(ctx.guild.id)
         if channel.id in channels:
             if await self.database.delete_starboard_ignored_channel(ctx.guild.id, channel.id):
-                await commandSuccess(ctx, f"{channel.mention} removed from the ignored channel list!")
                 await self.database.audit_record(ctx.guild.id,
                                                  ctx.guild.name,
                                                  ctx.message.content,
                                                  ctx.message.author.id)
+                await commandSuccess(ctx, f"{channel.mention} removed from the ignored channel list!")
         else:
             if await self.database.add_starboard_ignored_channel(ctx.guild.id, channel.id):
-                await commandSuccess(ctx, f"{channel.mention} added to the ignored channel list!")
                 await self.database.audit_record(ctx.guild.id,
                                                  ctx.guild.name,
                                                  ctx.message.content,
                                                  ctx.message.author.id)
+                await commandSuccess(ctx, f"{channel.mention} added to the ignored channel list!")
 
     @starboard.command(name="emoji")
     async def set_emoji(self, ctx, emoji="⭐"):
@@ -127,86 +126,90 @@ class Star(commands.Cog):
                 is_guild_emoji = True
                 emoji = ":" + emoji.name + ":" + emoji.id
         await self.database.update_starboard_settings(server_id=guild.id, emoji=emoji)
-        if is_guild_emoji:
-            await commandSuccess(ctx, f"Starboard emoji set to <{emoji}>.")
-        else:
-            await commandSuccess(ctx, f"Starboard emoji set to {emoji}.")
         await self.database.audit_record(ctx.guild.id,
                                          ctx.guild.name,
                                          ctx.message.content,
                                          ctx.message.author.id)
+        if is_guild_emoji:
+            await commandSuccess(ctx, f"Starboard emoji set to <{emoji}>.")
+        else:
+            await commandSuccess(ctx, f"Starboard emoji set to {emoji}.")
 
     @starboard.command(name="channel")
     async def set_channel(self, ctx, channel: discord.TextChannel = None):
         """Set the channel for the starboard"""
         guild = ctx.guild
-        if str(guild.id) not in self.settings:
+        settings = await self.database.get_starboard_settings(guild.id)
+        if settings is None:
             return await commandError(ctx, f"I am not setup for the starboard on this server!\
                                                      \nuse **{ctx.prefix}starboard set** to set it up.")
         if channel is None:
             channel = ctx.channel
-        self.settings[str(guild.id)]["channel"] = channel.id
-        await self.save_settings()
-        await ctx.send(f"Starboard channel set to {channel.mention}.")
+        await self.database.update_starboard_settings(ctx.guild.id, channel_id=channel.id)
         await self.database.audit_record(ctx.guild.id,
                                          ctx.guild.name,
                                          ctx.message.content,
                                          ctx.message.author.id)
+        await ctx.send(f"Starboard channel set to {channel.mention}.")
 
     @starboard.command(name="threshold")
     async def set_threshold(self, ctx, threshold: int = 0):
         """Set the threshold before posting to the starboard"""
         guild = ctx.guild
-        if str(guild.id) not in self.settings:
+        settings = await self.database.get_starboard_settings(guild.id)
+        if settings is None:
             return await commandError(ctx, f"I am not setup for the starboard on this server!\
-                                                     \nuse **{ctx.prefix}starboard set** to set it up.")
-        self.settings[str(guild.id)]["threshold"] = threshold
-        await self.save_settings()
-        await ctx.send(f"Starboard threshold set to {threshold}.")
+                                                            \nuse **{ctx.prefix}starboard set** to set it up.")
+        await self.database.update_starboard_settings(guild.id, threshold=threshold)
         await self.database.audit_record(ctx.guild.id,
                                          ctx.guild.name,
                                          ctx.message.content,
                                          ctx.message.author.id)
+        await ctx.send(f"Starboard threshold set to {threshold}.")
 
     @_roles.command(name="add")
     async def add_role(self, ctx, role: discord.Role = None):
         """Add a role allowed to add messages to the starboard defaults to @everyone"""
         guild = ctx.guild
         settings = await self.database.get_starboard_settings(guild.id)
-        if settings is None or settings.enabled is False:
+        if settings is None:
             return await commandError(ctx, f"I am not setup for the starboard on this server!\
                                                      \nuse **{ctx.prefix}starboard set** to set it up.")
-        roles = await self.database.get_starboard_roles(guild.id)
+        current_roles = await self.database.get_starboard_roles(guild.id)
         everyone_role = await self.get_everyone_role(guild)
         if role is None:
             role = everyone_role
-        if role.id in roles:
+        if role.id in current_roles:
             return await ctx.send(f"{role.name} can already add to the starboard!")
-        if everyone_role.id in roles and role != everyone_role:
+        if everyone_role.id in current_roles and role != everyone_role:
             await self.database.delete_starboard_role(guild.id, everyone_role.id)
         await self.database.post_starboard_role(guild.id, role.id)
-        await ctx.send(f"{role.name} can now post to the Starboard")
         await self.database.audit_record(ctx.guild.id,
                                          ctx.guild.name,
                                          ctx.message.content,
                                          ctx.message.author.id)
+        await ctx.send(f"{role.name} can now post to the Starboard")
 
     @_roles.command(name="remove", aliases=["del", "rem"])
     async def remove_role(self, ctx, role: discord.Role):
         """Remove a role allowed to add messages to the starboard"""
         guild = ctx.guild
+        settings = await self.database.get_starboard_settings(guild.id)
+        if settings is None:
+            return await commandError(ctx, f"I am not setup for the starboard on this server!\
+                                                            \nuse **{ctx.prefix}starboard set** to set it up.")
+        current_roles = await self.database.get_starboard_roles(guild.id)
         everyone_role = await self.get_everyone_role(guild)
-        if str(role.id) in self.settings[str(guild.id)]["role"]:
-            self.settings[str(guild.id)]["role"].remove(role.id)
-        if self.settings[str(guild.id)]["role"] == []:
-            self.settings[str(guild.id)]["role"].append(everyone_role.id)
-        await self.save_settings()
-        await ctx.send(
-                                    "{} removed from starboard.".format(role.name))
+        if role.id in current_roles:
+            await self.database.delete_starboard_role(guild.id, role.id)
+            current_roles.remove(role.id)
+        if current_roles == []:
+            await self.database.post_starboard_role(guild.id, everyone_role.id)
         await self.database.audit_record(ctx.guild.id,
                                          ctx.guild.name,
                                          ctx.message.content,
                                          ctx.message.author.id)
+        await ctx.send(f"{role.name} removed from starboard.")
 
     async def check_roles(self, user, author, guild):
         """Checks if the user is allowed to add to the starboard
@@ -215,7 +218,7 @@ class Star(commands.Cog):
         has_role = False
         roles = await self.database.get_starboard_roles(guild.id)
         for role in user.roles:
-            if str(role.id) in roles:
+            if role.id in roles:
                 has_role = True
         if user is author:
             has_role = False

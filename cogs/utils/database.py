@@ -267,13 +267,24 @@ class Database:
         settings = self.session.query(StarBoardSettings).filter_by(server_id=server_id).one_or_none()
         return settings
 
-    async def update_starboard_settings(self, server_id, emoji):
+    async def update_starboard_settings(self, server_id, emoji=None, channel_id=None, threshold=None, enabled=None):
+        updated = False
         settings = self.session.query(StarBoardSettings).filter_by(server_id=server_id).one_or_none()
-        if settings is not None:
+        if settings is not None and emoji is not None:
             settings.emoji = emoji
+            updated = True
+        if settings is not None and channel_id is not None:
+            settings.channel_id = channel_id
+            updated = True
+        if settings is not None and threshold is not None:
+            settings.threshold = threshold
+            updated = True
+        if settings is not None and enabled is not None:
+            settings.enabled = enabled
+            updated = True
+        if updated:
             self.session.commit()
-            return True
-        return False
+        return updated
 
     async def get_starboard_roles(self, server_id):
         list_of_roles = []
