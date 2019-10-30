@@ -9,13 +9,14 @@ from discord.ext import commands
 from loguru import logger
 
 from cogs.utils.checks import is_bot_owner_check
+from cogs.utils.database import Database
 
 #initiate logger test
 logger.add(f"file_{str(time.strftime('%Y%m%d-%H%M%S'))}.log", rotation="500 MB")
 
 auth = ConfigParser()
 auth.read('auth.ini')  # All my usernames and passwords for the api
-
+database = Database(path='cogs/peribot.db')
 def load_cogs(folder):
     os.chdir(folder)
     files = []
@@ -29,8 +30,15 @@ def config():
     with open('config.json', 'r') as f:
         config = json.load(f)
         return config
-# bot_config = config()
-bot = commands.Bot(command_prefix=auth.get('discord', 'PREFIX'))
+
+async def get_prefix(bot, message):
+    if not message.guild:
+        return commands.when_mentioned_or('!')(bot, message)
+    settings = await database.get_server_settings(message.guild.id)
+    prefix = settings.prefix
+    return commands.when_mentioned_or(str(prefix))(bot, message)
+
+bot = commands.Bot(command_prefix=get_prefix)
 
 @bot.event
 async def on_ready():

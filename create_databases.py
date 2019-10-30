@@ -17,6 +17,15 @@ class ServerSettings(Base):
     is_premium = Column(Boolean)
 
 
+class UserActivityLogs(Base):
+    __tablename__ = 'user_activity_log'
+    id = Column(Integer, autoincrement=True, primary_key=True)
+    server_id = Column(Integer, ForeignKey('server_settings.server_id'))
+    user_id = Column(Integer)
+    last_online = Column(String)
+    last_activity = Column(String)
+    last_nickname = Column(String)
+
 class AuditLog(Base):
     __tablename__ = 'audit_log'
     id = Column(Integer, autoincrement=True, primary_key=True)

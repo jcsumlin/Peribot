@@ -67,6 +67,7 @@ class Star(commands.Cog):
                                               channel.id,
                                               emoji,
                                               0)
+        await self.database.post_starboard_role(ctx.guild.id, role_id=role.id)
         await self.database.audit_record(ctx.guild.id,
                                          ctx.guild.name,
                                          ctx.message.content,
@@ -272,9 +273,11 @@ class Star(commands.Cog):
         :return:
         """
         message = await self.database.get_one_starboard_message(guild.id, message.id)
-        updated_message = await self.database.update_starboard_message(message.id, count=(message.count+1))
-        if updated_message is not False:
-            return updated_message.starboard_message_id, updated_message.count
+        if message is not None:
+            count = message.count + 1
+            updated_message = await self.database.update_starboard_message(original_message_id=message.original_message_id, count=count)
+            if updated_message is not False:
+                return updated_message.starboard_message_id, updated_message.count
         return None, None
 
     @commands.Cog.listener()
@@ -283,7 +286,7 @@ class Star(commands.Cog):
         msg = reaction.message
         guid_id = guild.id
         starboard_settings = await self.database.get_starboard_settings(guild.id)
-        if starboard_settings is None:
+        if starboard_settings is None or starboard_settings.enabled is False:
             return
         ignored_channels = await self.database.get_ignored_starboard_channels(guild.id)
         if msg.channel.id in ignored_channels:
@@ -309,81 +312,86 @@ class Star(commands.Cog):
                     else:
                         await self.database.post_starboard_message(guild_id=guild.id,
                                                                    original_message_id=msg.id,
-                                                                   starboard_message_id=message.starboard_message_id,
+                                                                   starboard_message_id=None,
                                                                    count=count)
                     return
             author = reaction.message.author
             channel = reaction.message.channel
             starboard_channel = self.bot.get_channel(starboard_settings.channel_id)
-            if reaction.message.embeds != []:
-                embed = reaction.message.embeds[0]  # .to_dict()
-                # print(embed)
-                em = discord.Embed(timestamp=reaction.message.timestamp)
-                if "title" in embed:
-                    em.title = embed["title"]
-                if "thumbnail" in embed:
-                    em.set_thumbnail(url=embed["thumbnail"]["url"])
-                if "description" in embed:
-                    em.description = msg.clean_content + "\n\n" + embed["description"]
-                if "description" not in embed:
-                    em.description = msg.clean_content
-                if "url" in embed:
-                    em.url = embed["url"]
-                if "footer" in embed:
-                    em.set_footer(text=embed["footer"]["text"])
-                if "author" in embed:
-                    postauthor = embed["author"]
-                    if "icon_url" in postauthor:
-                        if author.nick != None:
-                            em.set_author(name=author.nick, icon_url=author.avatar_url)
-                        else:
-                            em.set_author(name=author.name, icon_url=author.avatar_url)
-                    else:
-                        if author.nick != None:
-                            em.set_author(name=author.nick)
-                        else:
-                            em.set_author(name=author.name)
-                if "author" not in embed:
-                    if author.nick != None:
-                        em.set_author(name=author.nick, icon_url=author.avatar_url)
-                    else:
-                        em.set_author(name=author.name, icon_url=author.avatar_url)
-                if "color" in embed:
-                    em.color = embed["color"]
-                if "color" not in embed:
-                    em.color = author.top_role.color
-                if "image" in embed:
-                    em.set_image(url=embed["image"]["url"])
-                if embed["type"] == "image":
-                    em.type = "image"
-                    if ".png" in embed["url"] or ".jpg" in embed["url"]:
-                        em.set_thumbnail(url="")
-                        em.set_image(url=embed["url"])
-                    else:
-                        em.set_thumbnail(url=embed["url"])
-                        em.set_image(
-                            url=embed["url"] + "." + embed["thumbnail"]["url"].rsplit(".")[-1])
-                if embed["type"] == "gifv":
-                    em.type = "gifv"
-                    em.set_thumbnail(url=embed["url"])
-                    em.set_image(url=embed["url"] + ".gif")
-            else:
-                em = discord.Embed(timestamp=reaction.message.created_at)
-                em.color = author.top_role.color
-                em.description = msg.content
-                if author.nick != None:
-                    em.set_author(name=author.nick, icon_url=author.avatar_url)
-                else:
-                    em.set_author(name=author.name, icon_url=author.avatar_url)
-                if reaction.message.attachments != []:
-                    em.set_image(url=reaction.message.attachments[0].url)
-            em.set_footer(text='{} | {}'.format(channel.guild.name, channel.name))
+            em = await self.build_starboard_message(reaction.message, author, channel)
             post_msg = await starboard_channel.send("{} **#{}**".format(reaction.emoji, count),
                                                    embed=em)
             await self.database.post_starboard_message(guild_id=guild.id, original_message_id=msg.id,
                                                        starboard_message_id=post_msg.id, count=count)
         else:
             return
+
+    async def build_starboard_message(self, message: discord.Message, author: discord.Member, channel: discord.TextChannel):
+        msg = message.content
+        if message.embeds != []:
+            embed = message.embeds[0]  # .to_dict()
+            # print(embed)
+            em = discord.Embed(timestamp=message.timestamp)
+            if "title" in embed:
+                em.title = embed["title"]
+            if "thumbnail" in embed:
+                em.set_thumbnail(url=embed["thumbnail"]["url"])
+            if "description" in embed:
+                em.description = msg.clean_content + "\n\n" + embed["description"]
+            if "description" not in embed:
+                em.description = msg.clean_content
+            if "url" in embed:
+                em.url = embed["url"]
+            if "footer" in embed:
+                em.set_footer(text=embed["footer"]["text"])
+            if "author" in embed:
+                postauthor = embed["author"]
+                if "icon_url" in postauthor:
+                    if author.nick is not None:
+                        em.set_author(name=author.nick, icon_url=author.avatar_url)
+                    else:
+                        em.set_author(name=author.name, icon_url=author.avatar_url)
+                else:
+                    if author.nick is not None:
+                        em.set_author(name=author.nick)
+                    else:
+                        em.set_author(name=author.name)
+            if "author" not in embed:
+                if author.nick is not None:
+                    em.set_author(name=author.nick, icon_url=author.avatar_url)
+                else:
+                    em.set_author(name=author.name, icon_url=author.avatar_url)
+            if "color" in embed:
+                em.color = embed["color"]
+            if "color" not in embed:
+                em.color = author.top_role.color
+            if "image" in embed:
+                em.set_image(url=embed["image"]["url"])
+            if embed["type"] == "image":
+                em.type = "image"
+                if ".png" in embed["url"] or ".jpg" in embed["url"]:
+                    em.set_thumbnail(url="")
+                    em.set_image(url=embed["url"])
+                else:
+                    em.set_thumbnail(url=embed["url"])
+                    em.set_image(
+                        url=embed["url"] + "." + embed["thumbnail"]["url"].rsplit(".")[-1])
+            if embed["type"] == "gifv":
+                em.type = "gifv"
+                em.set_thumbnail(url=embed["url"])
+                em.set_image(url=embed["url"] + ".gif")
+        else:
+            em = discord.Embed(timestamp=message.created_at)
+            em.color = author.top_role.color
+            em.description = msg
+            if author.nick is not None:
+                em.set_author(name=author.nick, icon_url=author.avatar_url)
+            else:
+                em.set_author(name=author.name, icon_url=author.avatar_url)
+            if message.attachments != []:
+                em.set_image(url=message.attachments[0].url)
+        em.set_footer(text='{} | {}'.format(channel.guild.name, channel.name))
+        return em
 
 
     # TODO: Update this with database rewrite

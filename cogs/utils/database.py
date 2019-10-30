@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 
 import discord
@@ -6,12 +7,13 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from create_databases import AuditLog, ServerSettings, Base, CustomCommands, Warnings, StarBoardSettings, \
-    BirthdaySettings, Birthdays, StarBoardMessages, StarBoardIgnoredChannels, StarboardAllowedRoles
+    BirthdaySettings, Birthdays, StarBoardMessages, StarBoardIgnoredChannels, StarboardAllowedRoles, RemindMe
 
 
 class Database:
-    def __init__(self):
-        engine = create_engine("sqlite:///peribot.db")
+    def __init__(self, path='peribot.db'):
+        path = os.path.abspath(path)
+        engine = create_engine("sqlite:///" + path)
         Base.metadata.bind = engine
         DBSession = sessionmaker(bind=engine)
         self.session = DBSession()
@@ -30,8 +32,16 @@ class Database:
             return await self.audit_record(guild.id,guild.name,"Joined new server", 0)
         return await self.audit_record(guild.id,guild.name,"rejoined server", 0)
 
+    async def update_server_settings(self, server_id, prefix=None):
+        settings = await self.get_server_settings(server_id)
+        if prefix is not None:
+            settings.prefix = prefix
+            self.session.commit()
+            return True
+        return False
+
     async def get_server_settings(self, server_id):
-        return self.session.query(ServerSettings).filter_by(server_id = server_id).first()
+        return self.session.query(ServerSettings).filter(ServerSettings.server_id == server_id).first()
 
     async def update_server_premium(self, server_id, status: bool):
         server_settings = await self.get_server_settings(server_id)
@@ -66,6 +76,12 @@ class Database:
             return cc.result
         return None
 
+    async def get_custom_commands(self, id):
+        cc = self.session.query(CustomCommands).filter_by(server_id=id).all()
+        if cc is not None and len(cc) > 0:
+            return cc
+        return None
+
     async def edit_custom_command(self, server_id, command, result):
         cc = self.session.query(CustomCommands).filter_by(server_id=server_id).filter_by(command=command).first()
         if cc is not None:
@@ -84,7 +100,9 @@ class Database:
 
     async def get_all_reports(self, server_id):
         reports = self.session.query(Warnings).filter_by(server_id=server_id).all()
-        return reports
+        if reports is not None and len(reports) > 0:
+            return reports
+        return None
 
     async def add_warning(self, server_id: int, user, mod, reason):
         new_report = Warnings(date=datetime.utcnow(),
@@ -340,14 +358,33 @@ class Database:
         else:
             return False
 
-
     async def post_starboard_message(self, guild_id, original_message_id, starboard_message_id=None, count=0):
         if await self.get_one_starboard_message(guild_id,original_message_id) is None:
             message = StarBoardMessages(server_id=guild_id,
                                         starboard_message_id=starboard_message_id,
                                         original_message_id=original_message_id,
                                         count=count)
+            self.session.add(message)
+            self.session.commit()
             return message
         else:
             return False
 
+    async def get_reminders(self):
+        return list(self.session.query(RemindMe).all())
+
+    async def post_reminder(self, user_id:int, future:int, text:str):
+        reminder = RemindMe(user_id=user_id,
+                            future=future,
+                            text=text,
+                            completed=False)
+        self.session.add(reminder)
+        self.session.commit()
+
+    async def delete_reminder(self, id):
+        reminder = self.session.query(RemindMe).filter_by(id=id).delete()
+        if reminder == 1:
+            self.session.commit()
+            return True
+        else:
+            return False
