@@ -87,7 +87,7 @@ class Kindness(commands.Cog):
 
     @commands.command(name="relax")
     async def relax(self, ctx):
-        g = giphypop.Giphy("JzRc87AeuJqFmTs43ihnAQaUrA2AAfd6")
+        g = giphypop.Giphy("KZciiXBwyJ9RabyZyUHjQ8e4ZutZQ1Go")
         results = [x for x in g.search('calming loop')]
         embedrelax = discord.Embed(color=discord.Color.blue())
         embedrelax.set_image(url=random.choice(results).raw_data['images']['fixed_height_downsampled']['url'])
