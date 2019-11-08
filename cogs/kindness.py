@@ -85,6 +85,14 @@ class Kindness(commands.Cog):
         msg = random.choice(dataIO.load_json("data/compliment/compliments.json")['compliments'])
         await ctx.send(str(target) + ' ' + msg)
 
+    @commands.command(name="relax")
+    async def relax(self, ctx):
+        g = giphypop.Giphy("KZciiXBwyJ9RabyZyUHjQ8e4ZutZQ1Go")
+        results = [x for x in g.search('calming loop')]
+        embedrelax = discord.Embed(color=discord.Color.blue())
+        embedrelax.set_image(url=random.choice(results).raw_data['images']['fixed_height_downsampled']['url'])
+        await ctx.send(embed=embedrelax)
+
 
 def setup(bot):
     n = Kindness(bot)
