@@ -1,3 +1,4 @@
+import datetime
 import os
 
 from sqlalchemy import Column, String, DateTime, Integer, ForeignKey, Boolean, Text
@@ -203,6 +204,32 @@ class StarboardAllowedRoles(Base):
     id = Column(Integer, autoincrement=True, primary_key=True)
     server_id = Column(Integer, ForeignKey('starboard_settings.server_id'))
     role_id = Column(Integer)
+
+class ModerationLogSettings(Base):
+    __tablename__ = 'moderation_log_settings'
+    id = Column(Integer, autoincrement=True, primary_key=True)
+    server_id = Column(Integer, ForeignKey('server_settings.server_id'))
+    enabled = Column(Boolean)
+    channel_id = Column(Integer)
+    join = Column(Boolean)
+    leave = Column(Boolean)
+    voicechat = Column(Boolean)
+    msgedit = Column(Boolean)
+    msgdelete = Column(Boolean)
+    roleedit = Column(Boolean)
+    ban = Column(Boolean)
+    reactions = Column(Boolean)
+    channels = Column(Boolean)
+    nicknames = Column(Boolean)
+
+class ModerationLog(Base):
+    __tablename__ = 'moderation_log'
+    id = Column(Integer, autoincrement=True, primary_key=True)
+    server_id = Column(Integer, ForeignKey('server_settings.server_id'))
+    event_time = Column(DateTime, default=datetime.datetime.now(), nullable=False)
+    event_type = Column(String)
+    event_description = Column(String)
+
 
 
 if __name__ == '__main__':

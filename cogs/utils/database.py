@@ -7,7 +7,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 from create_databases import AuditLog, ServerSettings, Base, CustomCommands, Warnings, StarBoardSettings, \
-    BirthdaySettings, Birthdays, StarBoardMessages, StarBoardIgnoredChannels, StarboardAllowedRoles, RemindMe
+    BirthdaySettings, Birthdays, StarBoardMessages, StarBoardIgnoredChannels, StarboardAllowedRoles, RemindMe, \
+    ModerationLogSettings
 
 
 class Database:
@@ -388,3 +389,27 @@ class Database:
             return True
         else:
             return False
+
+    async def get_moderation_log_settings(self, server_id):
+        return self.session.query(ModerationLogSettings).filter_by(server_id=server_id).one_or_none()
+
+    async def post_moderation_log_settings(self, server_id:int, channel_id:int):
+        settings = ModerationLogSettings(
+            server_id=server_id,
+            enabled=True,
+            channel_id=channel_id,
+            join=True,
+            leave=True,
+            voicechat=True,
+            msgedit=True,
+            msgdelete=True,
+            roleedit=True,
+            ban=True,
+            reactions=True,
+            channels=True,
+            nicknames=True
+        )
+        self.session.add(settings)
+        self.session.commit()
+
+    # async def update_moderation_log_settings(self, server_id:int, channel_id:int=None):
