@@ -62,6 +62,12 @@ class ReactionRolesGroups(Base):
     group_name = Column(String)
     group_description = Column(String)
 
+class ReactionRoleMessage(Base):
+    __tablename__ = 'reaction_role_message'
+    id = Column(Integer, autoincrement=True, primary_key=True)
+    group_id = Column(Integer, ForeignKey('reaction_roles_groups.id'))
+    message_id = Column(Integer)
+
 
 class ReactionRoles(Base):
     __tablename__ = 'reaction_roles'

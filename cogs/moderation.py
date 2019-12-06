@@ -88,7 +88,7 @@ class Moderation(commands.Cog):
     async def warn(self, ctx):
         if ctx.invoked_subcommand is None:
             await ctx.send(embed=easyembed(title="Sorry that's not how this command works!",
-                                           description="ex: !warn add [user id] Stop spamming please"))
+                                           description=f"ex: {ctx.prefix}warn add [user id] Stop spamming please"))
 
     @warn.group(name="add", aliases=['user'])
     @checks.mod_or_higher()
@@ -96,11 +96,11 @@ class Moderation(commands.Cog):
         if user_id is None and reason is None:
             await ctx.send(
                 embed=easyembed(title="Sorry that's not how this command works!",
-                                description="ex: !warn add [user id] Stop spamming please"))
+                                description=f"ex: {ctx.prefix}warn add [user id] Stop spamming please"))
         elif user_id is not None and reason is None:
             await ctx.send(
                 embed=easyembed(title="Sorry that's not how this command works!",
-                                description="ex: !warn add [user id] Stop spamming please"))
+                                description=f"ex: {ctx.prefix}warn add [user id] Stop spamming please"))
         elif user_id is not None and reason is not None:
             user = await self.bot.fetch_user(int(user_id))
             if not await self.database.add_warning(ctx.guild.id, user, ctx.message.author, reason):
@@ -110,7 +110,8 @@ class Moderation(commands.Cog):
                 title=f"Hey there {user.name} the mods from {ctx.message.guild.name} have sent you a warning!",
                 description=f"Their reason is as follows: {reason}\n\nIf you have any questions please reach out to any of the staff members"))
             await ctx.send(embed=easyembed(
-                title="User has been warned in the DM's",
+                title=":white_check_mark: User has been warned in the DM's",
+                description=f"use **{ctx.prefix}warn list** : to see all your server's warns!",
                 color=discord.Color.green()))
             await self.database.audit_record(ctx.guild.id,
                                              ctx.guild.name,
@@ -149,7 +150,7 @@ class Moderation(commands.Cog):
     async def reason(self, ctx, user_id=None):
         if user_id == None:
             easy_embed = easyembed(title="Sorry that's not how this command works!",
-                                   description="ex: !warn reason [user id]")
+                                   description=f"ex: {ctx.prefix}warn reason [user id]")
             await ctx.send(embed=easy_embed)
             return
         reports = await self.database.get_user_warns(ctx.guild.id, user_id)
@@ -158,11 +159,14 @@ class Moderation(commands.Cog):
         else:
             user = await self.bot.fetch_user(int(user_id))
             embed1 = discord.Embed(
-                title=f"Use **{ctx.prefix}warn list** to see all the warns for this server. ", color=user.color, timestamp=datetime.now())
+                title=f"Use **{ctx.prefix}warn list** to see all the warns for this server. ",
+                description=f"You can use **{ctx.prefix}warn delete [ID]** to remove a warn from the database.",
+                color=user.color,
+                timestamp=datetime.now())
             embed1.set_author(name=f"Warnings for {user.name} are as follows:", icon_url=user.avatar_url)
             embed1.set_footer(text=f"{ctx.message.author.name}", icon_url=ctx.message.author.avatar_url)
             for report in reports:
-                embed1.add_field(name=f"ID: {report.id} | {report.date.strftime('%m/%d/%Y %H:%M')} UTC by {report.mod_name}", value=f"```\n{report.reason}\n```")
+                embed1.add_field(name=f"ID: {report.id} | {report.date.strftime('%m/%d/%Y %H:%M')} UTC by {report.mod_name}", value=f"```\n{report.reason}\n```", inline=False)
             await ctx.send(embed=embed1)
             await self.database.audit_record(ctx.guild.id,
                                              ctx.guild.name,
@@ -180,13 +184,13 @@ class Moderation(commands.Cog):
         """
         if warning_id == None:
             easy_embed = discord.Embed(title="Sorry that's not how this command works!",
-                                   description=f"ex: !warn delete [warning id]\n*The warning id is found from {ctx.prefix}warn reason [user id]*")
+                                   description=f"ex: {ctx.prefix}warn delete [warning id]\n*The warning id is found from {ctx.prefix}warn reason [user id]*")
             await ctx.send(embed=easy_embed)
             return
         reports = await self.database.get_warn(ctx.guild.id, warning_id)
         if reports is None:
             easy_embed = discord.Embed(title="Sorry that ID does not exist!",
-                                       description=f"ex: !warn delete [warning id]\n*The warning id is found from {ctx.prefix}warn reason [user id]*")
+                                       description=f"ex: {ctx.prefix}warn delete [warning id]\n*The warning id is found from {ctx.prefix}warn reason [user id]*")
             await ctx.send(embed=easy_embed)
         else:
             report = await self.database.delete_report(ctx.guild.id,warning_id)

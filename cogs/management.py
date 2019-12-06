@@ -1,5 +1,7 @@
 import asyncio
 
+from loguru import logger
+
 import discord
 import git
 from discord.ext import commands
@@ -114,6 +116,13 @@ class Management(commands.Cog):
     @commands.has_permissions(manage_messages=True)
     async def mute(self, ctx, user: discord.User):
         pass
+
+    @commands.command(name='servers')
+    @commands.has_permissions(manage_messages=True)
+    async def servers(self, ctx):
+        servers = self.bot.guilds
+        for server in servers:
+            await ctx.send(server.name)
 
 
     @commands.command(name='pin')

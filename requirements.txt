@@ -1,4 +1,4 @@
-discord.py==1.2.3
+discord.py==1.2.5
 loguru
 pip
 praw
@@ -11,4 +11,5 @@ sqlalchemy
 tmdbv3api
 alembic
 youtube_dl
-cairosvg
+CairoSVG
+PyNaCl

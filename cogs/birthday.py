@@ -5,7 +5,6 @@ import discord
 from discord.ext import commands, tasks
 from loguru import logger
 from pytz import timezone
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from .utils.genericResponseBuilder import commandSuccess, commandError
 from .utils.database import Database
 

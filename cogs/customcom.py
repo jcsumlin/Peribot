@@ -16,7 +16,6 @@ class CustomCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.database = Database()
-        self.config.read('../auth.ini')
 
     @commands.group(aliases=["cc"], no_pm=True)
     async def customcom(self, ctx):
@@ -24,9 +23,9 @@ class CustomCommands(commands.Cog):
         if ctx.invoked_subcommand is None:
             e = discord.Embed(title="Error: That's not how you use this command!",
                               description="", color=discord.Color.red())
-            e.add_field(name="!cc add [command] [result]", value="This will create a new custom command. Every time the [command] is invoked I will reply with the [result]")
-            e.add_field(name="!cc edit [command] [result]", value="This will edit an existing custom command. Just incase you don't like my response any more")
-            e.add_field(name="!cc delete [command]", value="This will completly delete a custom command from this server. I will no lover respond to it.")
+            e.add_field(name=f"{ctx.prefix}cc add [command] [result]", value="This will create a new custom command. Every time the [command] is invoked I will reply with the [result]")
+            e.add_field(name=f"{ctx.prefix}cc edit [command] [result]", value="This will edit an existing custom command. Just incase you don't like my response any more")
+            e.add_field(name=f"{ctx.prefix}cc delete [command]", value="This will completly delete a custom command from this server. I will no lover respond to it.")
             await ctx.send(embed=e)
 
 
@@ -131,7 +130,7 @@ class CustomCommands(commands.Cog):
             return
         if len(message.content) < 2 or isinstance(message.channel, discord.DMChannel):
             return
-        prefix = self.get_prefix(message)
+        prefix = await self.get_prefix(message)
         if not prefix:
             return
 
@@ -142,9 +141,11 @@ class CustomCommands(commands.Cog):
         cmd = self.format_cc(cmd, message)
         await message.channel.send(cmd)
 
-    def get_prefix(self, message):
+    async def get_prefix(self, message):
         try:
-            server = self.database.get_server_settings(message.guild.id)
+            server = await self.database.get_server_settings(message.guild.id)
+            if server is None:
+                return '!'
             return server.prefix
         except Exception as error:
             logger.exception(error)

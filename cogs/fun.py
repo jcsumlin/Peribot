@@ -47,7 +47,7 @@ class Fun(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
-    async def changegame(self, ctx, game):
+    async def setgame(self, ctx, game):
         """
         Changes my displayed game. Only for privileged users!
         :param ctx: message context.

@@ -35,6 +35,8 @@ async def get_prefix(bot, message):
     if not message.guild:
         return commands.when_mentioned_or('!')(bot, message)
     settings = await database.get_server_settings(message.guild.id)
+    if not settings:
+        return commands.when_mentioned_or('!')(bot, message)
     prefix = settings.prefix
     return commands.when_mentioned_or(str(prefix))(bot, message)
 
@@ -92,5 +94,5 @@ if __name__ == "__main__":
             logger.debug(f'Loaded {extension} cog.')
         except Exception as error:
             logger.exception(f"Extension {extension} could not be loaded. [{error}]")
-    logger.info(str(bot.guilds) + "Peribot is apart of")
+
     bot.run(auth.get('discord', 'TOKEN'))

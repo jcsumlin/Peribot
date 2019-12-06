@@ -5,6 +5,8 @@ import discord
 from discord.ext import commands
 from loguru import logger
 
+from .utils.database import Database
+
 from cogs.utils.dataIO import dataIO
 from .utils import checks
 
@@ -14,6 +16,7 @@ class Modlog(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.database = Database()
         self.settings = dataIO.load_json("data/modlog/settings.json")
 
     @commands.group(no_pm=True)
@@ -30,6 +33,10 @@ class Modlog(commands.Cog):
                                                         'channels': True,
                                                         'nicknames': True}
             self.save_settings()
+        await self.database.audit_record(ctx.guild.id,
+                                         ctx.guild.name,
+                                         ctx.message.content,
+                                         ctx.message.author.id)
 
     @modlogset.command(no_pm=True)
     async def channel(self, ctx, channel: discord.TextChannel):
@@ -37,6 +44,10 @@ class Modlog(commands.Cog):
         self.settings[str(ctx.message.guild.id)]['channel'] = channel.id
         self.save_settings()
         await ctx.send("Channel set, I will now log to {}.".format(channel.mention))
+        await self.database.audit_record(ctx.guild.id,
+                                         ctx.guild.name,
+                                         ctx.message.content,
+                                         ctx.message.author.id)
 
     @modlogset.command(no_pm=True)
     async def disable(self, ctx):
@@ -49,6 +60,10 @@ class Modlog(commands.Cog):
             self.settings[str(ctx.message.guild.id)]['disabled'] = False
             self.save_settings()
             await ctx.send("Logging system has been enabled.")
+        await self.database.audit_record(ctx.guild.id,
+                                         ctx.guild.name,
+                                         ctx.message.content,
+                                         ctx.message.author.id)
 
     @modlogset.command(no_pm=True)
     async def toggle(self, ctx, module=None):
@@ -56,94 +71,152 @@ class Modlog(commands.Cog):
         server = ctx.message.guild
         modules = ['join', 'leave', 'ban', 'voicechat', 'msgedit', 'msgdelete', 'roleedit', 'channels', 'nicknames']
         if module == None:
-            msg = "```py"
+            msg = ""
             try:
-                msg += "\nChannel: " + str(self.settings[str(server.id)]['channel'])
-                msg += "\nDisabled: " + str(self.settings[str(server.id)]['disabled'])
-                msg += "\nJoin: " + str(self.settings[str(server.id)]['join'])
-                msg += "\nLeave: " + str(self.settings[str(server.id)]['leave'])
-                msg += "\nBan: " + str(self.settings[str(server.id)]['ban'])
-                msg += "\nVoicechat: " + str(self.settings[str(server.id)]['voicechat'])
-                msg += "\nMessage edit: " + str(self.settings[str(server.id)]['msgedit'])
-                msg += "\nMessage delete: " + str(self.settings[str(server.id)]['msgdelete'])
-                msg += "\nRole edit: " + str(self.settings[str(server.id)]['roleedit'])
-                msg += "\nChannels: " + str(self.settings[str(server.id)]['channels'])
-                msg += "\nNicknames: " + str(self.settings[str(server.id)]['nicknames'])
+                msg += "\n**Log Channel**: <#" + str(self.settings[str(server.id)]['channel']) + ">"
+                msg += "\n**Disabled**: " + str(self.settings[str(server.id)]['disabled'])
+                msg += "\n**Join**: " + str(self.settings[str(server.id)]['join'])
+                msg += "\n**Leave**: " + str(self.settings[str(server.id)]['leave'])
+                msg += "\n**Ban**: " + str(self.settings[str(server.id)]['ban'])
+                msg += "\n**Voicechat**: " + str(self.settings[str(server.id)]['voicechat'])
+                msg += "\n**Message edit**: " + str(self.settings[str(server.id)]['msgedit'])
+                msg += "\n**Message delete**: " + str(self.settings[str(server.id)]['msgdelete'])
+                msg += "\n**Role edit**: " + str(self.settings[str(server.id)]['roleedit'])
+                msg += "\n**Channels**: " + str(self.settings[str(server.id)]['channels'])
+                msg += "\n**Nicknames**: " + str(self.settings[str(server.id)]['nicknames'])
             except KeyError:
                 pass
-            msg += "\n\nFalse = not being logged.\nTrue = being logged."
-            msg += "```"
-            await ctx.send(msg + "You can toggle\n{}.".format(", ".join(modules)))
+            msg += "\n\nFalse = *not being logged.*\nTrue = *being logged.*"
+            embed = discord.Embed(title="Please specify a module",
+                                  description=msg + "\n\n**__You can toggle__**\n{}.".format(", ".join(modules)),
+                                  color=discord.Color.green())
+            await ctx.send(embed=embed)
 
         elif module.lower() == 'join':
             if self.settings[str(server.id)]['join']:
                 self.settings[str(server.id)]['join'] = False
                 self.save_settings()
                 await ctx.send("Join logging has been disabled.")
+                await self.database.audit_record(ctx.guild.id,
+                                                 ctx.guild.name,
+                                                 ctx.message.content,
+                                                 ctx.message.author.id)
             else:
                 self.settings[str(server.id)]['join'] = True
                 self.save_settings()
                 await ctx.send("Join logging has been enabled.")
+                await self.database.audit_record(ctx.guild.id,
+                                                 ctx.guild.name,
+                                                 ctx.message.content,
+                                                 ctx.message.author.id)
 
         elif module.lower() == 'leave':
             if self.settings[str(server.id)]['leave']:
                 self.settings[str(server.id)]['leave'] = False
                 self.save_settings()
                 await ctx.send("Leave (and kick) logging has been disabled.")
+                await self.database.audit_record(ctx.guild.id,
+                                                 ctx.guild.name,
+                                                 ctx.message.content,
+                                                 ctx.message.author.id)
             else:
                 self.settings[str(server.id)]['leave'] = True
                 self.save_settings()
                 await ctx.send("Leave (and kick) logging has been enabled.")
+                await self.database.audit_record(ctx.guild.id,
+                                                 ctx.guild.name,
+                                                 ctx.message.content,
+                                                 ctx.message.author.id)
 
         elif module.lower() == 'ban':
             if self.settings[str(server.id)]['ban']:
                 self.settings[str(server.id)]['ban'] = False
                 self.save_settings()
                 await ctx.send("Ban logging has been disabled.")
+                await self.database.audit_record(ctx.guild.id,
+                                                 ctx.guild.name,
+                                                 ctx.message.content,
+                                                 ctx.message.author.id)
             else:
                 self.settings[str(server.id)]['ban'] = True
                 self.save_settings()
                 await ctx.send("Ban logging has been enabled.")
+                await self.database.audit_record(ctx.guild.id,
+                                                 ctx.guild.name,
+                                                 ctx.message.content,
+                                                 ctx.message.author.id)
 
         elif module.lower() == 'voicechat':
             if self.settings[str(server.id)]['voicechat']:
                 self.settings[str(server.id)]['voicechat'] = False
                 self.save_settings()
                 await ctx.send("Voicechat logging has been disabled.")
+                await self.database.audit_record(ctx.guild.id,
+                                                 ctx.guild.name,
+                                                 ctx.message.content,
+                                                 ctx.message.author.id)
             else:
                 self.settings[str(server.id)]['voicechat'] = True
                 self.save_settings()
                 await ctx.send("Voicechat logging has been enabled.")
+                await self.database.audit_record(ctx.guild.id,
+                                                 ctx.guild.name,
+                                                 ctx.message.content,
+                                                 ctx.message.author.id)
 
         elif module.lower() == 'msgedit':
             if self.settings[str(server.id)]['msgedit']:
                 self.settings[str(server.id)]['msgedit'] = False
                 self.save_settings()
                 await ctx.send("Message edit has been disabled.")
+                await self.database.audit_record(ctx.guild.id,
+                                                 ctx.guild.name,
+                                                 ctx.message.content,
+                                                 ctx.message.author.id)
             else:
                 self.settings[str(server.id)]['msgedit'] = True
                 self.save_settings()
                 await ctx.send("Message edit has been enabled.")
+                await self.database.audit_record(ctx.guild.id,
+                                                 ctx.guild.name,
+                                                 ctx.message.content,
+                                                 ctx.message.author.id)
 
         elif module.lower() == 'msgdelete':
             if self.settings[str(server.id)]['msgdelete']:
                 self.settings[str(server.id)]['msgdelete'] = False
                 self.save_settings()
                 await ctx.send("Message delete has been disabled.")
+                await self.database.audit_record(ctx.guild.id,
+                                                 ctx.guild.name,
+                                                 ctx.message.content,
+                                                 ctx.message.author.id)
             else:
                 self.settings[str(server.id)]['msgdelete'] = True
                 self.save_settings()
                 await ctx.send("Message delete has been enabled.")
+                await self.database.audit_record(ctx.guild.id,
+                                                 ctx.guild.name,
+                                                 ctx.message.content,
+                                                 ctx.message.author.id)
 
         elif module.lower() == 'roleedit':
             if self.settings[str(server.id)]['roleedit']:
                 self.settings[str(server.id)]['roleedit'] = False
                 self.save_settings()
                 await ctx.send("Role edit has been disabled.")
+                await self.database.audit_record(ctx.guild.id,
+                                                 ctx.guild.name,
+                                                 ctx.message.content,
+                                                 ctx.message.author.id)
             else:
                 self.settings[str(server.id)]['roleedit'] = True
                 self.save_settings()
                 await ctx.send("Role edit has been enabled.")
+                await self.database.audit_record(ctx.guild.id,
+                                                 ctx.guild.name,
+                                                 ctx.message.content,
+                                                 ctx.message.author.id)
 
         elif module.lower() == 'channels':
             if 'channels' not in self.settings[str(server.id)]:
@@ -154,24 +227,43 @@ class Modlog(commands.Cog):
                 self.settings[str(server.id)]['channels'] = False
                 self.save_settings()
                 await ctx.send("Channels have been disabled.")
+                await self.database.audit_record(ctx.guild.id,
+                                                 ctx.guild.name,
+                                                 ctx.message.content,
+                                                 ctx.message.author.id)
             else:
                 self.settings[str(server.id)]['channels'] = True
                 self.save_settings()
                 await ctx.send("Channels have been enabled.")
-
+                await self.database.audit_record(ctx.guild.id,
+                                                 ctx.guild.name,
+                                                 ctx.message.content,
+                                                 ctx.message.author.id)
         elif module.lower() == 'nicknames':
             if 'nicknames' not in self.settings[str(server.id)]:
                 self.settings[str(server.id)]['nicknames'] = True
                 self.save_settings()
                 await ctx.send("Nicknames have been enabled.")
+                await self.database.audit_record(ctx.guild.id,
+                                                 ctx.guild.name,
+                                                 ctx.message.content,
+                                                 ctx.message.author.id)
             elif self.settings[str(server.id)]['nicknames']:
                 self.settings[str(server.id)]['nicknames'] = False
                 self.save_settings()
                 await ctx.send("Nicknames have been disabled.")
+                await self.database.audit_record(ctx.guild.id,
+                                                 ctx.guild.name,
+                                                 ctx.message.content,
+                                                 ctx.message.author.id)
             else:
                 self.settings[str(server.id)]['nicknames'] = True
                 self.save_settings()
                 await ctx.send("Nicknames have been enabled.")
+                await self.database.audit_record(ctx.guild.id,
+                                                 ctx.guild.name,
+                                                 ctx.message.content,
+                                                 ctx.message.author.id)
 
         else:
             await ctx.send("That module cannot be toggled, you can toggle\n{}.".format(", ".join(modules)))
@@ -179,25 +271,34 @@ class Modlog(commands.Cog):
     @commands.Cog.listener()
     async def on_member_join(self, member):
         if self.is_module(member.guild, 'join'):
-            await self.log(member.guild, "`[{}]` :inbox_tray: **Member Join Log**\n"
-                                         "```Member Joined: {}```".format(self.get_time(), str(member)))
+            await self.log(member.guild,
+                           title=":inbox_tray: Member Join Log",
+                           user=member,
+                           message=f"Member Joined: {member}")
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
         if self.is_module(member.guild, 'leave'):
-            await self.log(member.guild, "`[{}]` :outbox_tray: **Member Leave/Kick Log**\n"
-                                         "```Member Left/Kicked: {}```".format(self.get_time(), str(member)))
+
+            await self.log(member.guild,
+                           title=":outbox_tray: Member Leave/Kick Log",
+                           user=member,
+                           message=f"{member} left the server!")
 
     @commands.Cog.listener()
     async def on_member_ban(self, guild, member):
         if self.is_module(member.guild, 'ban'):
-            await self.log(member.guild, "`[{}]` :hammer: **Member Ban Log**\n"
-                                         "```Member Banned: {}```".format(self.get_time(), str(member)))
+            await self.log(member.guild,
+                           title=":hammer: Member Ban Log",
+                           user=member,
+                           message=f"{member} was banned!")
 
     @commands.Cog.listener()
     async def on_member_unban(self, guild, member):
-        await self.log(member.guild, "`[{}]` :hammer: **Member Un-Ban Log**\n"
-                                     "```Member Un-Banned: {}```".format(self.get_time(), str(member)))
+        await self.log(member.guild,
+                       title=":hammer: Member Un-Ban Log",
+                       user=member,
+                       message=f"{member} was unbanned!")
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
@@ -221,23 +322,22 @@ class Modlog(commands.Cog):
             return
         if self.is_module(before.guild, 'msgedit'):
             if before.content != after.content:
-                await self.log(before.guild, "`[{}]` :pencil2: **Message Edit Log**\n"
-                                             "```User: {}"
-                                             "\nChannel: {}"
-                                             "\nBefore: {}".format(self.get_time(), before.author.name,
-                                                                   before.channel.name, before.content) +
-                               "\nAfter: {}```".format(after.content))
+                await self.log(before.guild,
+                               title=":pencil2: Message Edit Log",
+                               user=before.author.name,
+                               message=f"Message in {before.channel.name} was edited",
+                               before=before.content,
+                               after=after.content)
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):
         if message.author == message.guild.me:
             return
         if self.is_module(message.guild, 'msgdelete'):
-            await self.log(message.guild, "`[{}]` :wastebasket: **Message Delete Log**\n"
-                                          "```User: {}\n"
-                                          "Channel: {}\n"
-                                          "Message: {}\n```".format(self.get_time(), str(message.author),
-                                                                    str(message.channel), message.content))
+            await self.log(message.guild,
+                           title=":wastebasket: Message Delete Log",
+                           user=message.author,
+                           message=f"{message.author} deleted message in {message.channel} was deleted: {message.content}",)
 
     @commands.Cog.listener()
     async def on_guild_role_create(self, role):
@@ -301,8 +401,9 @@ class Modlog(commands.Cog):
     @commands.Cog.listener()
     async def on_guild_role_delete(self, role):
         if self.is_module(role.guild, 'roleedit'):
-            await self.log(role.guild, "`[{}]` :game_die: **Role Delete Log**\n"
-                                       "```Role: {}```".format(self.get_time(), role.name))
+            await self.log(role.guild,
+                           title=":game_die: Role Delete Log",
+                           message=f"{role.name} was deleted",)
 
     @commands.Cog.listener()
     async def on_guild_role_update(self, before, after):
@@ -420,36 +521,53 @@ class Modlog(commands.Cog):
     @commands.Cog.listener()
     async def on_guild_channel_create(self, channel):
         if self.is_module(channel.guild, 'channels'):
-            await self.log(channel.guild, "`[{}]` :pick: **Channel Create Log**\n"
-                                          "```Channel: {}```".format(self.get_time(), channel.name))
+            await self.log(channel.guild,
+                           title=":pick: Channel Create Log",
+                           message=f"{channel.name} was created",)
 
     @commands.Cog.listener()
     async def on_guild_channel_delete(self, channel):
         if self.is_module(channel.guild, 'channels'):
-            await self.log(channel.guild, "`[{}]` :pick: **Channel Delete Log**\n"
-                                          "```Channel: {}```".format(self.get_time(), channel.name))
+            await self.log(channel.guild,
+                           title=":pick: Channel Delete Log",
+                           message=f"{channel.name} was deleted",)
 
     @commands.Cog.listener()
     async def on_guild_channel_update(self, before, after):
         if self.is_module(before.guild, 'channels'):
             if not before.name == after.name:
-                await self.log(before.guild, "`[{}]` :pick: **Channel Edit Log**\n"
-                                             "```Before: {}\nAfter: {}```".format(self.get_time(), before.name,
-                                                                                  after.name))
+                await self.log(before.guild,
+                               title=":pick: Channel Edit Log",
+                               message=f"{before.guild.name}",
+                               before=before.name,
+                               after=before.name)
 
     @commands.Cog.listener()
     async def on_member_update(self, before, after):
         if self.is_module(before.guild, 'nicknames'):
             if not before.nick == after.nick:
-                await self.log(before.guild, "`[{}]` :warning: **Nickname Change Log**\n"
-                                             "```User: {}\nBefore: {}\nAfter: {}```".format(self.get_time(),
-                                                                                            str(before), before.nick,
-                                                                                            after.nick))
+                await self.log(before.guild,
+                               title=":warning: Nickname Change Log",
+                               message=f"{str(before)} nickname changed",
+                               user=before,
+                               before=before.nick,
+                               after=after.nick)
 
-    async def log(self, server, message):
+    async def log(self, server, title, message, user=None, before=None, after=None):
         channel = discord.utils.get(server.channels, id=self.settings[str(server.id)]['channel'])
         try:
-            await channel.send(message)
+            embed = discord.Embed(title=title,
+                                  timestamp=datetime.datetime.now(),
+                                  color=discord.Color.green())
+            if user:
+                embed.description = f"{user.mention} {user.name}#{user.discriminator}"
+            embed.set_author(name=message,
+                             icon_url=user.avatar_url if user else server.icon_url)
+            embed.set_footer(text=f"ID: {user.id if user else server.id}")
+            if before and after:
+                embed.add_field(name="Before", value=before, inline=False)
+                embed.add_field(name="After", value=after, inline=False)
+            await channel.send(embed=embed)
         except:
             pass
 

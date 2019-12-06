@@ -12,7 +12,8 @@ from loguru import logger
 
 from .utils.chat_formatting import escape_mass_mentions
 from .utils.dataIO import dataIO
-
+from .utils.database import Database
+from .utils.checks import is_bot_owner_check
 
 class StreamsError(Exception):
     pass
@@ -58,6 +59,7 @@ class Streams(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.stream_checker.start()
+        self.database = Database()
         self.twitch_streams = dataIO.load_json("data/streams/twitch.json")
         self.mixer_streams = dataIO.load_json("data/streams/beam.json")
         settings = dataIO.load_json("data/streams/settings.json")
@@ -85,6 +87,10 @@ class Streams(commands.Cog):
                            "".format(ctx.prefix))
         else:
             await ctx.send(embed=embed)
+            await self.database.audit_record(ctx.guild.id,
+                                             ctx.guild.name,
+                                             ctx.message.content,
+                                             ctx.message.author.id)
 
     @commands.command()
     async def mixer(self, ctx, stream: str):
@@ -102,6 +108,10 @@ class Streams(commands.Cog):
             await ctx.send("Error contacting the API.")
         else:
             await ctx.send(embed=embed)
+            await self.database.audit_record(ctx.guild.id,
+                                             ctx.guild.name,
+                                             ctx.message.content,
+                                             ctx.message.author.id)
 
     @commands.group(no_pm=True)
     async def streamalert(self, ctx):
@@ -140,6 +150,10 @@ class Streams(commands.Cog):
                            "when {} is live.".format(stream))
         else:
             await ctx.send("Alert has been removed from this channel.")
+            await self.database.audit_record(ctx.guild.id,
+                                             ctx.guild.name,
+                                             ctx.message.content,
+                                             ctx.message.author.id)
 
         dataIO.save_json("data/streams/twitch.json", self.twitch_streams)
 
@@ -170,6 +184,10 @@ class Streams(commands.Cog):
                            "when {} is live.".format(stream))
         else:
             await ctx.send("Alert has been removed from this channel.")
+            await self.database.audit_record(ctx.guild.id,
+                                             ctx.guild.name,
+                                             ctx.message.content,
+                                             ctx.message.author.id)
 
         dataIO.save_json("data/streams/beam.json", self.mixer_streams)
 
@@ -200,6 +218,10 @@ class Streams(commands.Cog):
 
         await ctx.send("There will be no more stream alerts in this "
                        "channel.")
+        await self.database.audit_record(ctx.guild.id,
+                                         ctx.guild.name,
+                                         ctx.message.content,
+                                         ctx.message.author.id)
 
     @commands.group()
     async def streamset(self, ctx):
@@ -208,7 +230,7 @@ class Streams(commands.Cog):
             await self.bot.send_cmd_help(ctx)
 
     @streamset.command()
-    @commands.has_permissions(administrator=True)
+    @is_bot_owner_check()
     async def twitchtoken(self, ctx, token: str):
         """Sets the Client ID for twitch
         To do this, follow these steps:
@@ -222,6 +244,10 @@ class Streams(commands.Cog):
         self.settings["TWITCH_TOKEN"] = token
         dataIO.save_json("data/streams/settings.json", self.settings)
         await ctx.send('Twitch Client-ID set.')
+        await self.database.audit_record(ctx.guild.id,
+                                         ctx.guild.name,
+                                         ctx.message.content,
+                                         ctx.message.author.id)
 
     @streamset.command(no_pm=True)
     async def mention(self, ctx, *, mention_type: str):
@@ -240,6 +266,11 @@ class Streams(commands.Cog):
         else:
             await self.bot.send_cmd_help(ctx)
 
+        await self.database.audit_record(ctx.guild.id,
+                                         ctx.guild.name,
+                                         ctx.message.content,
+                                         ctx.message.author.id)
+
         dataIO.save_json("data/streams/settings.json", self.settings)
 
     @streamset.command(no_pm=True)
@@ -255,6 +286,10 @@ class Streams(commands.Cog):
 
         else:
             await ctx.send("Notifications won't be deleted anymore.")
+        await self.database.audit_record(ctx.guild.id,
+                                         ctx.guild.name,
+                                         ctx.message.content,
+                                         ctx.message.author.id)
 
         dataIO.save_json("data/streams/settings.json", self.settings)
 
@@ -435,7 +470,7 @@ class Streams(commands.Cog):
                     stream["ALREADY_ONLINE"] = True
                     messages_sent = []
                     for channel_id in stream["CHANNELS"]:
-                        channel = self.bot.get_channel(channel_id)
+                        channel = self.bot.get_channel(int(channel_id))
                         if channel is None:
                             continue
                         mention = self.settings.get(channel.guild.id, {}).get("MENTION", "")
@@ -453,7 +488,7 @@ class Streams(commands.Cog):
             await asyncio.sleep(CHECK_DELAY)
 
     @commands.has_permissions(manage_messages=True)
-    async def delete_old_notifications(self, key):
+    async def delete_old_notifications(self, ctx, key):
         for message in self.messages_cache[key]:
             guild = message.guild
             settings = self.settings.get(guild.id, {})
@@ -463,6 +498,10 @@ class Streams(commands.Cog):
                     await self.bot.delete_message(message)
             except:
                 pass
+        await self.database.audit_record(ctx.guild.id,
+                                         ctx.guild.name,
+                                         ctx.message.content,
+                                         ctx.message.author.id)
 
         del self.messages_cache[key]
 
@@ -495,6 +534,4 @@ class Streams(commands.Cog):
 
 def setup(bot):
     n = Streams(bot)
-    loop = asyncio.get_event_loop()
-    loop.create_task(n.stream_checker())
     bot.add_cog(n)
