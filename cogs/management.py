@@ -90,10 +90,12 @@ class Management(commands.Cog):
     @commands.command()
     async def exec(self, ctx, *, code):
         msg = await ctx.send(":clock: Evaluating...")
+        if "exit" in code:
+            await msg.edit(content="No u >:(")
         try:
             x = eval(code)
         except Exception as e:
-            return await msg.edit("Could not Evaluate this command!: " + str(e))
+            return await msg.edit(content="Could not Evaluate this command!: " + str(e))
         await msg.edit(content=str(x))
 
     @commands.command(name='nick', aliases=["setnick"])
