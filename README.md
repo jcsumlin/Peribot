@@ -4,7 +4,7 @@ Highly customizable discord bot made with love in the US
 
  ![Python Versions](https://img.shields.io/badge/python-3.6-blue?style=for-the-badge)
  ![Discord.py Version](https://img.shields.io/badge/discord.py-1.2.5-blue?style=for-the-badge)
- ![Issues](https://img.shields.io/bitbucket/issues/jcsumlin/Peribot?style=for-the-badge)
+ ![Issues](https://img.shields.io/github/issues/jcsumlin/Peribot?style=for-the-badge)
  ![Patreon](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Fshieldsio-patreon.herokuapp.com%2Fbotboi&style=for-the-badge)
 
 ## Getting Started
