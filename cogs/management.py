@@ -1,7 +1,5 @@
 import asyncio
 
-from loguru import logger
-
 import discord
 import git
 from discord.ext import commands
@@ -13,7 +11,6 @@ from .utils.database import Database
 
 
 class Management(commands.Cog):
-
     """
     Set of commands for Administration.
     """
@@ -21,6 +18,14 @@ class Management(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.database = Database()
+
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        if message.author.bot is True:
+            return
+        server = await self.database.get_server_settings(message.guild.id)
+        if server is None:
+            await self.database.add_server_settings(message.guild)
 
     @commands.Cog.listener()
     async def on_error(self, ctx, error):
@@ -60,16 +65,18 @@ class Management(commands.Cog):
                 embed = discord.Embed(title="Peribot cannot affect the default roles.")
                 await ctx.send(embed=embed)
         except discord.Forbidden:
-            embed = discord.Embed(title="Peribot does not have permissions to change roles." )
+            embed = discord.Embed(title="Peribot does not have permissions to change roles.")
             await ctx.send(embed=embed)
         except discord.HTTPException:
-            embed = discord.Embed(title=f"Peribot failed to update {role.name}'s color" )
+            embed = discord.Embed(title=f"Peribot failed to update {role.name}'s color")
             await ctx.send(embed=embed)
         except discord.InvalidArgument:
-            embed = discord.Embed(title=f"Invalid Arguments!", description=f"{ctx.prefix}setcolor @Role [Hex Code or Generic Name]")
+            embed = discord.Embed(title=f"Invalid Arguments!",
+                                  description=f"{ctx.prefix}setcolor @Role [Hex Code or Generic Name]")
             await ctx.send(embed=embed)
         except discord.ext.commands.errors.BadArgument:
-            embed = discord.Embed(title=f"Invalid Arguments!", description=f"{ctx.prefix}setcolor @Role [Hex Code or Generic Name]")
+            embed = discord.Embed(title=f"Invalid Arguments!",
+                                  description=f"{ctx.prefix}setcolor @Role [Hex Code or Generic Name]")
             await ctx.send(embed=embed)
 
     @commands.command('prefix', no_pm=True)
@@ -79,6 +86,15 @@ class Management(commands.Cog):
             await ctx.send("Preibot's command prefix has been updated!")
         else:
             await ctx.send("Preibot's command prefix failed to update!")
+
+    @commands.command()
+    async def exec(self, ctx, *, code):
+        msg = await ctx.send(":clock: Evaluating...")
+        try:
+            x = eval(code)
+        except Exception as e:
+            return await msg.edit("Could not Evaluate this command!: " + str(e))
+        await msg.edit(content=str(x))
 
     @commands.command(name='nick', aliases=["setnick"])
     @commands.cooldown(1, 21600, commands.BucketType.user)
@@ -121,8 +137,10 @@ class Management(commands.Cog):
     @commands.has_permissions(manage_messages=True)
     async def servers(self, ctx):
         servers = self.bot.guilds
+        serverNames = []
         for server in servers:
-            await ctx.send(server.name)
+            serverNames.append(server.name)
+        await ctx.send(", ".join(serverNames))
 
 
     @commands.command(name='pin')
@@ -184,11 +202,13 @@ class Management(commands.Cog):
         try:
             await member.ban(reason=reason, delete_message_days=delete)
         except discord.Forbidden:
-            embed = discord.Embed(title="Command Error!", description=f"I do not have permissions to do that", color=discord.Color.red())
+            embed = discord.Embed(title="Command Error!", description=f"I do not have permissions to do that",
+                                  color=discord.Color.red())
             await ctx.send(embed=embed)
             return
         except discord.HTTPException:
-            embed = discord.Embed(title="Command Error!", description=f"Banning failed. Try again", color=discord.Color.red())
+            embed = discord.Embed(title="Command Error!", description=f"Banning failed. Try again",
+                                  color=discord.Color.red())
             await ctx.send(embed=embed)
             return
         embed = discord.Embed(timestamp=ctx.message.created_at, color=0x00ff00,
@@ -232,7 +252,6 @@ class Management(commands.Cog):
                                                  ctx.guild.name,
                                                  ctx.message.content,
                                                  ctx.message.author.id)
-
 
 
 def setup(bot):

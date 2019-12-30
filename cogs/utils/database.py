@@ -41,7 +41,7 @@ class Database:
             return True
         return False
 
-    async def get_server_settings(self, server_id):
+    async def get_server_settings(self, server_id:int):
         return self.session.query(ServerSettings).filter(ServerSettings.server_id == server_id).first()
 
     async def update_server_premium(self, server_id, status: bool):

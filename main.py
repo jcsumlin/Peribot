@@ -35,10 +35,11 @@ async def get_prefix(bot, message):
     if not message.guild:
         return commands.when_mentioned_or('!')(bot, message)
     settings = await database.get_server_settings(message.guild.id)
-    if not settings:
-        return commands.when_mentioned_or('!')(bot, message)
-    prefix = settings.prefix
-    return commands.when_mentioned_or(str(prefix))(bot, message)
+    if settings:
+        prefix = settings.prefix
+        return commands.when_mentioned_or(str(prefix))(bot, message)
+    else:
+        return commands.when_mentioned_or("!")(bot, message)
 
 bot = commands.Bot(command_prefix=get_prefix)
 
