@@ -1,11 +1,13 @@
+from random import randint as ri
+
 import discord
 from discord.ext import commands
+from loguru import logger
 
 from .utils.checks import admin_or_permissions
 from .utils.database import Database
 from .utils.easyembed import command_error, command_success
-from loguru import logger
-from random import randint as ri
+
 
 class ReactionRoleGroup:
     def __init__(self, name, server_id):
@@ -36,8 +38,11 @@ class ReactionRoles(commands.Cog):
                         role = discord.utils.get(reaction.message.guild.roles, id=reaction_role_group['role'].role_id)
                     except Exception as e:
                         logger.error('Could not get role ' + e)
+                        await reaction.message.remove_reaction(reaction, user)
+                        return await reaction.message.channel.send(embed=command_error('Adding Role to User', "That role could not be found! Please contact an admin!"))
                     try:
                         await user.add_roles(role, reason=f"Reaction Role Group {reaction_role_group['group'].group_name}")
+                        await user.send(f"You have successfully received the {role.name} role!")
                     except discord.errors.Forbidden:
                         await reaction.message.channel.send(embed=command_error('Adding Role to User', "Permission Denied! Please make sure that I have 'Manage Roles' turned on!"))
                         await reaction.message.remove_reaction(reaction, user)
