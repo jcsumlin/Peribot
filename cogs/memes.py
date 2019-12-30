@@ -21,7 +21,7 @@ class Memes(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def kobioshi(self, ctx, *, text):
+    async def kobayashi(self, ctx, *, text):
         try:
             img = await self.make_meme_from_template("data/memes/zvlmhl1iw77412.jpeg", text)
         except ValueError as e:
