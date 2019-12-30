@@ -6,7 +6,7 @@ from discord.ext import commands
 from loguru import logger
 
 from .utils.database import Database
-
+from .utils.chat_formatting import escape
 from cogs.utils.dataIO import dataIO
 from .utils import checks
 
@@ -337,7 +337,8 @@ class Modlog(commands.Cog):
             await self.log(message.guild,
                            title=":wastebasket: Message Delete Log",
                            user=message.author,
-                           message=f"{message.author} deleted message in {message.channel} was deleted: {message.content}",)
+                           message=f"{message.author} deleted a message in {message.channel}:",
+                           deleted_message=message.content)
 
     @commands.Cog.listener()
     async def on_guild_role_create(self, role):
@@ -553,20 +554,23 @@ class Modlog(commands.Cog):
                                before=before.nick,
                                after=after.nick)
 
-    async def log(self, server, title, message, user=None, before=None, after=None):
+    async def log(self, server, title, message, user=None, deleted_message=False, before=None, after=None):
         channel = discord.utils.get(server.channels, id=self.settings[str(server.id)]['channel'])
         try:
             embed = discord.Embed(title=title,
                                   timestamp=datetime.datetime.now(),
                                   color=discord.Color.green())
             if user:
-                embed.description = f"{user.mention} {user.name}#{user.discriminator}"
+                embed.description = f"{user.mention} {escape(user.name, formatting=True)}#{user.discriminator}"
             embed.set_author(name=message,
                              icon_url=user.avatar_url if user else server.icon_url)
             embed.set_footer(text=f"ID: {user.id if user else server.id}")
             if before and after:
                 embed.add_field(name="Before", value=before, inline=False)
                 embed.add_field(name="After", value=after, inline=False)
+            if deleted_message:
+                embed.add_field(name="Message:", value=str(deleted_message), inline=False)
+
             await channel.send(embed=embed)
         except:
             pass
