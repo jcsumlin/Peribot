@@ -34,7 +34,7 @@ class Kindness(commands.Cog):
 
         # await ctx.send(msg)
 
-    @commands.command("hug", )
+    @commands.command("hug")
     async def hug(self, ctx, victim: discord.Member, number=None):
         """
         Hug a user with a cute gif
@@ -46,7 +46,7 @@ class Kindness(commands.Cog):
             await ctx.channel.send('https://tenor.com/view/steven-universe-su-stevenuniverse-diamonddays-gif-13326567')
             return
         if number is None:
-            file = str(random.randint(1,58)) + '.gif'
+            file = str(random.randint(1, 58)) + '.gif'
         else:
             file = str(number) + '.gif'
         area = ctx.channel

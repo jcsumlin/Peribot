@@ -8,7 +8,7 @@ from loguru import logger
 try:
     import cairosvg
     cairo = True
-except:
+except Exception as e:
     cairo = False
 
 
@@ -57,5 +57,5 @@ def setup(bot):
     n = Bigmoji(bot)
     bot.add_cog(n)
     if not cairo:
-        print('Could not import cairosvg. Standard emoji conversions will be '
+        logger.error('Could not import cairosvg. Standard emoji conversions will be '
               'limited to 72x72 png.')
