@@ -62,6 +62,7 @@ class ReactionRoles(commands.Cog):
             await ctx.send(embed=e)
 
     @reactionroles.group(name="list")
+    @admin_or_permissions()
     async def list_reaction_roles(self, ctx):
         groups = await self.database.get_reaction_roles_by_server(ctx.guild.id)
         e = discord.Embed(title=f"{ctx.guild.name}'s Reaction Roles",
