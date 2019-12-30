@@ -91,7 +91,7 @@ class Management(commands.Cog):
     async def exec(self, ctx, *, code):
         msg = await ctx.send(":clock: Evaluating...")
         if "exit" in code:
-            await msg.edit(content="No u >:(")
+            return await msg.edit(content="No u >:(")
         try:
             x = eval(code)
         except Exception as e:
