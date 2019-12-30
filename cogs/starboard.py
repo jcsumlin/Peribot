@@ -315,6 +315,7 @@ class Star(commands.Cog):
                                                                    starboard_message_id=None,
                                                                    count=count)
                     return
+
             author = reaction.message.author
             channel = reaction.message.channel
             starboard_channel = self.bot.get_channel(starboard_settings.channel_id)

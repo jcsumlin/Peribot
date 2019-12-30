@@ -18,7 +18,7 @@ class Memes(commands.Cog):
         """
         base_url = "https://belikebill.ga/billgen-API.php?text=This%20is%20Bill%0D%0A" + urllib.parse.quote(text) + "%0D%0ABe%20Like%20Bill"
         embed = discord.Embed().set_image(url=base_url)
-        await ctx.send(ctx.message.channel, embed=embed)
+        await ctx.send(embed=embed)
 
     @commands.command()
     async def kobioshi(self, ctx, *, text):

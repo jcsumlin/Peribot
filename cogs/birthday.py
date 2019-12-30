@@ -37,7 +37,7 @@ class Birthdays(commands.Cog):
     async def add(self, ctx, birthday):
         settings = await self.database.get_birthday_settings(ctx.guild.id)
         if settings is None:
-            await commandError(ctx, f"This feature has not been enabled by your admins! Please have them do {ctx.prefix}birthday to see how to set this up!")
+            return await commandError(ctx, f"This feature has not been enabled by your admins! Please have them do {ctx.prefix}birthday to see how to set this up!")
         birthday = birthday.split('/')
         birthdays = await self.database.birthday_exists(ctx)
         if birthdays is not False:
@@ -59,7 +59,7 @@ class Birthdays(commands.Cog):
         except ValueError:
             await commandError(ctx, "Coundn't find your birthday record in my database, are you sure you registered it with me?")
 
-    @birthday.group()
+    @birthday.command(name="list")
     async def list(self, ctx):
         birthdays = await self.database.get_months_bdays()
         settings = await self.database.get_birthday_settings(ctx.guild.id)
@@ -70,7 +70,7 @@ class Birthdays(commands.Cog):
             embed.add_field(name=member.name, value=user.birthday.strftime('%m/%d/%Y'))
         await ctx.channel.send(embed=embed)
 
-    @birthday.group()
+    @birthday.command(name="channel")
     @commands.has_permissions(administrator=True)
     async def channel(self, ctx, channel: discord.TextChannel):
         """
@@ -87,7 +87,7 @@ class Birthdays(commands.Cog):
             settings.channel_id = channel.id
         return await ctx.send("Birthday Channel Set! :birthday:")
 
-    @birthday.group()
+    @birthday.command(name="disable")
     @commands.has_permissions(administrator=True)
     async def disable(self, ctx):
         settings = await self.database.get_birthday_settings(ctx.guild.id)
@@ -97,7 +97,6 @@ class Birthdays(commands.Cog):
                 return await commandSuccess(ctx, ":white_check_mark: Birthday Messages Disabled!")
             else:
                 return await commandError(ctx, ":x: Failed to update Birthday Settings!")
-
         else:
             return await commandError(ctx, ":interrobang: Birthday Message Channel Not Set For This Server!")
 
