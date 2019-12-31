@@ -115,7 +115,7 @@ class CustomCommands(commands.Cog):
                                f" Use `{ctx.prefix}customcom add` to start adding some.")
             return
 
-        commands = ", ".join([ctx.prefix + c.command for c in sorted(commands)])
+        commands = ", ".join([ctx.prefix + c.command for c in commands])
         commands = "Custom commands:\n\n" + commands
 
         if len(commands) < 1500:
