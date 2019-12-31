@@ -46,7 +46,7 @@ class ReactionRoles(commands.Cog):
                         await user.remove_roles(role, reason=f"Reaction Role Group {reaction_role_group['group'].group_name}")
                         await user.send(f"You have successfully removed the {role.name} role!")
                     except discord.errors.Forbidden:
-                        await user.send(embed=command_error('Removing Role to User', "Permission Denied! Please make sure that I have 'Manage Roles' turned on!"))
+                        await user.send(embed=command_error('Removing Role from User', "Permission Denied! Please make sure that I have 'Manage Roles' turned on!"))
                         await reaction.message.remove_reaction(reaction, user)
 
     @commands.Cog.listener()
@@ -65,7 +65,7 @@ class ReactionRoles(commands.Cog):
                         await user.add_roles(role, reason=f"Reaction Role Group {reaction_role_group['group'].group_name}")
                         await user.send(f"You have successfully received the {role.name} role!")
                     except discord.errors.Forbidden:
-                        await reaction.message.channel.send(embed=command_error('Adding Role to User', "Permission Denied! Please make sure that I have 'Manage Roles' turned on!"))
+                        await user.send(embed=command_error('Adding Role to User', "Permission Denied! Please make sure that I have 'Manage Roles' turned on!"))
                         await reaction.message.remove_reaction(reaction, user)
                 pass
 
