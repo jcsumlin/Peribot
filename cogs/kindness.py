@@ -61,19 +61,17 @@ class Kindness(commands.Cog):
         await ctx.send(file=discord.File('data/lewd/hugs/' + file))
 
     @commands.command()
-    async def hugadd(self, ctx, url):
-        if '.gif' not in url:
-            return await ctx.send("Please provide a Gif not an image!")
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url) as resp:
-                if resp.status != 200:
-                    return await ctx.send('Could not download file...')
-                data = io.BytesIO(await resp.read())
-                DIR = 'data/lewd/hugs'
-                number = len([name for name in os.listdir(DIR) if os.path.isfile(os.path.join(DIR, name))]) + 1
-                with open(f"{DIR}/{number}.gif", 'wb') as f:
-                    f.write(data.read())
-                await ctx.send(f"File Successfully saved as number {number}")
+    async def addhug(self, ctx):
+        dir = 'data/lewd/hugs'
+        if ("https://" in ctx.message.content.lower() or "http://" in ctx.message.content.lower()):
+            url = ctx.message.content[7:].lstrip(" ")
+            await self.linkSubmit(ctx, url, dir)
+        else:
+            try:
+                await self.normalSubmit(ctx, dir)
+            except Exception as e:
+                print(str(e))
+
 
     @commands.command()
     async def pat(self, ctx, target=None, number=None):
