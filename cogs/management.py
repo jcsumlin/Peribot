@@ -6,7 +6,7 @@ from discord.ext import commands
 from discord.ext.commands import CommandNotFound
 from discord.ext.commands.errors import BadArgument
 
-from .utils.checks import admin_or_permissions
+from .utils.checks import admin_or_permissions, is_bot_owner_check
 from .utils.database import Database
 
 

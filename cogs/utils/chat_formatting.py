@@ -70,9 +70,9 @@ def escape(text, *, mass_mentions=False, formatting=False):
         text = text.replace("@here", "@\u200bhere")
     if formatting:
         text = (text.replace("`", "\\`")
-                    .replace("*", "\\*")
-                    .replace("_", "\\_")
-                    .replace("~", "\\~"))
+                .replace("*", "\\*")
+                .replace("_", "\\_")
+                .replace("~", "\\~"))
     return text
 
 
