@@ -87,6 +87,16 @@ class Management(commands.Cog):
         else:
             await ctx.send("Preibot's command prefix failed to update!")
 
+    @commands.command('purge', no_pm=True)
+    @admin_or_permissions()
+    async def purge(self, ctx, number: int):
+        async for message in ctx.message.channel.history(limit=number+1):
+            await message.delete()
+        await self.database.audit_record(ctx.guild.id,
+                                         ctx.guild.name,
+                                         ctx.message.content,
+                                         ctx.message.author.id)
+
     @commands.command()
     async def exec(self, ctx, *, code):
         msg = await ctx.send(":clock: Evaluating...")
