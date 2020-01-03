@@ -42,7 +42,7 @@ class Management(commands.Cog):
             await message.delete()
 
     @commands.command(name='setcolor', no_pm=True, aliases=["rolecolor", "color"])
-    @mod_or_higher()
+    @commands.has_permissions(manage_roles=True)
     async def set_role_color(self, ctx, role: discord.Role, color: discord.Color):
         """
         Color the nickname of the participant. * Let there be bright colors and colors! *
