@@ -6,7 +6,7 @@ from discord.ext import commands
 from discord.ext.commands import CommandNotFound
 from discord.ext.commands.errors import BadArgument
 
-from .utils.checks import admin_or_permissions, is_bot_owner_check
+from .utils.checks import admin_or_permissions, is_bot_owner_check, mod_or_higher
 from .utils.database import Database
 
 
@@ -42,6 +42,7 @@ class Management(commands.Cog):
             await message.delete()
 
     @commands.command(name='setcolor', no_pm=True, aliases=["rolecolor", "color"])
+    @mod_or_higher()
     async def set_role_color(self, ctx, role: discord.Role, color: discord.Color):
         """
         Color the nickname of the participant. * Let there be bright colors and colors! *
@@ -88,7 +89,7 @@ class Management(commands.Cog):
             await ctx.send("Preibot's command prefix failed to update!")
 
     @commands.command('purge', no_pm=True)
-    @admin_or_permissions()
+    @mod_or_higher()
     async def purge(self, ctx, number: int):
         async for message in ctx.message.channel.history(limit=number+1):
             await message.delete()
@@ -141,12 +142,12 @@ class Management(commands.Cog):
             await ctx.send("You don't have access to this command!")
 
     @commands.command(name='mute')
-    @commands.has_permissions(manage_messages=True)
+    @mod_or_higher()
     async def mute(self, ctx, user: discord.User):
         pass
 
     @commands.command(name='servers')
-    @commands.has_permissions(manage_messages=True)
+    @is_bot_owner_check()
     async def servers(self, ctx):
         servers = self.bot.guilds
         serverNames = []
@@ -156,7 +157,7 @@ class Management(commands.Cog):
 
 
     @commands.command(name='pin')
-    @commands.has_permissions(manage_messages=True)
+    @mod_or_higher()
     async def pin_message(self, ctx, *, message):
         """Copy your message in a stylish and modern frame, and then fix it!
         Arguments:
