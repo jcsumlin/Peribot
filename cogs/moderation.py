@@ -1,9 +1,6 @@
 import json
 from datetime import datetime
 
-import json
-from datetime import datetime
-
 import cv2
 import discord
 from discord.ext import commands
@@ -12,11 +9,7 @@ from loguru import logger
 from cogs.utils import checks
 from cogs.utils.database import Database
 from .utils.dataIO import DataIO
-# declaration for User class is in here
 from .utils.easyembed import embed as easyembed
-
-
-# from create_databases import Base, Report
 
 
 class Moderation(commands.Cog):
@@ -37,9 +30,9 @@ class Moderation(commands.Cog):
             settings = await self.getQRSettings(message.guild.id)
             if len(message.attachments) > 0 and settings is not None and settings.enabled is True:
                 for attachment in message.attachments:
-                    await self.dataIO.download_link(message, attachment.url, "tempQR.png")
+                    await self.dataIO.download_link(message, attachment.url, "tempQR.jpeg")
                     try:
-                        image = cv2.imread("tempQR.png")
+                        image = cv2.imread("tempQR.jpeg")
                     except Exception as e:
                         logger.exception(e)
                         return
