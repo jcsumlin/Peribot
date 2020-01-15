@@ -1,18 +1,15 @@
-import csv
 import json
-import os
-from datetime import datetime, timezone
+from datetime import datetime
 
+import cv2
 import discord
 from discord.ext import commands
 from loguru import logger
-# from create_databases import Base, Report
 
-# declaration for User class is in here
-from .utils.easyembed import embed as easyembed
-from cogs.utils.database import Database
 from cogs.utils import checks
-
+from cogs.utils.database import Database
+from .utils.dataIO import DataIO
+from .utils.easyembed import embed as easyembed
 
 
 class Moderation(commands.Cog):
@@ -21,10 +18,45 @@ class Moderation(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.database = Database()
+        self.dataIO = DataIO()
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild):
         return await self.database.add_server_settings(guild)
+
+    @commands.Cog.listener()
+    async def on_message(self, message):
+        if not message.author.bot:
+            settings = await self.getQRSettings(message.guild.id)
+            if len(message.attachments) > 0 and settings is not None and settings.enabled is True:
+                for attachment in message.attachments:
+                    await self.dataIO.download_link(message, attachment.url, "tempQR.jpeg")
+                    try:
+                        image = cv2.imread("tempQR.jpeg")
+                    except Exception as e:
+                        logger.exception(e)
+                        return
+                    qrCodeDetector = cv2.QRCodeDetector()
+                    decodedText, points, _ = qrCodeDetector.detectAndDecode(image)
+                    if points is not None:
+                        # QR Code detected handling code
+                        await message.delete()
+                        channel = self.bot.get_channel(id=settings.logging_channel_id)
+                        await channel.send(f"QR Code detected and deleted from {message.author.mention}")
+                    else:
+                        logger.debug("QR code not detected")
+
+    @commands.command()
+    @commands.has_permissions(manage_messages=True)
+    async def deleteqrcodes(self, ctx, loggingChannel: discord.TextChannel=None):
+        if loggingChannel is None:
+            if await self.database.put_qr_settings(ctx.guild.id, status=False):
+                return await ctx.send(f"Successfully disabled qr code deletion!")
+        await self.database.post_qr_settings(ctx.guild.id, loggingChannel.id)
+        await ctx.send(f"Successfully enabled qr code deletion and logging to {loggingChannel}")
+
+    async def getQRSettings(self, server_id: int):
+        return await self.database.get_qr_settings(server_id)
 
     @commands.command()
     @commands.has_permissions(manage_messages=True)

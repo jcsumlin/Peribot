@@ -9,6 +9,7 @@ from sqlalchemy.orm import sessionmaker
 from create_databases import AuditLog, ServerSettings, Base, CustomCommands, Warnings, StarBoardSettings, \
     BirthdaySettings, Birthdays, StarBoardMessages, StarBoardIgnoredChannels, StarboardAllowedRoles, RemindMe, \
     ModerationLogSettings, ReactionRolesGroups, ReactionRoles, ReactionRoleMessage
+from create_databases import QRCodes
 
 
 class Database:
@@ -479,3 +480,70 @@ class Database:
             for row in rrm:
                 self.session.delete(row)
                 self.session.commit()
+
+    async def post_qr_settings(self, server_id: int, logging_channel_id: int):
+        settings = self.session.query(QRCodes).filter_by(server_id=server_id).one_or_none()
+        if settings is not None:
+            settings.enabled = True
+            settings.channel_id = logging_channel_id
+            self.session.commit()
+            return True
+        settings = QRCodes(server_id= server_id,enabled=True, logging_channel_id=logging_channel_id)
+        self.session.add(settings)
+        return self.session.commit()
+
+    async def put_qr_settings(self, server_id: int, status:bool):
+        settings = self.session.query(QRCodes).filter_by(server_id=server_id).one_or_none()
+        if settings is not None:
+            settings.enabled = status
+            self.session.commit()
+            return True
+        return False
+
+    async def get_qr_settings(self, server_id: int):
+        return self.session.query(QRCodes).filter_by(server_id=server_id).one_or_none()
+
+
+
+# class Giveaway(Database):
+#     def __init__(self, name, server_id, msg_id, end_date_time, sponsor_user_id):
+#         self.name = name
+#         self.server_id = server_id
+#         self.giveaway_message_id = msg_id
+#         self.enabled = True
+#         self.number_of_entries = 0
+#         self.end_date_time = end_date_time
+#         self.completed = False
+#         self.open_for_entries = True
+#         self.sponsor_user_id = sponsor_user_id
+#         existing = self.session.query(GiveawaySettings).filter_by(
+#             giveaway_msg_id=self.giveaway_msg_id
+#         ).one_or_none()
+#         if existing:
+#             raise ValueError("Giveaway with matching message ID found!")
+#
+#         self.settings = None
+#
+#     def create(self):
+#         settings = GiveawaySettings(
+#             giveaway_msg_id=self.giveaway_message_id,
+#             server_id=self.server_id,
+#             enabled=self.enabled,
+#             number_of_entries=self.number_of_entries,
+#             end_datetime=self.end_date_time,
+#             open_for_entries=self.open_for_entries,
+#             name=self.name,
+#             sponsor_user_id=self.sponsor_user_id,
+#             completed=self.completed
+#                          )
+#         self.session.add(settings)
+#         self.session.commit()
+#
+#
+#     def add_entry(self, user_id):
+#         entry = GiveawayEntries(
+#             giveaway_msg_id=self.giveaway_message_id,
+#             user_id=user_id
+#         )
+#         self.session.add(entry)
+#         self.session.commit()

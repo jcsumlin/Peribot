@@ -14,3 +14,5 @@ youtube_dl
 CairoSVG
 PyNaCl
 pytz
+opencv-python
+numpy

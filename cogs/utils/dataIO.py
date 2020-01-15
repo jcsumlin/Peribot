@@ -1,14 +1,33 @@
+import io
 import json
 import os
-import logging
 from random import randint
+
+import aiohttp
+from loguru import logger
+
 
 class InvalidFileIO(Exception):
     pass
 
 class DataIO():
     def __init__(self):
-        self.logger = logging.getLogger("red")
+        self.logger = logger
+
+    async def download_link(self, ctx, url, filename):
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as resp:
+                if resp.status != 200:
+                    return await ctx.send('Could not download file...')
+                data = io.BytesIO(await resp.read())
+                with open(f"{filename}", 'wb') as f:
+                    f.write(data.read())
+                return True
+
+    async def download_file(self, ctx, dir):
+        jsonstr = ctx.message.attachments[0]
+        url = jsonstr.url
+        await self.download_link(ctx, url, dir)
 
     def save_json(self, filename, data):
         """Atomically saves json file"""
