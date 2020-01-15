@@ -8,6 +8,7 @@ from discord.ext.commands.errors import BadArgument
 
 from .utils.checks import admin_or_permissions, is_bot_owner_check, mod_or_higher
 from .utils.database import Database
+from loguru import logger
 
 
 class Management(commands.Cog):
@@ -40,6 +41,25 @@ class Management(commands.Cog):
             message = await ctx.send(embed=embed)
             await asyncio.sleep(5)
             await message.delete()
+
+    @commands.command(name="announce")
+    @commands.is_owner()
+    async def announce(self, ctx, *, message):
+        servers = self.bot.guilds
+        users = []
+        for server in servers:
+            embed = discord.Embed(color=ctx.message.author.top_role.color,
+                                  title='Announcement From Peribot\'s creator',
+                                  description=message)
+            embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url)
+            try:
+                await server.owner.send(embed=embed)
+                users.append(server.owner.name)
+            except Exception as e:
+                logger.exception(str(e))
+        await ctx.send(f"Announcement successfully sent to {', '.join(users)}")
+
+
 
     @commands.command(name='setcolor', no_pm=True, aliases=["rolecolor", "color"])
     @commands.has_permissions(manage_roles=True)
