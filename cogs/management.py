@@ -46,17 +46,20 @@ class Management(commands.Cog):
     @commands.is_owner()
     async def announce(self, ctx, *, message):
         servers = self.bot.guilds
+        user_ids = []
         users = []
         for server in servers:
-            embed = discord.Embed(color=ctx.message.author.top_role.color,
-                                  title='Announcement From Peribot\'s creator',
-                                  description=message)
-            embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url)
-            try:
-                await server.owner.send(embed=embed)
-                users.append(server.owner.name)
-            except Exception as e:
-                logger.exception(str(e))
+            if server.owner.id not in user_ids:
+                embed = discord.Embed(color=ctx.message.author.top_role.color,
+                                      title='Announcement From Peribot\'s creator',
+                                      description=message)
+                embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url)
+                try:
+                    await server.owner.send(embed=embed)
+                    user_ids.append(server.owner.id)
+                    users.append(server.owner.name)
+                except Exception as e:
+                    logger.exception(str(e))
         await ctx.send(f"Announcement successfully sent to {', '.join(users)}")
 
 
