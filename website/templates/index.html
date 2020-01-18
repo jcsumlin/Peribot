@@ -1,0 +1,67 @@
+{% extends 'base_template.html' %}
+
+{% block navigation %}
+
+{% endblock %}
+
+{% block body %}
+    <style>
+        .header-img {
+            filter: blur(5px);
+        }
+
+        .peribot-pfp {
+            height: 150px;
+            width: 150px;
+        }
+
+        .pfp-container {
+            height: 150px;
+            width: 150px;
+            border-radius: 100px;
+            border-width: 5px;
+            overflow: hidden;
+            border-style: solid;
+            background: #23272a;
+        }
+
+        div.offset-6 {
+            margin-left: calc(50% - (150px / 2));
+            margin-top: calc(500px / 2 - (200px / 2));
+            z-index: 1;
+        }
+
+        .header-container {
+            height: 500px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .background-img {
+            z-index: -1;
+            position: absolute;
+            top: 0px;
+            left: 0px;
+        }
+
+        body > div.header-container > div.offset-6.align-middle > h1 {
+            text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff;
+            color: black;
+            margin-left: 10px
+        }
+    </style>
+    <div class="header-container">
+        <div class="offset-6 align-middle">
+            <div class="pfp-container border-success rounded-circle">
+                <img src="{{ url_for('static', filename='image0.png') }}" class="peribot-pfp">
+            </div>
+            <h1 style="">Peribot</h1>
+        </div>
+        <div class="background-img">
+            <img src="{{ url_for('static', filename='16.png') }}" class="header-img img-fluid" alt="Responsive image">
+        </div>
+    </div>
+    <div class="container">
+        <h1>Home</h1>
+    </div>
+{% endblock %}

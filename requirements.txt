@@ -14,3 +14,7 @@ youtube_dl
 CairoSVG
 PyNaCl
 pytz
+Flask
+Flask-Discord
+wtforms
+wheel

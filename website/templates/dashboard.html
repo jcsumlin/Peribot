@@ -1,0 +1,20 @@
+{% extends 'dashboard_template.html' %}
+{% block servers %}
+    {% for server in servers %}
+        <div class="col-sm-2">
+            <a href="{{ url_for('.server', server_id=server.id) }}">
+                <div class="m-2">
+                    {% if server.icon_url != None %}
+                        <img src="{{ server.icon_url }}"
+                             class="server-icon border rounded-circle rounded-sm"
+                             data-toggle="tooltip" data-placement="top" title="{{ server.name }}">
+                    {% else %}
+                        <div class="server-no-icon border rounded-circle rounded-sm"
+                             data-toggle="tooltip" data-placement="top" title="{{ server.name }}"></div>
+                    {% endif %}
+                    <p class="text-center">{{ server.name }}</p>
+                </div>
+            </a>
+        </div>
+    {% endfor %}
+{% endblock %}

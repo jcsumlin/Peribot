@@ -1,0 +1,85 @@
+{% extends 'base_template.html' %}
+{% block body %}
+    <style>
+        .server-icon {
+            width: 150px;
+            height: 150px;
+            alignment: center;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .server-no-icon {
+            width: 150px;
+            height: 150px;
+            background-color: #23272A;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+    </style>
+    <div class="container-fluid">
+        <div class="row">
+            <nav class="col-md-2 d-none d-md-block bg-light sidebar" style="height: 100vh;">
+                <div class="sidebar-sticky">
+                    <ul class="nav flex-column">
+                        <li class="text-center p-3">
+                            <img src="{{ user.avatar_url }}"
+                                 class="border border-success rounded-circle rounded-sm align-center">
+                            <h4> {{ user.name }}#{{ user.discriminator }}</h4>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" href="{{ url_for('.me') }}">
+                                <span data-feather="home"></span>
+                                Servers <span class="sr-only">(current)</span>
+                            </a>
+                        </li>
+                    </ul>
+                    {% if display_subnav %}
+                    <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                        <span>Modules</span>
+                        <a class="d-flex align-items-center text-muted" href="#" aria-label="Add a new report">
+                            <span data-feather="plus-circle"></span>
+                        </a>
+                    </h6>
+                    <ul class="nav flex-column mb-2">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <span data-feather="file-text"></span>
+                                Custom Commands
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">
+                                <span data-feather="file-text"></span>
+                                Starboard Settings
+                            </a>
+                        </li>
+                    </ul>
+                    {% endif %}
+                </div>
+            </nav>
+
+            <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2">{{ header }}</h1>
+{#                   <div class="btn-toolbar mb-2 mb-md-0">#}
+{#                        <div class="btn-group mr-2">#}
+{#                            <button type="button" class="btn btn-sm btn-outline-secondary">Share</button>#}
+{#                            <button type="button" class="btn btn-sm btn-outline-secondary">Export</button>#}
+{#                        </div>#}
+{#                        <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle">#}
+{#                            <span data-feather="calendar"></span>#}
+{#                            This week#}
+{#                        </button>#}
+{#                    </div>#}
+                </div>
+                <div class="row">
+                    {% block servers %}{% endblock %}
+                </div>
+
+            </main>
+        </div>
+    </div>
+{% endblock %}

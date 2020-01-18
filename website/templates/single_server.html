@@ -1,0 +1,22 @@
+{% extends 'dashboard_template.html' %}
+{% block servers %}
+    <div class="col-sm-12">
+        <div>
+            {% if server.icon_url != None %}
+                <img src="{{ server['data'].icon_url }}" class="img-thumbnail">
+            {% else %}
+                <div class="server-no-icon border rounded-circle rounded-sm"
+                     data-toggle="tooltip" data-placement="top" title="{{ server.name }}"></div>
+            {% endif %}
+        </div>
+    </div>
+
+    <form method="post">
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+            <label>{{ form.prefix.label }}</label>
+            {{ form.prefix(class_="form-control", placeholder=server.prefix) }}
+        </div>
+        {{ form.save(class_="btn btn-primary") }}
+    </form>
+{% endblock %}

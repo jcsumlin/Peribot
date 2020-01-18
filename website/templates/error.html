@@ -1,0 +1,8 @@
+{% extends 'base_template.html' %}
+{% block body %}
+    <h1 class="display-1 text-center m-3">{{ error }}</h1>
+    {% if error %}
+        <h6 class="display-6 text-center m-3">{{ msg }}</h6>
+    {% endif %}
+    <p class="text-center m-3">If you think is an error please report it on our <a href="https://discord.gg/UA4uUvH">support server.</a></p>
+{% endblock %}
