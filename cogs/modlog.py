@@ -541,7 +541,7 @@ class Modlog(commands.Cog):
                                title=":pick: Channel Edit Log",
                                message=f"{before.guild.name}",
                                before=before.name,
-                               after=before.name)
+                               after=after.name)
 
     @commands.Cog.listener()
     async def on_member_update(self, before, after):
