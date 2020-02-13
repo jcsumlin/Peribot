@@ -341,7 +341,7 @@ class Star(commands.Cog):
             if "thumbnail" in embed:
                 em.set_thumbnail(url=embed["thumbnail"]["url"])
             if "description" in embed:
-                em.description = msg.clean_content + "\n\n" + embed["description"]
+                em.description = discord.utils.escape_markdown(message.clean_content) + "\n\n" + embed["description"]
             if "description" not in embed:
                 em.description = discord.utils.escape_markdown(message.clean_content)
             if "url" in embed:
