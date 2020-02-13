@@ -332,7 +332,10 @@ class Star(commands.Cog):
         if message.embeds != []:
             embed = message.embeds[0]  # .to_dict()
             # print(embed)
-            em = discord.Embed(timestamp=message.timestamp)
+            if message.timestamp is not None:
+                em = discord.Embed(timestamp=message.timestamp)
+            else:
+                em = discord.Embed()
             if "title" in embed:
                 em.title = embed["title"]
             if "thumbnail" in embed:
