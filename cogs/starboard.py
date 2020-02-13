@@ -332,7 +332,7 @@ class Star(commands.Cog):
         if message.embeds != []:
             embed = message.embeds[0]  # .to_dict()
             # print(embed)
-            if message.timestamp is not None:
+            if hasattr(message, 'timestamp'):
                 em = discord.Embed(timestamp=message.timestamp)
             else:
                 em = discord.Embed()
