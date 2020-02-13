@@ -336,19 +336,19 @@ class Star(commands.Cog):
                 em = discord.Embed(timestamp=message.timestamp)
             else:
                 em = discord.Embed()
-            if "title" in embed:
+            if hasattr(embed, 'title'):
                 em.title = embed["title"]
-            if "thumbnail" in embed:
+            if hasattr(embed, 'thumbnail'):
                 em.set_thumbnail(url=embed["thumbnail"]["url"])
-            if "description" in embed:
+            if hasattr(embed, 'thumbnail'):
                 em.description = msg.clean_content + "\n\n" + embed["description"]
-            if "description" not in embed:
+            if not hasattr(embed, 'description'):
                 em.description = msg.clean_content
-            if "url" in embed:
+            if hasattr(embed, 'url'):
                 em.url = embed["url"]
-            if "footer" in embed:
+            if hasattr(embed, 'footer'):
                 em.set_footer(text=embed["footer"]["text"])
-            if "author" in embed:
+            if hasattr(embed, 'author'):
                 postauthor = embed["author"]
                 if "icon_url" in postauthor:
                     if author.nick is not None:
@@ -360,16 +360,16 @@ class Star(commands.Cog):
                         em.set_author(name=author.nick)
                     else:
                         em.set_author(name=author.name)
-            if "author" not in embed:
+            if not hasattr(embed, 'author'):
                 if author.nick is not None:
                     em.set_author(name=author.nick, icon_url=author.avatar_url)
                 else:
                     em.set_author(name=author.name, icon_url=author.avatar_url)
-            if "color" in embed:
+            if hasattr(embed, 'color'):
                 em.color = embed["color"]
-            if "color" not in embed:
+            if not hasattr(embed, 'color'):
                 em.color = author.top_role.color
-            if "image" in embed:
+            if hasattr(embed, 'image'):
                 em.set_image(url=embed["image"]["url"])
             if embed["type"] == "image":
                 em.type = "image"
