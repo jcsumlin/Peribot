@@ -330,7 +330,7 @@ class Star(commands.Cog):
     async def build_starboard_message(self, message: discord.Message, author: discord.Member, channel: discord.TextChannel):
         msg = message.content
         if message.embeds != []:
-            embed = message.embeds[0]  # .to_dict()
+            embed = message.embeds[0].to_dict()
             # print(embed)
             if hasattr(message, 'timestamp'):
                 em = discord.Embed(timestamp=message.timestamp)
@@ -343,7 +343,7 @@ class Star(commands.Cog):
             if hasattr(embed, 'thumbnail'):
                 em.description = msg.clean_content + "\n\n" + embed["description"]
             if not hasattr(embed, 'description'):
-                em.description = msg.clean_content
+                em.description = discord.utils.escape_markdown(message.clean_content)
             if hasattr(embed, 'url'):
                 em.url = embed["url"]
             if hasattr(embed, 'footer'):
