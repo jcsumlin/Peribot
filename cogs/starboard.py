@@ -391,6 +391,7 @@ class Star(commands.Cog):
                 em.set_author(name=author.name, icon_url=author.avatar_url)
             if message.attachments != []:
                 em.set_image(url=message.attachments[0].url)
+        em.add_field(name="jump to Message", value=f"[Click Here]({message.jump_url})")
         em.set_footer(text='{} | {}'.format(channel.guild.name, channel.name))
         return em
 

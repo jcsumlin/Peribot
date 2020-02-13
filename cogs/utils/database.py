@@ -372,7 +372,7 @@ class Database:
             self.session.commit()
             return message
         else:
-            return False
+            return await self.update_starboard_message(original_message_id, starboard_message_id, count)
 
     async def get_reminders(self):
         return list(self.session.query(RemindMe).all())

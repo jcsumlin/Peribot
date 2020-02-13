@@ -113,9 +113,8 @@ class Management(commands.Cog):
 
     @commands.command('purge', no_pm=True)
     @mod_or_higher()
-    async def purge(self, ctx, number: int):
-        async for message in ctx.message.channel.history(limit=number+1):
-            await message.delete()
+    async def purge(self, ctx, number: int = 5):
+        await ctx.channel.purge(limit=number)
         await self.database.audit_record(ctx.guild.id,
                                          ctx.guild.name,
                                          ctx.message.content,
