@@ -165,17 +165,28 @@ class Management(commands.Cog):
 
     @commands.command(name='mute')
     @mod_or_higher()
-    async def mute(self, ctx, user: discord.User):
-        pass
+    async def mute(self, ctx, member: discord.Member, minutes: int = 5):
+        for channel in member.guild.channels:
+            await channel.set_permissions(member, send_messages=False, reason=f"{ctx.message.author} muted {member}")
+        await ctx.send(f"<:check:677974494815584286> {member} has been muted for {minutes} minute(s)")
+        await asyncio.sleep(minutes * 60)
+        for channel in member.guild.channels:
+            await channel.set_permissions(member, send_messages=None, reason=f"{member} has been un-muted after {minutes} minute(s)")
+        await ctx.send(f"<:check:677974494815584286> {member} has been un-muted after {minutes} minute(s)")
 
     @commands.command(name='servers')
     @is_bot_owner_check()
     async def servers(self, ctx):
         servers = self.bot.guilds
         serverNames = []
+        member_count = 0
         for server in servers:
             serverNames.append(server.name)
-        await ctx.send(", ".join(serverNames))
+            member_count += len(server.members)
+        e = discord.Embed(title="Servers Peribot is apart of", description=", ".join(serverNames))
+        e.add_field(name="Number of Servers", value=str(len(serverNames)))
+        e.add_field(name="Number of Users", value=str(member_count))
+        await ctx.send(embed=e)
 
 
     @commands.command(name='pin')
