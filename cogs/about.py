@@ -1,5 +1,10 @@
+import datetime
+
 import discord
 from discord.ext import commands
+from loguru import logger
+
+from cogs.utils.checks import hastebin
 
 
 class Help(commands.Cog):
@@ -8,170 +13,191 @@ class Help(commands.Cog):
 
     @commands.command('help', aliases=["phelp"])
     async def help(self, ctx):
-        embed = discord.Embed(title="A modular Discord bot made by J_C___#8947", color=0x93ff50)
-        embed.set_author(name="Peribot", url="http://www.patreon.com/botboi")
+        embed = discord.Embed(title="A modular Discord bot made by J\_C\_\_\_#8947", color=0x93ff50)
+        embed.timestamp = datetime.datetime.utcnow()
+        embed.set_author(name="Peribot Help :: Patreon Support Page", url="http://www.patreon.com/botboi")
         embed.set_thumbnail(url="https://pa1.narvii.com/6363/a99a0f938da2c75791c1cfd8a93173eaf6c54b6a_128.gif")
-        embed.add_field(name="!source", value="Interested in my source code? This will return my GitHub repository.")
-        embed.add_field(name="!botboi",
-                        value="Love Peribot? Want your own bot? I have a Patreon with more info on how you can support my creations!")
-        embed2 = discord.Embed(title="Meme Commands", color=0x93ff50)
-        embed2.set_thumbnail(url="https://pa1.narvii.com/6507/d2f05279a966b21757f9c55b92ef71bc720dba64_128.gif")
-        embed2.add_field(name="!bigmoji :discord-emoji:", value="Returns a larger version of any emoji/reaction",
-                         inline=False)
-        embed2.add_field(name="!chikadance", value="(or !chika) returns random gif of Chika Dancing from ",
-                         inline=False)
-        embed2.add_field(name="!xkcd [number]",
-                         value="Returns today's XLCD post or a specific XLCD comic using it's number", inline=False)
-        embed3 = discord.Embed(title="Custom Commands", color=0x93ff50)
-
-        embed3.set_thumbnail(url="http://pa1.narvii.com/6520/ee53df0ba159bbebb84d3d7ed35bf89e8e978ac5_128.gif")
-        embed3.add_field(name="!cc add [command-name] [result]",
-                         value="Adds a server specific command that will return whatever text/link you want!",
-                         inline=False)
-        embed3.add_field(name="!cc list", value="Lists all of the server specific custom commands available",
-                         inline=False)
-        embed3.add_field(name="!cc edit [command-name] [result]",
-                         value="Edit what the bot says when you use your custom command",
-                         inline=False)
-        embed3.add_field(name="!cc delete [command]",
-                         value="Remove custom command from your server.",
-                         inline=False)
-        embed4 = discord.Embed(title="Utility Commands", color=0x93ff50)
-        embed4.set_thumbnail(url="https://pa1.narvii.com/6328/aef12f691e993564ae13c1e19c6d19d907d5886a_128.gif")
-        embed4.add_field(name="!welcome enable #channel [custom message | optional]",
-                         value="Sets the channel of your server where you want Peribot to welcome users\nNote: you can add [user] to your custom message to mention the new user!",
-                         inline=False)
-        embed4.add_field(name="!welcome disable",
-                         value="Disables the welcome new users function",
-                         inline=False)
-        embed4.add_field(name="!poll [question], [option 1], [option ...]",
-                         value="Creates a poll for users to respond to. You can use up to 10 options!", inline=False)
-        embed4.add_field(name="!quickpoll [question]",
-                         value="Creates a quick yes, no or i dont car poll for users to respond to", inline=False)
-        embed4.add_field(name="!ded",
-                         value="Press F the chat is dead.",
-                         inline=False)
-        embed4.add_field(name="!eightball [question]", value="(or !8b) Ask the magic conch your deepest questions",
-                         inline=False)
-
-        embed4.add_field(name="!ping", value="Pong!",
-                         inline=False)
-        embed4.add_field(name="!avatar [User]", value="Sends the [user]'s Discord Avatar",
-                         inline=False)
-        embed4.add_field(name="!pin [message]",
-                         value="Copy your message in a stylish and modern frame, and then fix it!",
-                         inline=False)
-        embed4.add_field(name="!roll [max]", value="(or !r) rolls a d20 or d[max] die",
-                         inline=False)
-        embed4.add_field(name="!flip", value="Flips a coin ... or a user. But not me.",
-                         inline=False)
-        embed4.add_field(name="!hiatus", value="How long has this Hiatus been going on for? (SVTFOE and SU)",
-                         inline=False)
-        embed4.add_field(name="!urban [word] [definition number]",
-                         value="Uses Urban Dictionary to define a word. Example: !urban hello. If there is more than one definition you can return a specific definition by secifying its number",
-                         inline=False)
-        embed4.add_field(name="!remindme [quantity] [time_unit] [text]",
-                         value="Sends you <text> when the time is up. Accepts: minutes, hours, days, weeks, month. Example: !remindme 3 days Have sushi with Asu and JennJenn",
-                         inline=False)
-        embed4.add_field(name="!remindhere [quantity] [time_unit] [text]",
-                         value="Sends a channel <text> when the time is up. Accepts: minutes, hours, days, weeks, month. Example: !remindhere 3 days Have sushi with Asu and JennJenn. Will use @here! and requires role with name 'RemindHere'",
-                         inline=False)
-        embed4.add_field(name="!forgetme", value="Removes all your upcoming notifications", inline=False)
-        embed5 = discord.Embed(title="Kindness Commands", color=0x93ff50)
-        embed5.set_thumbnail(url="http://pa1.narvii.com/6341/7ff7b249739c0841f8a64ecfe23ab0bc15257ace_128.gif")
-        embed5.add_field(name="!kiss [user]", value="Smooch someone you love <3", inline=False)
-        embed5.add_field(name="!cuddle [user]",
-                         value="Cuddle your favorite users with lots of love <3. Results may vary...", inline=False)
-        embed5.add_field(name="!cats", value="Sends a cute cat :3", inline=False)
-        embed5.add_field(name="!pugs [user]", value="Sends a cute Pug", inline=False)
-        embed5.add_field(name="!catsbomb [amount]", value="Throws a cat bomb! Amount Defaults to 5", inline=False)
-        embed5.add_field(name="!pugsbomb [amount]", value="Throws a pugs bomb! Amount defaults to 5", inline=False)
-        embed5.add_field(name="!hug [user]", value="Hug someone with a laundry list of gifs", inline=False)
-        embed5.add_field(name="!compliment [user]", value="Make someone's day buy sending them a compliment",
-                         inline=False)
-        embed5.add_field(name="!ship [user1] [user2]", value="Creates a ship name for two users", inline=False)
-        embed6 = discord.Embed(title="Stream Alert Commands", color=0x6441a5)
-        embed6.set_thumbnail(
-            url="https://cdn2.iconfinder.com/data/icons/gaming-platforms-logo-shapes/250/twitch_logo-256.png")
-        embed6.add_field(name="!streamalert [source] [url]",
-                         value="Example: !streamalert twitch https://www.twitch.tv/J_C___ This will alert this channel when the specified twitch user goes live.",
-                         inline=False)
-        embed6.add_field(name="!streamalert stop [url]",
-                         value="Example: !streamalert stop https://www.twitch.tv/J_C___ This will stop alerts in this channel.",
-                         inline=False)
-        embed6.add_field(name="!streamset mention [mention_type]",
-                         value="Sets mentions for stream alerts Types: everyone, here, none. Example: !streamset mention everyone",
-                         inline=False)
-        embed7 = discord.Embed(title="Starboard Commands", color=0x93ff50)
-        embed7.set_thumbnail(
-            url="https://66.media.tumblr.com/6a26e7bb8eb024d8a8b5ee7eef1ac04f/tumblr_p0xl72aK9y1vdwh7uo2_500.gif")
-        embed7.add_field(name="!starboard setup [channel] [emoji] [role]",
-                         value="Sets the starboard channel, emoji and role. All of the parameters are optional.",
-                         inline=False)
-        embed7.add_field(name="!starboard ignore [channel]",
-                         value="This will ignore all starboard messages in this channel", inline=False)
-        embed7.add_field(name="!starboard emoji [emoji]",
-                         value="Sets the emoji that the starboard tracks. Defaults to ⭐", inline=False)
-        embed7.add_field(name="!starboard channel [channel]", value="Sets the channel that the starboard resides in.",
-                         inline=False)
-        embed7.add_field(name="!starboard threshold [threshold]",
-                         value="Sets the threshold of 'stars' required for a post to make it to the starboard.",
-                         inline=False)
-        embed7.add_field(name="!starboard clear", value="Clears the database of previous starred messages.",
-                         inline=False)
+        embed.add_field(name="View Command Documentation", value="[Here](https://jcsumlin.github.io/peribot-docs/)")
+        embed.add_field(name="Support Server", value="[Join Now](https://discord.gg/dGGdQQD)")
+        embed.set_footer(text=f"ID: {ctx.author.id}")
 
         await ctx.send(embed=embed)
-        await ctx.send(embed=embed2)
-        await ctx.send(embed=embed3)
-        await ctx.send(embed=embed4)
-        await ctx.send(embed=embed5)
-        await ctx.send(embed=embed6)
-        await ctx.send(embed=embed7)
 
-    @commands.command(aliases=['server', 'sinfo', 'si'], )
-    async def serverinfo(self, ctx):
-        """Various info about the server. !help server for more info."""
-        guild = ctx.guild
-        online = 0
-        for i in guild.members:
-            if str(i.status) == 'online' or str(i.status) == 'idle' or str(i.status) == 'dnd':
-                online += 1
-        all_users = []
-        for user in guild.members:
-            all_users.append('{}#{}'.format(user.name, user.discriminator))
-        all_users.sort()
-        all = '\n'.join(all_users)
+    @commands.group(aliases=['server', 'sinfo', 'si'], invoke_without_command=True)
+    async def serverinfo(self, ctx, *, msg=""):
+        """Various info about the server. [p]help server for more info."""
+        if ctx.invoked_subcommand is None:
+            if msg:
+                server = None
+                try:
+                    float(msg)
+                    server = self.bot.get_guild(int(msg))
+                    if not server:
+                        return await ctx.send(
+                            self.bot.bot_prefix + 'Server not found.')
+                except:
+                    for i in self.bot.guilds:
+                        if i.name.lower() == msg.lower():
+                            server = i
+                            break
+                    if not server:
+                        return await ctx.send(
+                            self.bot.bot_prefix + 'Could not find server. Note: You must be a member of the server you are trying to search.')
+            else:
+                server = ctx.message.guild
 
-        channel_count = len(
-            [x for x in guild.channels if type(x) == self.bot.get_all_channels()])
+            online = 0
+            for i in server.members:
+                if str(i.status) == 'online' or str(i.status) == 'idle' or str(i.status) == 'dnd':
+                    online += 1
+            all_users = []
+            for user in server.members:
+                all_users.append('{}#{}'.format(user.name, user.discriminator))
+            all_users.sort()
+            all = '\n'.join(all_users)
 
-        role_count = len(guild.roles)
-        emoji_count = len(guild.emojis)
-        print("Done with calculations")
-        em = discord.Embed(title="", color=discord.Color.green())
-        em.add_field(name='Name', value=guild.name)
-        em.add_field(name='Owner', value=guild.owner.nick, inline=False)
-        em.add_field(name='Members', value=str(guild.member_count))
-        em.add_field(name='Currently Online', value=str(online))
-        em.add_field(name='Text Channels', value=str(channel_count))
-        em.add_field(name='Region', value=guild.region)
-        em.add_field(name='Verification Level', value=str(guild.verification_level))
-        # em.add_field(name='Highest role', value=guild.role_hierarchy[0])
-        em.add_field(name='Number of roles', value=str(role_count))
-        em.add_field(name='Number of emotes', value=str(emoji_count))
-        em.add_field(name='Number of boosts', value=str(guild.premium_subscription_count))
-        if len(guild.features) > 0:
-            em.add_field(name='Guild Features', value=f"{guild.features.join(', ')}")
-        em.add_field(name='Created At',
-                     value=guild.created_at.__format__('%A, %d. %B %Y @ %H:%M:%S'))
-        if guild.is_icon_animated():
-            em.set_thumbnail(url=guild.icon_url_as(format='gif'))
+            channel_count = len([x for x in server.channels if type(x) == discord.channel.TextChannel])
+
+            role_count = len(server.roles)
+            emoji_count = len(server.emojis)
+
+            em = discord.Embed(color=0xea7938)
+            em.add_field(name='Name', value=server.name)
+            em.add_field(name='Owner', value=server.owner, inline=False)
+            em.add_field(name='Members', value=server.member_count)
+            em.add_field(name='Currently Online', value=str(online))
+            em.add_field(name='Text Channels', value=str(channel_count))
+            em.add_field(name='Region', value=server.region)
+            em.add_field(name='Verification Level', value=str(server.verification_level))
+            em.add_field(name='Highest role', value=server.roles[-1])
+            em.add_field(name='Number of roles', value=str(role_count))
+            em.add_field(name='Number of emotes', value=str(emoji_count))
+            url = await hastebin(str(all))
+
+            hastebin_of_users = '[List of all {} users in this server]({})'.format(server.member_count, url)
+            em.add_field(name='Users', value=hastebin_of_users)
+            em.add_field(name='Created At', value=server.created_at.__format__('%A, %d. %B %Y @ %H:%M:%S'))
+            em.set_thumbnail(url=server.icon_url)
+            em.set_author(name='Server Info', icon_url='https://i.imgur.com/RHagTDg.png')
+            em.set_footer(text='Server ID: %s' % server.id)
+            logger.debug(all)
+            await ctx.send(embed=em)
+            await ctx.message.delete()
+
+    @serverinfo.command(pass_context=True)
+    async def emojis(self, ctx, msg: str = None):
+        """List all emojis in this server. Ex: [p]server emojis"""
+        server = ctx.message.guild
+        emojis = [str(x) for x in server.emojis]
+        await ctx.send("".join(emojis))
+        await ctx.message.delete()
+
+    @serverinfo.command(pass_context=True)
+    async def avi(self, ctx, msg: str = None):
+        """Get server avatar image link."""
+        server = ctx.message.guild
+        em = discord.Embed()
+        em.set_image(url=server.icon_url)
+        await ctx.send(embed=em)
+        await ctx.message.delete()
+
+    @serverinfo.command()
+    async def role(self, ctx, *, msg):
+        """Get more info about a specific role. Ex: [p]server role Admins"""
+        guild = ctx.message.guild
+        guild_roles = ctx.message.guild.roles
+        for role in guild_roles:
+            if msg.lower() == role.name.lower() or msg == role.id:
+                all_users = [str(x) for x in role.members]
+                all_users.sort()
+                all_users = ', '.join(all_users)
+                em = discord.Embed(title='Role Info', color=role.color)
+                em.add_field(name='Name', value=role.name)
+                em.add_field(name='ID', value=role.id, inline=False)
+                em.add_field(name='Users in this role', value=str(len(role.members)))
+                em.add_field(name='Role color hex value', value=str(role.color))
+                em.add_field(name='Role color RGB value', value=role.color.to_rgb())
+                em.add_field(name='Mentionable', value=role.mentionable)
+                if len(role.members) > 10:
+                    all_users = all_users.replace(', ', '\n')
+                    url = await hastebin(str(all_users))
+                    em.add_field(name='All users',
+                                 value='{} users. [List of users posted to Hastebin.]({})'.format(len(role.members),
+                                                                                                  url), inline=False)
+                elif len(role.members) >= 1:
+                    em.add_field(name='All users', value=all_users, inline=False)
+                else:
+                    em.add_field(name='All users', value='There are no users in this role!', inline=False)
+                em.add_field(name='Created at', value=role.created_at.__format__('%x at %X'))
+                em.set_thumbnail(url='http://www.colorhexa.com/{}.png'.format(str(role.color).strip("#")))
+                await ctx.message.delete()
+                return await ctx.send(content=None, embed=em)
+        await ctx.message.delete()
+        await ctx.send(self.bot.bot_prefix + 'Could not find role ``{}``'.format(msg))
+
+    @commands.command(aliases=['channel', 'cinfo', 'ci'], no_pm=True)
+    async def channelinfo(self, ctx, channel: int = None):
+        """Shows channel information"""
+        if not channel:
+            channel = ctx.message.channel
         else:
-            em.set_thumbnail(url=guild.icon_url_as(format='png'))
-        em.set_author(name='Server Info')
-        em.set_footer(text='Server ID: %s' % guild.id)
-        print("sending")
-        message = await ctx.send(embed=em)
+            channel = self.bot.get_channel(channel)
+        data = discord.Embed()
+        if hasattr(channel, 'mention'):
+            data.description = "**Information about Channel:** " + channel.mention
+        if hasattr(channel, 'changed_roles'):
+            if len(channel.changed_roles) > 0:
+                data.color = discord.Color.green() if channel.changed_roles[0].permissions.read_messages else discord.Color.red()
+        if isinstance(channel, discord.TextChannel):
+            _type = "Text"
+        elif isinstance(channel, discord.VoiceChannel):
+            _type = "Voice"
+        else:
+            _type = "Unknown"
+        data.add_field(name="Type", value=_type)
+        data.add_field(name="ID", value=channel.id, inline=False)
+        if hasattr(channel, 'position'):
+            data.add_field(name="Position", value=channel.position)
+        if isinstance(channel, discord.VoiceChannel):
+            if channel.user_limit != 0:
+                data.add_field(name="Users Connected", value="{}/{}".format(len(channel.members), channel.user_limit))
+            else:
+                data.add_field(name="Users Connected", value="{}".format(len(channel.members)))
+
+            userlist = [r.display_name for r in channel.members]
+            if not userlist:
+                userlist = "None"
+            else:
+                userlist = "\n".join(userlist)
+
+            data.add_field(name="Users", value=userlist)
+            data.add_field(name="Bitrate", value=str(channel.bitrate))
+        elif isinstance(channel, discord.TextChannel):
+            try:
+                pins = await channel.pins()
+                data.add_field(name="Pins", value=str(len(pins)), inline=True)
+            except discord.Forbidden:
+                pass
+            data.add_field(name="Members", value="%s" % len(channel.members))
+            if channel.topic:
+                data.add_field(name="Topic", value=channel.topic, inline=False)
+            hidden = []
+            allowed = []
+            for role in channel.changed_roles:
+                if role.permissions.read_messages is True:
+                    if role.name != "@everyone":
+                        allowed.append(role.mention)
+                elif role.permissions.read_messages is False:
+                    if role.name != "@everyone":
+                        hidden.append(role.mention)
+            if len(allowed) > 0:
+                data.add_field(name='Allowed Roles ({})'.format(len(allowed)), value=', '.join(allowed), inline=False)
+            if len(hidden) > 0:
+                data.add_field(name='Restricted Roles ({})'.format(len(hidden)), value=', '.join(hidden), inline=False)
+        if channel.created_at:
+            data.set_footer(text=("Created on {} ({} days ago)".format(channel.created_at.strftime("%d %b %Y %H:%M"), (
+                        ctx.message.created_at - channel.created_at).days)))
+        await ctx.send(embed=data)
 
 
 def setup(bot):

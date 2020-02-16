@@ -1,5 +1,5 @@
+import aiohttp
 from discord.ext import commands
-from loguru import logger
 
 
 #
@@ -46,3 +46,12 @@ def is_in_guild(guild_id):
 
 def mod_or_higher():
     return commands.has_permissions(manage_messages=True)
+
+async def hastebin(content):
+    async with aiohttp.ClientSession() as session:
+        async with session.post('https://hastebin.com/documents', data=content.encode('utf-8')) as r:
+            if r.status == 200:
+                result = await r.json()
+                return "https://hastebin.com/" + result["key"]
+            else:
+                return "Error with creating Hastebin. Status: %s" % resp.status
