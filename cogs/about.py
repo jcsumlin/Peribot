@@ -2,7 +2,6 @@ import datetime
 
 import discord
 from discord.ext import commands
-from loguru import logger
 
 from cogs.utils.checks import hastebin
 
@@ -80,7 +79,6 @@ class Help(commands.Cog):
             em.set_thumbnail(url=server.icon_url)
             em.set_author(name='Server Info', icon_url='https://i.imgur.com/RHagTDg.png')
             em.set_footer(text='Server ID: %s' % server.id)
-            logger.debug(all)
             await ctx.send(embed=em)
             await ctx.message.delete()
 
