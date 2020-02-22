@@ -5,7 +5,6 @@ import discord
 import requests
 from bs4 import BeautifulSoup
 from discord.ext import commands
-from loguru import logger
 
 
 class Fun(commands.Cog):
@@ -47,7 +46,6 @@ class Fun(commands.Cog):
                     return
                 msg = random.randint(1, upper_bound)
                 math = f"{msg} {modifier} {number}"
-                logger.info(math)
                 msg = eval(math)
 
         if msg >= upper_bound:
