@@ -54,4 +54,4 @@ async def hastebin(content):
                 result = await r.json()
                 return "https://hastebin.com/" + result["key"]
             else:
-                return "Error with creating Hastebin. Status: %s" % resp.status
+                return "Error with creating Hastebin. Status: %s" % r.status
