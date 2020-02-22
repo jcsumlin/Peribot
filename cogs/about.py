@@ -199,6 +199,51 @@ class Help(commands.Cog):
                         ctx.message.created_at - channel.created_at).days)))
         await ctx.send(embed=data)
 
+    @commands.group(invoke_without_command=True, aliases=['user', 'uinfo', 'info', 'ui'])
+    async def userinfo(self, ctx, *, name=None):
+        """Get user info. Ex: [p]info @user"""
+        if ctx.invoked_subcommand is None:
+            if name:
+                try:
+                    user = ctx.message.mentions[0]
+                except IndexError:
+                    user = ctx.guild.get_member_named(name)
+                if not user:
+                    user = ctx.guild.get_member(int(name))
+                if not user:
+                    user = self.bot.get_user(int(name))
+                if not user:
+                    await ctx.send(self.bot.bot_prefix + 'Could not find user.')
+                    return
+            else:
+                user = ctx.message.author
+
+            avi = user.avatar_url_as(format='png')
+
+            if isinstance(user, discord.Member):
+                role = user.top_role.name
+                if role == "@everyone":
+                    role = "N/A"
+                voice_state = None if not user.voice else user.voice.channel
+            em = discord.Embed(timestamp=ctx.message.created_at, colour=0x708DD0)
+            em.add_field(name='User ID', value=user.id, inline=True)
+            if isinstance(user, discord.Member):
+                em.add_field(name='Nick', value=user.nick, inline=True)
+                em.add_field(name='Status', value=user.status, inline=True)
+                em.add_field(name='In Voice', value=voice_state, inline=True)
+                for activity in user.activities:
+                    if activity.type == 4:
+                        continue
+                    game = activity.name
+                    em.add_field(name='Game', value=game, inline=True)
+                em.add_field(name='Highest Role', value=role, inline=True)
+            em.add_field(name='Account Created', value=user.created_at.__format__('%A, %d. %B %Y @ %H:%M:%S'), inline=False)
+            if isinstance(user, discord.Member):
+                em.add_field(name='Join Date', value=user.joined_at.__format__('%A, %d. %B %Y @ %H:%M:%S'), inline=False)
+            em.set_thumbnail(url=avi)
+            em.set_author(name=user, icon_url='')
+            await ctx.send(embed=em)
+            await ctx.message.delete()
 
 def setup(bot):
     bot.add_cog(Help(bot))
