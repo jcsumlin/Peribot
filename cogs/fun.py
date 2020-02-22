@@ -5,12 +5,12 @@ import discord
 import requests
 from bs4 import BeautifulSoup
 from discord.ext import commands
+from loguru import logger
 
 
 class Fun(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-
 
     @commands.command()
     async def ping(self, ctx):
@@ -30,15 +30,27 @@ class Fun(commands.Cog):
         await ctx.send(topic)
 
     @commands.command(aliases=['r'])
-    async def roll(self, ctx, upper_bound=20 #type: int
-                   ):
-        """
-        Roll a d20 or a d[upper_bound]
-        :param upper_bound: the highest you can roll.
-        :return: Your die roll
-        """
-        msg = random.randint(1,int(upper_bound))
-        if msg == upper_bound:
+    async def roll(self, ctx, upper_bound: int = None, modifier: str = None, number: int = None):
+        if upper_bound is None and modifier is None and number is None:
+            upper_bound = 20
+            msg = random.randint(1, upper_bound)
+        else:
+            if upper_bound is not None and modifier is None and number is None:
+                msg = random.randint(1, upper_bound)
+            else:
+                allowed_modifiers = ["+", "-", "*", "/"]
+                if modifier not in allowed_modifiers:
+                    await ctx.send("That is not a valid modifier! Allowed Modifiers include: " + str(allowed_modifiers))
+                    return
+                if upper_bound is not None and modifier is not None and number is None:
+                    await ctx.send(f"If you want to specify a modifier please make sure to give a number after it!\n\rExample: {ctx.prefix}roll 20 + 2")
+                    return
+                msg = random.randint(1, upper_bound)
+                math = f"{msg} {modifier} {number}"
+                logger.info(math)
+                msg = eval(math)
+
+        if msg >= upper_bound:
             msg = "***Critical Hit!*** " + str(msg)
         elif msg == 1:
             msg = "***Critical Fail!*** " + str(msg)
@@ -60,7 +72,7 @@ class Fun(commands.Cog):
         await ctx.send(embed=embedMsg)
 
     @commands.command()
-    async def flip(self, ctx, user : discord.Member=None):
+    async def flip(self, ctx, user: discord.Member = None):
         """
         Flips a coin ... or a user. But not me.
         :param user: the user you are flipping
