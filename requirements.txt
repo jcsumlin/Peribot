@@ -16,3 +16,5 @@ PyNaCl
 pytz
 opencv-python
 numpy
+discord-timers
+
