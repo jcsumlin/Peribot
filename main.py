@@ -5,7 +5,7 @@ import re
 import time
 from configparser import *
 
-from discord.ext import commands
+from discord.ext import commands, timers
 from loguru import logger
 
 from cogs.utils.checks import is_bot_owner_check
@@ -49,6 +49,7 @@ async def on_ready():
     When bot is ready and online it prints that its online
     :return:
     """
+    bot.timer_manager = timers.TimerManager(bot)
     logger.debug("Bot is ready!")
 
 
