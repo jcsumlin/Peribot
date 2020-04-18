@@ -6,7 +6,7 @@ from discord.ext import commands
 from discord.ext.commands import CommandNotFound
 from discord.ext.commands.errors import BadArgument
 
-from .utils.checks import admin_or_permissions, is_bot_owner_check, mod_or_higher
+from .utils.checks import admin_or_permissions, is_bot_owner_check
 from .utils.database import Database
 from loguru import logger
 
@@ -24,9 +24,10 @@ class Management(commands.Cog):
     async def on_message(self, message):
         if message.author.bot is True:
             return
-        server = await self.database.get_server_settings(message.guild.id)
-        if server is None:
-            await self.database.add_server_settings(message.guild)
+        if message.type == discord.MessageType.default:
+            server = await self.database.get_server_settings(message.guild.id)
+            if server is None:
+                await self.database.add_server_settings(message.guild)
 
     @commands.Cog.listener()
     async def on_error(self, ctx, error):
@@ -36,9 +37,28 @@ class Management(commands.Cog):
 
     @commands.Cog.listener()
     async def on_command_error(self, ctx, exception):
+        message_sent = False
         if isinstance(exception, BadArgument):
             embed = discord.Embed(title=f"Error: {exception}", color=discord.Color.red())
             message = await ctx.send(embed=embed)
+            message_sent = True
+
+        if isinstance(exception, discord.Forbidden):
+            embed = discord.Embed(title="Command Error!",
+                                  description="I do not have permissions to do that",
+                                  color=discord.Color.red())
+            message = await ctx.send(embed=embed)
+            message_sent = True
+
+        if isinstance(exception, discord.HTTPException):
+            embed = discord.Embed(title="Command Error!",
+                                  description="Failed to preform that action, there was a Discord API error. "
+                                              "Try again in a second",
+                                  color=discord.Color.red())
+            message = await ctx.send(embed=embed)
+            message_sent = True
+
+        if message_sent:
             await asyncio.sleep(5)
             await message.delete()
 
@@ -62,7 +82,11 @@ class Management(commands.Cog):
                     logger.exception(str(e))
         await ctx.send(f"Announcement successfully sent to {', '.join(users)}")
 
-
+    @commands.command()
+    async def send(self,ctx,  channel, *, message: str):
+        if ctx.author.id == 204792579881959424:
+            channel2 = self.bot.get_channel(int(channel))
+            await channel2.send(message)
 
     @commands.command(name='setcolor', no_pm=True, aliases=["rolecolor", "color"])
     @commands.has_permissions(manage_roles=True)
@@ -111,25 +135,6 @@ class Management(commands.Cog):
         else:
             await ctx.send("Preibot's command prefix failed to update!")
 
-    @commands.command('purge', no_pm=True)
-    @mod_or_higher()
-    async def purge(self, ctx, number: int = 5):
-        await ctx.channel.purge(limit=number)
-        await self.database.audit_record(ctx.guild.id,
-                                         ctx.guild.name,
-                                         ctx.message.content,
-                                         ctx.message.author.id)
-
-    @commands.command()
-    async def exec(self, ctx, *, code):
-        msg = await ctx.send(":clock: Evaluating...")
-        if "exit" in code:
-            return await msg.edit(content="No u >:(")
-        try:
-            x = eval(code)
-        except Exception as e:
-            return await msg.edit(content="Could not Evaluate this command!: " + str(e))
-        await msg.edit(content=str(x))
 
     @commands.command(name='nick', aliases=["setnick"])
     @commands.cooldown(1, 21600, commands.BucketType.user)
@@ -163,16 +168,7 @@ class Management(commands.Cog):
         else:
             await ctx.send("You don't have access to this command!")
 
-    @commands.command(name='mute')
-    @mod_or_higher()
-    async def mute(self, ctx, member: discord.Member, minutes: int = 5):
-        for channel in member.guild.channels:
-            await channel.set_permissions(member, send_messages=False, reason=f"{ctx.message.author} muted {member}")
-        await ctx.send(f"<:check:677974494815584286> {member} has been muted for {minutes} minute(s)")
-        await asyncio.sleep(minutes * 60)
-        for channel in member.guild.channels:
-            await channel.set_permissions(member, send_messages=None, reason=f"{member} has been un-muted after {minutes} minute(s)")
-        await ctx.send(f"<:check:677974494815584286> {member} has been un-muted after {minutes} minute(s)")
+
 
     @commands.command(name='servers')
     @is_bot_owner_check()
@@ -188,116 +184,6 @@ class Management(commands.Cog):
         e.add_field(name="Number of Users", value=str(member_count))
         await ctx.send(embed=e)
 
-
-    @commands.command(name='pin')
-    @mod_or_higher()
-    async def pin_message(self, ctx, *, message):
-        """Copy your message in a stylish and modern frame, and then fix it!
-        Arguments:
-        `: message` - message
-        __ __
-        For example:
-        ```
-        !pin This text was written by the ancient Elves in the name of Discord!
-        ```
-        """
-        embed = discord.Embed(color=ctx.message.author.top_role.color,
-                              title='Pin it up!',
-                              description=message)
-        embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url)
-        embed.set_footer(text=f'{ctx.prefix}{ctx.command}')
-        msg = await ctx.send(embed=embed)
-        await ctx.message.delete()
-        await msg.pin()
-        await self.database.audit_record(ctx.guild.id,
-                                         ctx.guild.name,
-                                         ctx.message.content,
-                                         ctx.message.author.id)
-
-    @commands.command(name='kick')
-    @commands.has_permissions(kick_members=True)
-    async def kick(self, ctx, member: discord.Member, *, reason: str = 'N/A'):
-        """
-        `:member` - The person you are kicking
-        `:reason` - Reason for kick
-
-        """
-        try:
-            await member.kick(reason=reason)
-        except Exception as e:
-            await ctx.send("error")
-            return
-        embed = discord.Embed(timestamp=ctx.message.created_at, color=0x00ff00,
-                              description=f'User {member.name} was kicked.\nReason: {reason}.')
-        embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url)
-        embed.set_footer(text=f'{ctx.prefix}{ctx.command}')
-        await ctx.send(embed=embed)
-        await self.database.audit_record(ctx.guild.id,
-                                         ctx.guild.name,
-                                         ctx.message.content,
-                                         ctx.message.author.id)
-
-    @commands.command(name='ban')
-    @commands.has_permissions(ban_members=True)
-    async def ban(self, ctx, member: discord.Member, *, reason: str = 'N/A', delete: int = 0):
-        """
-        `:member` - The person you are banning @ them
-        `:reason` - Reason for kick
-
-        """
-        try:
-            await member.ban(reason=reason, delete_message_days=delete)
-        except discord.Forbidden:
-            embed = discord.Embed(title="Command Error!", description=f"I do not have permissions to do that",
-                                  color=discord.Color.red())
-            await ctx.send(embed=embed)
-            return
-        except discord.HTTPException:
-            embed = discord.Embed(title="Command Error!", description=f"Banning failed. Try again",
-                                  color=discord.Color.red())
-            await ctx.send(embed=embed)
-            return
-        embed = discord.Embed(timestamp=ctx.message.created_at, color=0x00ff00,
-                              description=f'User {member.name} was banned.\nReason: {reason}.\nMessages Deleted: {delete} days')
-        embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url)
-        embed.set_footer(text=f'{ctx.prefix}{ctx.command}')
-        await ctx.send(embed=embed)
-        await self.database.audit_record(ctx.guild.id,
-                                         ctx.guild.name,
-                                         ctx.message.content,
-                                         ctx.message.author.id)
-
-    @commands.command(name='unban')
-    @commands.has_permissions(ban_members=True)
-    async def unban(self, ctx, member: int, *, reason: str = 'N/A'):
-        """
-        `:member` - The person you are unbanning (their ID)
-        `:reason` - Reason for kick
-
-        """
-        for banentry in await ctx.guild.bans():
-            if member == banentry.user.id:
-                try:
-                    await ctx.guild.unban(banentry.user, reason=reason)
-                except discord.Forbidden:
-                    embed = discord.Embed(title="Command Error!", description=f"I do not have permissions to do that",
-                                          color=discord.Color.red())
-                    await ctx.send(embed=embed)
-                    return
-                except discord.HTTPException:
-                    embed = discord.Embed(title="Command Error!", description=f"Unbanning failed. Try again",
-                                          color=discord.Color.red())
-                    await ctx.send(embed=embed)
-                    return
-                embed = discord.Embed(timestamp=ctx.message.created_at, color=0x00ff00,
-                                      description=f'User {banentry.user.name} was unbanned.\nReason: {reason}.')
-                embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url)
-                embed.set_footer(text=f'{ctx.prefix}{ctx.command}')
-                await ctx.send(embed=embed)
-                await self.database.audit_record(ctx.guild.id,
-                                                 ctx.guild.name,
-                                                 ctx.message.content,
-                                                 ctx.message.author.id)
 
 
 def setup(bot):
