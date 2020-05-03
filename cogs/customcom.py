@@ -133,6 +133,8 @@ class CustomCommands(commands.Cog):
         prefix = await self.get_prefix(message)
         if not prefix:
             return
+        if prefix not in message:
+            return
 
         cmd = message.content[len(prefix):]
         cmd = await self.database.get_custom_command(message.guild.id, cmd)
