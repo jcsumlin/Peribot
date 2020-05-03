@@ -133,7 +133,7 @@ class CustomCommands(commands.Cog):
         prefix = await self.get_prefix(message)
         if not prefix:
             return
-        if prefix not in message:
+        if prefix not in message.content:
             return
 
         cmd = message.content[len(prefix):]
