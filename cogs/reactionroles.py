@@ -29,44 +29,66 @@ class ReactionRoles(commands.Cog):
         self.database = Database()
 
     @commands.Cog.listener()
-    async def on_reaction_remove(self, reaction, user):
+    async def on_raw_reaction_remove(self, payload):
+        reaction = payload.emoji
+        message_id = payload.message_id
+        guild_id = payload.guild_id
+        guild = discord.utils.find(lambda g: g.id == guild_id, self.bot.guilds)
+        user = discord.utils.get(guild.members, id=payload.user_id)
+        channel = discord.utils.get(guild.channels, id=payload.channel_id)
+        message = await channel.fetch_message(id=message_id)
+
         if not user.bot:
-            reaction_role_group = await self.database.get_reaction_role_message(message_id=reaction.message.id,
+            reaction_role_group = await self.database.get_reaction_role_message(message_id=message_id,
                                                                                 role_emoji=str(reaction))
             if reaction_role_group is not None:
-                if str(reaction.emoji) == reaction_role_group['role'].role_emoji:
+                if str(reaction) == reaction_role_group['role'].role_emoji:
                     try:
-                        role = discord.utils.get(reaction.message.guild.roles, id=reaction_role_group['role'].role_id)
+                        role = discord.utils.get(guild.roles, id=reaction_role_group['role'].role_id)
                     except Exception as e:
-                        logger.error('Could not get role ' + e)
+                        logger.error(f'Could not get role {e}')
                         await reaction.message.remove_reaction(reaction, user)
                         return await reaction.message.channel.send(embed=command_error('Removing Role From User',
                                                                                        "That role could not be found! Please contact an admin!"))
+                    if role not in user.roles:
+                        await user.send(f"You don't have the {role.name} role, no action was preformed!")
+                        return
                     try:
                         await user.remove_roles(role, reason=f"Reaction Role Group {reaction_role_group['group'].group_name}")
                         await user.send(f"You have successfully removed the {role.name} role!")
                     except discord.errors.Forbidden:
                         await user.send(embed=command_error('Removing Role from User', "Permission Denied! Please make sure that I have 'Manage Roles' turned on!"))
-                        await reaction.message.remove_reaction(reaction, user)
+                        await message.remove_reaction(reaction, user)
 
     @commands.Cog.listener()
-    async def on_reaction_add(self, reaction, user):
+    async def on_raw_reaction_add(self, payload):
+        reaction = payload.emoji
+        message_id = payload.message_id
+        guild_id = payload.guild_id
+        guild = discord.utils.find(lambda g: g.id == guild_id, self.bot.guilds)
+        user = discord.utils.get(guild.members, id=payload.user_id)
+        channel = discord.utils.get(guild.channels, id=payload.channel_id)
+        message = await channel.fetch_message(id=message_id)
         if not user.bot:
-            reaction_role_group = await self.database.get_reaction_role_message(message_id=reaction.message.id, role_emoji=str(reaction))
+            reaction_role_group = await self.database.get_reaction_role_message(message_id=message_id, role_emoji=str(reaction))
             if reaction_role_group is not None:
-                if str(reaction.emoji) == reaction_role_group['role'].role_emoji:
+                if str(reaction) == reaction_role_group['role'].role_emoji:
                     try:
-                        role = discord.utils.get(reaction.message.guild.roles, id=reaction_role_group['role'].role_id)
+                        role = discord.utils.get(guild.roles, id=reaction_role_group['role'].role_id)
                     except Exception as e:
-                        logger.error('Could not get role ' + e)
+                        logger.error(f'Could not get role {e}')
                         await reaction.message.remove_reaction(reaction, user)
                         return await reaction.message.channel.send(embed=command_error('Adding Role to User', "That role could not be found! Please contact an admin!"))
+                    if role in user.roles:
+                        await user.send(f"You already have the {role.name} role, no action was preformed!")
+                        return
+
                     try:
                         await user.add_roles(role, reason=f"Reaction Role Group {reaction_role_group['group'].group_name}")
                         await user.send(f"You have successfully received the {role.name} role!")
                     except discord.errors.Forbidden:
                         await user.send(embed=command_error('Adding Role to User', "Permission Denied! Please make sure that I have 'Manage Roles' turned on!"))
-                        await reaction.message.remove_reaction(reaction, user)
+                        await message.remove_reaction(reaction, user)
                 pass
 
     @commands.group(aliases=['rr'])
