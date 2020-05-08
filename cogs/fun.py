@@ -29,11 +29,17 @@ class Fun(commands.Cog):
         await ctx.send(topic)
 
     @commands.command(aliases=['r'])
-    async def roll(self, ctx, upper_bound: int = None, modifier: str = None, number: int = None):
+    async def roll(self, ctx, upper_bound: str = None, modifier: str = None, number: int = None):
         if upper_bound is None and modifier is None and number is None:
             upper_bound = 20
             msg = random.randint(1, upper_bound)
         else:
+            if 'd' in upper_bound.lower():
+                upper_bound = upper_bound.lower()
+                upper_bound = int(upper_bound.replace('d', ''))
+            else:
+                upper_bound = int(upper_bound)
+
             if upper_bound is not None and modifier is None and number is None:
                 msg = random.randint(1, upper_bound)
             else:
