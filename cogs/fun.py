@@ -1,4 +1,5 @@
 import random
+from datetime import datetime
 from random import choice
 
 import discord
@@ -16,7 +17,15 @@ class Fun(commands.Cog):
         """
         Pong!
         """
-        await ctx.send("Pong!")
+        msg = await ctx.send("*Pinging...*")
+        seconds = datetime.now() - self.bot.start_time
+        server_latency = msg.created_at - ctx.message.created_at
+        embed = discord.Embed(title="📶 Ping",
+                              description=f"**Server**: `{server_latency}ms`\n" +
+                                          f"**API**: `{round(self.bot.latency, 1)}ms`\n" +
+                                          f"**Uptime**: `{seconds}`")
+
+        await msg.edit(embed=embed, content=None)
 
     @commands.command()
     async def topic(self, ctx):
@@ -48,7 +57,8 @@ class Fun(commands.Cog):
                     await ctx.send("That is not a valid modifier! Allowed Modifiers include: " + str(allowed_modifiers))
                     return
                 if upper_bound is not None and modifier is not None and number is None:
-                    await ctx.send(f"If you want to specify a modifier please make sure to give a number after it!\n\rExample: {ctx.prefix}roll 20 + 2")
+                    await ctx.send(
+                        f"If you want to specify a modifier please make sure to give a number after it!\n\rExample: {ctx.prefix}roll 20 + 2")
                     return
                 msg = random.randint(1, upper_bound)
                 math = f"{msg} {modifier} {number}"
