@@ -8,7 +8,7 @@ Highly customizable discord bot made with love in the US
  ![Patreon](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Fshieldsio-patreon.herokuapp.com%2Fbotboi&style=for-the-badge)
 
 ## Getting Started
-
+### [Docs](https://github.com/jcsumlin/Peribot)
 There are several branches for various environments (Heroku, Docker, Master (python console)). Pick the branch that you want to pull down and clone it to your machine.
 I highly recommend that you use the docker environment since it is the most up to date and easiest to setup.
 ### Starting your own instance of Peribot
