@@ -19,6 +19,10 @@ What things you need to install the software and how to install them. As long as
 pip install -r requirements.txt
 ```
 
+Copy the auth.ini.example to a new file named auth.ini and fill in the bot token and any other keys you may want to use.
+
+If you ware using this bot on linux you'll want to install FFMpeg `sudo apt install ffmpeg` for the music cog to work. Windows users will not have to do anything. The Exe for FFMpeg is included in the repository already.
+
 Then all you need to do is run `sh start.sh`
 
 
