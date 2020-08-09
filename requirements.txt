@@ -1,4 +1,4 @@
-discord.py==1.2.5
+discord.py
 loguru
 pip
 praw
@@ -17,4 +17,5 @@ pytz
 opencv-python
 numpy
 discord-timers
-
+pynacl
+youtube-dl
