@@ -19,8 +19,8 @@ csrf = CsrfProtect(app)
 
 app.secret_key = b"random bytes representing flask secret key"
 
-app.config["DISCORD_CLIENT_ID"] = 484461035315527700  # Discord client ID.
-app.config["DISCORD_CLIENT_SECRET"] = "LAJ-qDb2wUY_jIpoO7d5Zufm9q1AfLme"  # Discord client secret.
+app.config["DISCORD_CLIENT_ID"] = 0  # Discord client ID.
+app.config["DISCORD_CLIENT_SECRET"] = ""  # Discord client secret.
 app.config["DISCORD_REDIRECT_URI"] = ""  # Redirect URI.
 
 discord = DiscordOAuth2Session(app)
