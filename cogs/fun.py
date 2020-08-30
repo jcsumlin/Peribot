@@ -65,7 +65,7 @@ class Fun(commands.Cog):
                 msg = eval(math)
 
         if upper_bound == 1:
-            msg = "***How do you even roll a one sided die?***"
+            msg = "***1! How did you even roll a one sided die?***"
         elif msg >= upper_bound:
             msg = "***Critical Hit!*** " + str(msg)
         elif msg == 1:
