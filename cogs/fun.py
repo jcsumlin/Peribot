@@ -64,7 +64,9 @@ class Fun(commands.Cog):
                 math = f"{msg} {modifier} {number}"
                 msg = eval(math)
 
-        if msg >= upper_bound:
+        if upper_bound == 1:
+            msg = "***How do you even roll a one sided die?***"
+        elif msg >= upper_bound:
             msg = "***Critical Hit!*** " + str(msg)
         elif msg == 1:
             msg = "***Critical Fail!*** " + str(msg)
