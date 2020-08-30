@@ -152,8 +152,10 @@ class Management(commands.Cog):
             git_dir = "./"
             try:
                 g = git.cmd.Git(git_dir)
-                g.pull()
-                embed = discord.Embed(title=":white_check_mark: Successfully pulled from repository", color=0x00df00)
+                updates = g.pull()
+                embed = discord.Embed(title=":white_check_mark: Successfully pulled from repository",
+                                      description=f"```{updates}```",
+                                      color=0x00df00)
                 await ctx.channel.send(embed=embed)
                 await self.database.audit_record(ctx.guild.id,
                                                  ctx.guild.name,
