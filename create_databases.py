@@ -242,6 +242,14 @@ class QRCodes(Base):
     enabled = Column(Boolean)
     logging_channel_id = Column(Integer)
 
+class SecretSanta(Base):
+    __tablename__ = "secret_santa"
+    id = Column(Integer, autoincrement=True, primary_key=True)
+    server_id = Column(Integer, ForeignKey('server_settings.server_id'))
+    user_id = Column(Integer)
+    address = Column(String)
+    note = Column(String)
+
 
 if __name__ == '__main__':
     # Create an engine that stores data in the local directory's

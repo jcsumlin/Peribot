@@ -19,3 +19,4 @@ numpy
 discord-timers
 pynacl
 youtube-dl
+pyjwt
