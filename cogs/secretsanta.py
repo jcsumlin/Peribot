@@ -6,6 +6,9 @@ from collections import deque
 import jwt
 from configparser import *
 
+from .utils.checks import is_bot_owner_check
+
+
 class SecretSanta(commands.Cog):
 
     def __init__(self, bot):
@@ -32,11 +35,12 @@ class SecretSanta(commands.Cog):
                 return await ctx.send("You're already enrolled in the ACTA Secret Santa")
             address = {"address": address}
             address = jwt.encode(address, self.key, algorithm='HS256')
-            await self.secretsantamodel.add(user_id=ctx.author.id, address=address, server_id=ctx.guild.id)
+            await self.secretsantamodel.add(user_id=ctx.author.id, address=address, server_id=448695150135345152)
             await ctx.send("You have been enrolled in the ACTA Secret Santa")
         except Exception as e:
             await ctx.send(f"Failed to register you for the Secret Santa. Did you already register?\n```{e}```")
 
+    @is_bot_owner_check()
     @secretsanta.command()
     async def assign(self, ctx):
         all_users = await self.secretsantamodel.get_all(ctx.guild.id)
