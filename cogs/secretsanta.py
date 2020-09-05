@@ -42,6 +42,20 @@ class SecretSanta(commands.Cog):
 
     @is_bot_owner_check()
     @secretsanta.command()
+    async def list(self, ctx):
+        all_users = await self.secretsantamodel.get_all(ctx.guild.id)
+        members = []
+        for user in all_users:
+            user = await self.bot.fetch_user(user.user_id)
+            if user is not None:
+                members.append(user.mention)
+
+        embed = discord.Embed(title="ACTA Secret Santa Participants",
+                              description=f"Budget: **TBD**\nNumber of participants: {len(all_users)}\n\n {', '.join(members)}")
+        await ctx.send(embed=embed)
+
+    @is_bot_owner_check()
+    @secretsanta.command()
     async def assign(self, ctx):
         all_users = await self.secretsantamodel.get_all(ctx.guild.id)
         if len(all_users) % 2 != 0:
