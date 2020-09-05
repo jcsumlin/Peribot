@@ -17,7 +17,7 @@ depends_on = None
 
 
 def upgrade():
-    sa.table(
+    op.create_table(
         'secret_santa',
         sa.Column('id', sa.Integer, primary_key=True, autoincrement=True),
         sa.Column('server_id', sa.Integer(), nullable=False),
