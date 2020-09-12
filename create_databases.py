@@ -236,12 +236,6 @@ class ModerationLog(Base):
     event_type = Column(String)
     event_description = Column(String)
 
-class QRCodes(Base):
-    __tablename__ = 'qr_code_auto_deletion'
-    server_id = Column(Integer, autoincrement=True, primary_key=True)
-    enabled = Column(Boolean)
-    logging_channel_id = Column(Integer)
-
 class SecretSanta(Base):
     __tablename__ = "secret_santa"
     id = Column(Integer, autoincrement=True, primary_key=True)
