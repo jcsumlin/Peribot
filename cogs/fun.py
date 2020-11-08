@@ -1,7 +1,8 @@
 import random
+import re
 from datetime import datetime
 from random import choice
-
+from zalgo_text import zalgo
 import discord
 import requests
 from bs4 import BeautifulSoup
@@ -32,7 +33,8 @@ class Fun(commands.Cog):
         """
         Gets a random chat topic to keep the chat going.
         """
-        website = requests.get('https://www.conversationstarters.com/generator.php').content
+        website = requests.get(
+            'https://www.conversationstarters.com/generator.php').content
         soup = BeautifulSoup(website, 'html.parser')
         topic = soup.find(id="random").text
         await ctx.send(topic)
@@ -84,7 +86,8 @@ class Fun(commands.Cog):
         """
         game = discord.Game(game)
         await self.bot.change_presence(status=discord.Status.online, activity=game)
-        embedMsg = discord.Embed(color=0x90ee90, title=":video_game: Game changed successfully!")
+        embedMsg = discord.Embed(
+            color=0x90ee90, title=":video_game: Game changed successfully!")
         await ctx.send(embed=embedMsg)
 
     @commands.command()
@@ -120,9 +123,12 @@ class Fun(commands.Cog):
 
     @commands.command()
     async def uwu(self, ctx, *, message):
-        uwus = ['UwU', 'Uwu', 'uwU', 'ÚwÚ', 'uwu', '☆w☆', '✧w✧', '♥w♥', '︠uw ︠u', '(uwu)', 'OwO', 'owo', 'Owo', 'owO']
-        res = message.replace("r", "w").replace("l", "w").replace("L", "W").replace("R", "W")
-        res = res.replace("the ", "da ").replace("The ", "Da ").replace("THE ", "DA ")
+        uwus = ['UwU', 'Uwu', 'uwU', 'ÚwÚ', 'uwu', '☆w☆', '✧w✧',
+                '♥w♥', '︠uw ︠u', '(uwu)', 'OwO', 'owo', 'Owo', 'owO']
+        res = message.replace("r", "w").replace(
+            "l", "w").replace("L", "W").replace("R", "W")
+        res = res.replace("the ", "da ").replace(
+            "The ", "Da ").replace("THE ", "DA ")
         res = res.replace("th", "d").replace("TH", "D")
         res = res.replace("\n", " " + random.choice(uwus) + "\n")
         await ctx.send(res + ' ' + random.choice(uwus))
@@ -133,6 +139,33 @@ class Fun(commands.Cog):
             await message.add_reaction(u"\U0001F1EB")
         if message.content.lower() == "press x to doubt":
             await message.add_reaction(u"\U0001F1FD")
+
+        """handle zalgo stuff here"""
+
+        # look for the pattern zlg{text n stuff}
+        match = re.search(r"zlg\{.*\}", message.content)
+        if match is not None:
+            await self.handle_zalgo(match, message)
+
+    async def handle_zalgo(self, match, message):
+        span = match.span()
+        # get the slice of where the match is
+        sub = message.content[span[0]:span[1]]
+        # top mid and bot paramteter controll how intense the zalgo is
+        zlg = self.add_zalgo(3, 3, 3, sub)
+        # split the message into parts, isolating the area that was matched and replacing it with the zalgo
+        contents = [message.content[0:span[0]], zlg,
+                    message.content[span[1]:len(message.content)]]
+
+        await message.edit(''.join(contents))
+
+    def add_zalgo(self, top, mid, bot, message):
+        z = zalgo.zalgo()
+        z.numAccentsUp = top
+        z.numAccentsMiddle = mid
+        z.numAccentsDown = bot
+
+        return z.zalgofy(message)
 
 
 def setup(bot):
