@@ -157,13 +157,14 @@ class Fun(commands.Cog):
         contents = [message.content[0:span[0]], zlg,
                     message.content[span[1]:len(message.content)]]
 
-        await message.edit(''.join(contents))
+        await message.channel.send(''.join(contents))
+        await message.delete()
 
     def add_zalgo(self, top, mid, bot, message):
         z = zalgo.zalgo()
-        z.numAccentsUp = top
-        z.numAccentsMiddle = mid
-        z.numAccentsDown = bot
+        z.numAccentsUp = (1, top)
+        z.numAccentsMiddle = (1, mid)
+        z.numAccentsDown = (1, bot)
 
         return z.zalgofy(message)
 
