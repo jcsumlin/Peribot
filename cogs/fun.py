@@ -32,7 +32,8 @@ class Fun(commands.Cog):
         """
         Gets a random chat topic to keep the chat going.
         """
-        website = requests.get('https://www.conversationstarters.com/generator.php').content
+        website = requests.get(
+            'https://www.conversationstarters.com/generator.php').content
         soup = BeautifulSoup(website, 'html.parser')
         topic = soup.find(id="random").text
         await ctx.send(topic)
@@ -84,7 +85,8 @@ class Fun(commands.Cog):
         """
         game = discord.Game(game)
         await self.bot.change_presence(status=discord.Status.online, activity=game)
-        embedMsg = discord.Embed(color=0x90ee90, title=":video_game: Game changed successfully!")
+        embedMsg = discord.Embed(
+            color=0x90ee90, title=":video_game: Game changed successfully!")
         await ctx.send(embed=embedMsg)
 
     @commands.command()
@@ -120,12 +122,38 @@ class Fun(commands.Cog):
 
     @commands.command()
     async def uwu(self, ctx, *, message):
-        uwus = ['UwU', 'Uwu', 'uwU', 'ÚwÚ', 'uwu', '☆w☆', '✧w✧', '♥w♥', '︠uw ︠u', '(uwu)', 'OwO', 'owo', 'Owo', 'owO']
-        res = message.replace("r", "w").replace("l", "w").replace("L", "W").replace("R", "W")
-        res = res.replace("the ", "da ").replace("The ", "Da ").replace("THE ", "DA ")
+        uwus = ['UwU', 'Uwu', 'uwU', 'ÚwÚ', 'uwu', '☆w☆', '✧w✧',
+                '♥w♥', '︠uw ︠u', '(uwu)', 'OwO', 'owo', 'Owo', 'owO']
+        res = message.replace("r", "w").replace(
+            "l", "w").replace("L", "W").replace("R", "W")
+        res = res.replace("the ", "da ").replace(
+            "The ", "Da ").replace("THE ", "DA ")
         res = res.replace("th", "d").replace("TH", "D")
         res = res.replace("\n", " " + random.choice(uwus) + "\n")
         await ctx.send(res + ' ' + random.choice(uwus))
+
+    @commands.command(aliases=['chickenbob', 'cb', 'seachicken', 'mock'])
+    async def chicken(self, ctx, *, message):
+        res = ""
+        streak_mod = 0  # don't want to have long strings of all caps or all lowercase
+        prev = ''
+        for ch in message.lower():
+            if random.randint(0, 100) >= 50 + streak_mod:
+                res += ch.upper()
+                if prev is not 'upper':
+                    streak_mod = 0
+                    prev = 'upper'
+                else:
+                    streak_mod += 25  # should limit streaks to 2 characters for the most part
+            else:
+                res += ch
+                if prev is not 'lower':
+                    streak_mod = 0
+                    prev = 'lower'
+                else:
+                    streak_mod -= 25
+
+        await ctx.send(res)
 
     @commands.Cog.listener()
     async def on_message(self, message):
