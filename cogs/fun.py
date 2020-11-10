@@ -143,21 +143,21 @@ class Fun(commands.Cog):
         """handle zalgo stuff here"""
 
         # look for the pattern zlg{text n stuff}
-        match = re.search(r"zlg\{.*\}", message.content)
+        match = re.search(r"zlg\{.*\}", message.content) # this kinda breaks if there's more than one pattern in the message
         if match is not None:
             await self.handle_zalgo(match, message)
 
     async def handle_zalgo(self, match, message):
         span = match.span()
-        # get the slice of where the match is
-        sub = message.content[span[0]:span[1]]
+        # get the slice of where the match is and get rid of the pattern
+        sub = message.content[span[0]:span[1]].replace("zlg{", "").replace("}", "") 
         # top mid and bot paramteter controll how intense the zalgo is
         zlg = self.add_zalgo(3, 3, 3, sub)
         # split the message into parts, isolating the area that was matched and replacing it with the zalgo
         contents = [message.content[0:span[0]], zlg,
                     message.content[span[1]:len(message.content)]]
 
-        await message.channel.send(''.join(contents))
+        await message.channel.send(f"{message.author.mention} > {''.join(contents)}")
         await message.delete()
 
     def add_zalgo(self, top, mid, bot, message):
