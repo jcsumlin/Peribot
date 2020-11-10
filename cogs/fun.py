@@ -140,20 +140,20 @@ class Fun(commands.Cog):
         for ch in message.lower():
             if random.randint(0, 100) >= 50 + streak_mod:
                 res += ch.upper()
-                if prev is not 'upper':
+                if prev != 'upper':
                     streak_mod = 0
                     prev = 'upper'
                 else:
                     streak_mod += 25  # should limit streaks to 2 characters for the most part
             else:
                 res += ch
-                if prev is not 'lower':
+                if prev != 'lower':
                     streak_mod = 0
                     prev = 'lower'
                 else:
                     streak_mod -= 25
-
-        await ctx.send(res)
+        await ctx.message.delete()
+        await ctx.send(f"{ctx.author.mention} > {res}")
 
     @commands.Cog.listener()
     async def on_message(self, message):
