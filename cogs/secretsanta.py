@@ -86,7 +86,7 @@ class SecretSanta(commands.Cog):
         all_users = await self.secretsantamodel.get_all(448695150135345152)
         for user in all_users:
             decoded = jwt.decode(user.address, self.key, algorithms='HS256')
-            if SequenceMatcher(a=address,b=decoded).ratio() >= 0.90:
+            if SequenceMatcher(a=address,b=decoded['address']).ratio() >= 0.90:
                 user = await self.bot.fetch_user(user.user_id)
                 return await ctx.send(f"You have {user.name}")
         return await ctx.send("No user found. please make sure that you copied the address I sent you earlier "
