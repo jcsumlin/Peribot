@@ -79,9 +79,16 @@ class SecretSanta(commands.Cog):
             decoded = jwt.decode(value.address, self.key, algorithms='HS256')
             await user.send(f"You have been given {partner.mention} for secret santa. \nTheir address is {decoded['address']}\nIf there are issues with their address please contact JC.")
 
-
-
-
+    @secretsanta.command()
+    async def check(self, ctx, *, address):
+        all_users = await self.secretsantamodel.get_all(448695150135345152)
+        for user in all_users:
+            decoded = jwt.decode(user.address, self.key, algorithms='HS256')
+            if address == decoded:
+                user = await self.bot.fetch_user(user.user_id)
+                return await ctx.send(f"You have {user.name}")
+        return await ctx.send("No user found. please make sure that you copied the address I sent you earlier "
+                              "**exactly**")
 
 
 
