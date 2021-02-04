@@ -451,6 +451,23 @@ class Database:
         roles = self.session.query(ReactionRoles).filter_by(group_id=group.id).all()
         return {'group': group, 'roles': roles}
 
+    async def get_reaction_role_by_id_and_group(self, group_name, role_id, server_id):
+        group = self.session.query(ReactionRolesGroups)\
+            .filter_by(group_name=group_name)\
+            .filter_by(server_id=server_id).one_or_none()
+        if group is None:
+            return False
+        role = self.session.query(ReactionRoles)\
+            .filter_by(group_id=group.id)\
+            .filter_by(role_id=role_id).one_or_none()
+        if role is None:
+            return False
+        return role
+
+    async def delete_reaction_role(self, role: ReactionRoles):
+        self.session.delete(role)
+        return self.session.commit()
+
     async def post_reaction_role(self, role_id, emoji, role_name, group_name, server_id):
         group = self.session.query(ReactionRolesGroups).filter_by(group_name=group_name).filter_by(
             server_id=server_id).one_or_none()
