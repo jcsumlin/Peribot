@@ -108,6 +108,8 @@ class ReactionRoles(commands.Cog):
             e.add_field(name=f"{ctx.prefix}rr role add @[role] :emoji: [group name]]",
                         value="This will add a role to your reaction role group. **EMOJI MUST BE PRESENT ON YOUR SERVER**",
                         inline=False)
+            e.add_field(name=f"{ctx.prefix}rr role delete @role [group name]",
+                        value="This will delete a role from the group provided.", inline=False)
             e.add_field(name=f"{ctx.prefix}rr send [group name]",
                         value="This will send the reaction role group with the appropriate reactions", inline=False)
             await ctx.send(embed=e)
