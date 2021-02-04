@@ -165,7 +165,7 @@ class ReactionRoles(commands.Cog):
         rr = await self.database.get_reaction_role_by_id_and_group(group_name,
                                                                    role.id,
                                                                    ctx.guild.id)
-        if rr is None:
+        if not rr:
             return await ctx.send(embed=command_error("Role does not exist in that group.", ""))
         else:
             await self.database.delete_reaction_role(rr)
