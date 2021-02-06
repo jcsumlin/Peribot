@@ -20,3 +20,4 @@ discord-timers
 pynacl
 youtube-dl
 pyjwt
+statcord.py
