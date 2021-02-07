@@ -10,7 +10,7 @@ class StatcordPost(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         auth = ConfigParser()
-        auth.read('auth.ini')  # All my usernames and passwords for the api
+        auth.read('../auth.ini')  # All my usernames and passwords for the api
         self.key = "statcord.com-" + auth.get('discord', 'STATCORDKEY')
         self.api = statcord.Client(self.bot,self.key)
         self.api.start_loop()
