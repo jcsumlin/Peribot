@@ -1,4 +1,6 @@
 import asyncio
+import subprocess
+import sys
 
 import discord
 import git
@@ -82,7 +84,21 @@ class Management(commands.Cog):
                     logger.exception(str(e))
         await ctx.send(f"Announcement successfully sent to {', '.join(users)}")
 
+    @commands.command(name="pipinstall")
+    @commands.is_owner()
+    async def pipinstall(self, ctx):
+        results = subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "../requirements.txt"])
+        embed = discord.Embed(title=":white_check_mark: Successfully ran pip install",
+                              description=f"```{results}```",
+                              color=0x00df00)
+        await ctx.channel.send(embed=embed)
+        await self.database.audit_record(ctx.guild.id,
+                                         ctx.guild.name,
+                                         ctx.message.content,
+                                         ctx.message.author.id)
+
     @commands.command()
+    @commands.is_owner()
     async def send(self,ctx,  channel, *, message: str):
         if ctx.author.id == 204792579881959424:
             channel2 = self.bot.get_channel(int(channel))
