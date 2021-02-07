@@ -20,5 +20,4 @@ discord-timers
 pynacl
 youtube-dl
 pyjwt
-mysqlclient
 statcord.py
