@@ -3,11 +3,12 @@ from configparser import ConfigParser
 from discord.ext import commands
 
 import statcord
-auth = ConfigParser()
-auth.read('auth.ini')  # All my usernames and passwords for the api
+
 
 class StatcordPost(commands.Cog):
     def __init__(self, bot):
+        auth = ConfigParser()
+        auth.read('auth.ini')  # All my usernames and passwords for the api
         self.bot = bot
         self.key = auth.get('STATCORD', 'KEY')
         self.api = statcord.Client(self.bot,self.key)
