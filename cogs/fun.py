@@ -136,7 +136,7 @@ class Fun(commands.Cog):
         # once da uwu-ified message has been genewated, dewete da owd message Uwu
         await ctx.message.delete()
         # and send one "as" da usew who invoked da command ÚwÚ
-        await ctx.send(f"{ctx.user.mention} > {res + ' ' + random.choice(uwus)}")
+        await ctx.send(f"{ctx.author.mention} > {res + ' ' + random.choice(uwus)}")
 
     @commands.command(aliases=['chickenbob', 'cb', 'seachicken', 'mock'])
     async def chicken(self, ctx, *, message):
