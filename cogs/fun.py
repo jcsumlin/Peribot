@@ -163,7 +163,7 @@ class Fun(commands.Cog):
         await ctx.send(f"{ctx.author.mention} > {res}")
 
     @commands.command(aliases=['music', 'addmusic', 'am'])
-    async def memeify(self, ctx):
+    async def memeify(self, ctx, audio: int = 0):
         att = ctx.message.attachments[0]
         if not att:
             await ctx.send("You must send an image with this command")
@@ -171,8 +171,9 @@ class Fun(commands.Cog):
             tmp_name = f"data/memeify/temp_img_{datetime.now()}.png"
             final_name = f"data/memeify/final_vid_{datetime.now()}.webm"
             await att.save(tmp_name)
-            # TODO: support multiple audio files
-            audio = AudioFileClip("data/memeify/audio.mp4").set_duration(15)
+            audio = AudioFileClip(
+                f"data/memeify/audio/{audio}.mp4").set_duration(15)
+            # may need a way to change the audio duration depending on which file is chosen
             img = ImageClip(tmp_name).set_duration(15).set_fps(1)
             img = img.set_audio(audio)
 
