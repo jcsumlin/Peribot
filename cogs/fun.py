@@ -162,19 +162,26 @@ class Fun(commands.Cog):
         await ctx.message.delete()
         await ctx.send(f"{ctx.author.mention} > {res}")
 
-    @commands.command()
+    @commands.command(aliases=['music', 'addmusic', 'am'])
     async def memeify(self, ctx):
         att = ctx.message.attachments[0]
         if not att:
             await ctx.send("You must send an image with this command")
         else:
-            await att.save("data/memeify/tmp.png")  # this will probably break
+            tmp_name = f"data/memeify/temp_img_{datetime.now()}.png"
+            final_name = f"data/memeify/final_vid_{datetime.now()}.webm"
+            await att.save(tmp_name)
+            # TODO: support multiple audio files
             audio = AudioFileClip("data/memeify/audio.mp4").set_duration(15)
-            img = ImageClip("data/memeify/tmp.png").set_duration(15).set_fps(1)
+            img = ImageClip(tmp_name).set_duration(15).set_fps(1)
             img = img.set_audio(audio)
-            # need to generate unique filenames for these too
-            img.write_videofile("data/memeify/final.webm")
-            await ctx.send(file=discord.File("data/memeify/final.webm"))
+
+            img.write_videofile(final_name)
+            await ctx.send(file=discord.File(final_name))
+
+            # cleanup after sending the video
+            os.remove(tmp_name)
+            os.remove(final_name)
 
     @commands.Cog.listener()
     async def on_message(self, message):
