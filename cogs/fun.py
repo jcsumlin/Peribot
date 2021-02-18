@@ -1,6 +1,7 @@
 import random
 from datetime import datetime
 from random import choice
+from moviepy.editor import *
 
 import discord
 import requests
@@ -160,6 +161,20 @@ class Fun(commands.Cog):
                     streak_mod -= 25
         await ctx.message.delete()
         await ctx.send(f"{ctx.author.mention} > {res}")
+
+    @commands.command()
+    async def memeify(self, ctx):
+        att = ctx.message.attachments[0]
+        if not att:
+            await ctx.send("You must send an image with this command")
+        else:
+            await att.save("data/memeify/tmp.png")  # this will probably break
+            audio = AudioFileClip("data/memeify/audio.mp4").set_duration(15)
+            img = ImageClip("data/memeify/tmp.png").set_duration(15).set_fps(1)
+            img = img.set_audio(audio)
+            # need to generate unique filenames for these too
+            img.write_videofile("data/memeify/final.webm")
+            await ctx.send(file=discord.File("data/memeify/final.webm"))
 
     @commands.Cog.listener()
     async def on_message(self, message):
