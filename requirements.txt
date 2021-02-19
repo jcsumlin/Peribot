@@ -21,3 +21,4 @@ pynacl
 youtube-dl
 pyjwt
 statcord.py
+moviepy
