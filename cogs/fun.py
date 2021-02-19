@@ -181,6 +181,8 @@ class Fun(commands.Cog):
             await ctx.send(file=discord.File(final_name))
 
             # cleanup after sending the video
+            img.close()
+            audio.close()
             os.remove(tmp_name)
             os.remove(final_name)
 
