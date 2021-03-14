@@ -245,4 +245,5 @@ def upgrade():
 
 
 def downgrade():
-    pass
+    op.execute("DELETE FROM warnings;")
+

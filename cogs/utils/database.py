@@ -9,7 +9,6 @@ from sqlalchemy.orm import sessionmaker
 from create_databases import AuditLog, ServerSettings, Base, CustomCommands, Warnings, StarBoardSettings, \
     BirthdaySettings, Birthdays, StarBoardMessages, StarBoardIgnoredChannels, StarboardAllowedRoles, RemindMe, \
     ModerationLogSettings, ReactionRolesGroups, ReactionRoles, ReactionRoleMessage
-from create_databases import QRCodes
 
 
 class Database:

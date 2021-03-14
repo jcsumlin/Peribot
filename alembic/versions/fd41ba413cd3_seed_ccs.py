@@ -198,4 +198,4 @@ def data_upgrades():
 
 
 def downgrade():
-    pass
+    op.execute("DELETE FROM custom_commands;")
