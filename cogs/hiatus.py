@@ -1,4 +1,4 @@
-import configparser
+import os
 from datetime import datetime
 
 import discord
@@ -9,11 +9,9 @@ from tmdbv3api import TMDb, Season
 class Hiatus(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        config = configparser.ConfigParser()
-        config.read('../auth.ini')
 
         self.tmdb = TMDb()
-        self.tmdb.api_key = config.get('TMDB', 'api_key')
+        self.tmdb.api_key = os.environ.get("TMDB_API_KEY")
         self.StevenUniverseServerIDs = [593887030216228973]
         self.StarVsServerIDs = [
             448695150135345152,

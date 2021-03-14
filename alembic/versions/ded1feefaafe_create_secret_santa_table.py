@@ -22,7 +22,7 @@ def upgrade():
         sa.Column('id', sa.Integer, primary_key=True, autoincrement=True),
         sa.Column('server_id', sa.Integer(), nullable=False),
         sa.Column('user_id', sa.Integer(), nullable=False),
-        sa.Column('address', sa.String(), nullable=False),
+        sa.Column('address', sa.String(255), nullable=False),
         sa.Column('note', sa.Integer(), nullable=True)
     )
 

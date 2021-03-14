@@ -25,8 +25,8 @@ def data_upgrades():
         'custom_commands',
         sa.Column('id', sa.Integer, primary_key=True, autoincrement=True),
         sa.Column('server_id', sa.Integer(), nullable=False),
-        sa.Column('command', sa.String(), nullable=False),
-        sa.Column('result', sa.String(), nullable=False),
+        sa.Column('command', sa.String(255), nullable=False),
+        sa.Column('result', sa.String(255), nullable=False),
         sa.Column('added_by_user_id', sa.Integer(), nullable=False)
     )
     op.bulk_insert(custom_commands, [
