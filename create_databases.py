@@ -245,6 +245,17 @@ class SecretSanta(Base):
     note = Column(String)
 
 
+class BookClub(Base):
+    __tablename__ = "book_club"
+    id = Column(Integer, autoincrement=True, primary_key=True)
+    server_id = Column(Integer, ForeignKey('server_settings.server_id'))
+    channel_id = Column(Integer)
+    title = Column(String)
+    interval = Column(Integer)
+    start = Column(Integer)
+    end = Column(Integer)
+
+
 if __name__ == '__main__':
     # Create an engine that stores data in the local directory's
     # sqlalchemy_example.db file.
