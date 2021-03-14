@@ -261,5 +261,8 @@ class BookClub(Base):
 
 
 if __name__ == '__main__':
-    engine = create_engine("mysql+pymysql://root:password@localhost:49154/db")
+    if "DATABASE_URL" not in os.environ:
+        print("DATABASE_URL not in environment variables, exiting.")
+        exit(1)
+    engine = create_engine(os.environ.get('DATABASE_URL'))
     Base.metadata.create_all(bind=engine)
