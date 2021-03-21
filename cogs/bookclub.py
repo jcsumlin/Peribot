@@ -66,6 +66,15 @@ class BookClub(commands.Cog):
                           color=random.randint(0, 0xffffff))
         return await ctx.send(embed=e)
 
+    @bookclub.command()
+    async def end(self, ctx):
+        bc = await self.model.get_by_channel_id(ctx.channel.id)
+        if bc is not None:
+            await self.model.delete(bc)
+            await ctx.send("Book club has been ended!")
+        else:
+            await ctx.send("No book club was found")
+
     @commands.group()
     async def chapter(self, ctx):
         if ctx.invoked_subcommand is None:
