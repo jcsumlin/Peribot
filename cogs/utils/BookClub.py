@@ -20,7 +20,7 @@ class BookClubModel(Database):
         self.session.commit()
         return new
 
-    def delete(self, record: BookClub):
+    async def delete(self, record: BookClub):
         try:
             self.session.delete(record)
             self.session.commit()

@@ -66,6 +66,15 @@ class BookClub(commands.Cog):
                           color=random.randint(0, 0xffffff))
         return await ctx.send(embed=e)
 
+    @bookclub.command()
+    async def end(self, ctx):
+        bc = await self.model.get_by_channel_id(ctx.channel.id)
+        if bc is not None:
+            await self.model.delete(bc)
+            await ctx.send("Book club has been ended!")
+        else:
+            await ctx.send("No book club was found")
+
     @commands.group()
     async def chapter(self, ctx):
         if ctx.invoked_subcommand is None:
@@ -90,6 +99,13 @@ class BookClub(commands.Cog):
     async def add(self, ctx, number: int = 1):
         bc = await self.model.get_by_channel_id(ctx.channel.id)
         bc.end = bc.end + number
+        await self.model.save()
+        await ctx.send(f"Chapters updated! Chapters today are {bc.start} - {bc.end}")
+
+    @chapter.command()
+    async def subtract(self, ctx, number: int = 1):
+        bc = await self.model.get_by_channel_id(ctx.channel.id)
+        bc.end = bc.end - number
         await self.model.save()
         await ctx.send(f"Chapters updated! Chapters today are {bc.start} - {bc.end}")
 

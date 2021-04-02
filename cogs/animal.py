@@ -24,23 +24,23 @@ class Animal(commands.Cog):
         except:
             await ctx.send("Couldnt Get An Image")
 
-    @commands.command()
-    async def catsbomb(self, ctx, amount : int = 5):
-        """Throws a cat bomb!
-        Defaults to 5"""
-        search = "https://nekos.life/api/v2/img/meow"
-        results = []
-        if amount > 10 or amount < 1:
-            amount = 5
-        try:
-            for x in range(0,amount):
-                async with self.session.get(search) as r:
-                    api_result = await r.json()
-                    results.append(api_result['url'])
-            for result in results:
-                await ctx.send(embed=embed(image=result, color=random.randint(0, 0xffffff)))
-        except:
-            await ctx.send("Couldn't Get An Image")
+    # @commands.command()
+    # async def catsbomb(self, ctx, amount : int = 5):
+    #     """Throws a cat bomb!
+    #     Defaults to 5"""
+    #     search = "https://nekos.life/api/v2/img/meow"
+    #     results = []
+    #     if amount > 10 or amount < 1:
+    #         amount = 5
+    #     try:
+    #         for x in range(0,amount):
+    #             async with self.session.get(search) as r:
+    #                 api_result = await r.json()
+    #                 results.append(api_result['url'])
+    #         for result in results:
+    #             await ctx.send(embed=embed(image=result, color=random.randint(0, 0xffffff)))
+    #     except:
+    #         await ctx.send("Couldn't Get An Image")
 
     @commands.command()
     async def pugs(self, ctx):
@@ -53,23 +53,23 @@ class Animal(commands.Cog):
         except:
             await ctx.send("Could Not Get An Image")
 
-    @commands.command()
-    async def pugsbomb(self, ctx, amount : int = 5):
-        """Throws a pugs bomb!
-        Defaults to 5"""
-        search = "http://pugme.herokuapp.com/random"
-        results = []
-        if amount > 10 or amount < 1:
-            amount = 5
-        try:
-            for x in range(0,amount):
-                async with self.session.get(search) as r:
-                    api_result = await r.json()
-                    results.append(api_result['pug'])
-            for result in results:
-                await ctx.send(embed=embed(image=result, color=random.randint(0, 0xffffff)))
-        except:
-            await ctx.send("Couldnt Get An Image")
+    # @commands.command()
+    # async def pugsbomb(self, ctx, amount : int = 5):
+    #     """Throws a pugs bomb!
+    #     Defaults to 5"""
+    #     search = "http://pugme.herokuapp.com/random"
+    #     results = []
+    #     if amount > 10 or amount < 1:
+    #         amount = 5
+    #     try:
+    #         for x in range(0,amount):
+    #             async with self.session.get(search) as r:
+    #                 api_result = await r.json()
+    #                 results.append(api_result['pug'])
+    #         for result in results:
+    #             await ctx.send(embed=embed(image=result, color=random.randint(0, 0xffffff)))
+    #     except:
+    #         await ctx.send("Couldnt Get An Image")
 
 def setup(bot):
     n = Animal(bot)

@@ -4,6 +4,7 @@ import os
 import re
 import time
 from configparser import *
+from datetime import datetime
 
 from discord.ext import commands, timers
 from loguru import logger
@@ -13,8 +14,9 @@ from cogs.utils.database import Database
 
 #initiate logger test
 logger.add(f"file_{str(time.strftime('%Y%m%d-%H%M%S'))}.log", rotation="500 MB")
+database = Database()
 
-database = Database(path='cogs/peribot.db')
+
 def load_cogs(folder):
     os.chdir(folder)
     files = []
@@ -92,6 +94,7 @@ if __name__ == "__main__":
         exit(1)
     else:
         token = os.environ.get('DISCORD_TOKEN')
+    bot.start_time = datetime.now()
     bot.remove_command('help')
     extensions = load_cogs('cogs')
     for extension in extensions:

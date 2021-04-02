@@ -6,6 +6,8 @@ import discord
 import requests
 from bs4 import BeautifulSoup
 from discord.ext import commands
+import urllib.request
+import json
 
 
 class Fun(commands.Cog):
@@ -19,12 +21,10 @@ class Fun(commands.Cog):
         """
         msg = await ctx.send("*Pinging...*")
         seconds = datetime.now() - self.bot.start_time
-        server_latency = msg.created_at - ctx.message.created_at
         embed = discord.Embed(title="📶 Ping",
-                              description=f"**Server**: `{server_latency}ms`\n" +
-                                          f"**API**: `{round(self.bot.latency, 1)}ms`\n" +
+                              description=f"**API**: `{round(self.bot.latency, 3)}ms`\n" +
                                           f"**Uptime**: `{seconds}`")
-
+        print(embed)
         await msg.edit(embed=embed, content=None)
 
     @commands.command()
@@ -32,11 +32,11 @@ class Fun(commands.Cog):
         """
         Gets a random chat topic to keep the chat going.
         """
-        website = requests.get(
-            'https://www.conversationstarters.com/generator.php').content
-        soup = BeautifulSoup(website, 'html.parser')
-        topic = soup.find(id="random").text
-        await ctx.send(topic)
+        with urllib.request.urlopen('https://www.conversationstarters.com/generator.php') as url:
+            data = url.read()
+            soup = BeautifulSoup(data, 'html.parser')
+            topic = soup.find(id="random").text
+            await ctx.send(topic)
 
     @commands.command(aliases=['r'])
     async def roll(self, ctx, upper_bound: str = None, modifier: str = None, number: int = None):
@@ -76,7 +76,7 @@ class Fun(commands.Cog):
 
     @commands.command()
     @commands.is_owner()
-    async def setgame(self, ctx, game):
+    async def setgame(self, ctx, *, game):
         """
         Changes my displayed game. Only for privileged users!
         :param ctx: message context.
