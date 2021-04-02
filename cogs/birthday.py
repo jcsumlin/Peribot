@@ -4,12 +4,9 @@ from datetime import datetime
 import discord
 from discord.ext import commands, tasks
 from loguru import logger
-from pytz import timezone
 from .utils.genericResponseBuilder import commandSuccess, commandError
 from .utils.database import Database
-
-
-from .utils.dataIO import dataIO, fileIO
+from .utils.chat_formatting import escape
 
 
 class Birthdays(commands.Cog):
@@ -66,8 +63,8 @@ class Birthdays(commands.Cog):
         embed = discord.Embed(title=f"{ctx.guild.name}'s Birthday list for this month :birthday:",
                               description=f"Users will be pinged on their birthday in <#{settings.channel_id}>.\n You can use **{ctx.prefix}birthday clear** to remove your birthday from my records")
         for user in birthdays:
-            member = discord.utils.find(lambda m: m.id == user.user_id, ctx.guild.members)
-            embed.add_field(name=member.name, value=user.birthday.strftime('%m/%d/%Y'))
+            member = await self.bot.fetch_user(user.user_id)
+            embed.add_field(name=escape(member.name, formatting=True), value=user.birthday.strftime('%m/%d/%Y'))
         await ctx.channel.send(embed=embed)
 
     @birthday.command(name="channel")
@@ -101,13 +98,11 @@ class Birthdays(commands.Cog):
             return await commandError(ctx, ":interrobang: Birthday Message Channel Not Set For This Server!")
 
     # TODO: Add this as a migration later to the settings table
-    # @birthday.group()
-    # @commands.has_permissions(administrator=True)
-    # async def role(self, ctx, role: discord.Role):
-    #     birthdays = await self.get_config()
-    #     birthdays[str(ctx.guild.id)]['role_id'] = role.id
-    #     await self.save_config(birthdays)
-    #     await ctx.channel.send("Birthday Role Set!")
+    @birthday.group()
+    @commands.has_permissions(administrator=True)
+    async def role(self, ctx, role: discord.Role):
+        await self.database.update_birthday_settings(ctx.guild.id, role_id=role.id)
+        await ctx.channel.send("Birthday Role Set!")
 
     @tasks.loop(seconds=30.0)
     async def check_birthdays(self):
@@ -120,7 +115,8 @@ class Birthdays(commands.Cog):
             if settings.enabled is False:
                 return
             channel = self.bot.get_channel(settings.channel_id)
-            member = discord.utils.find(lambda m: m.id == birthday.user_id, channel.guild.members)
+            guild = await self.bot.fetch_guild(settings.server_id)
+            member = await guild.fetch_member(birthday.user_id)
             if member is None:
                 logger.error(f'Could not find user {birthday.user_id}')
                 continue
@@ -129,6 +125,10 @@ class Birthdays(commands.Cog):
                 suffix = "th"
             else:
                 suffix = ["th", "st", "nd", "rd","th", "th", "th", "th", "th", "th"][years % 10]
+            if settings.role_id is not None:
+                role = guild.get_role(settings.role_id)
+                if role is not None:
+                    await member.add_roles(role, reason="Its their birthday today!")
             await channel.send(f"Hey <@{birthday.user_id}>! I just wanted to wish you the happiest of birthdays on your {years}{suffix} birthday! :birthday: :heart:")
             await self.database.update_birthday(birthday.id, completed=True)
 

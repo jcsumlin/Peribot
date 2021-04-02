@@ -4,6 +4,7 @@ import os
 import re
 import time
 from configparser import *
+from datetime import datetime
 
 from discord.ext import commands, timers
 from loguru import logger
@@ -13,10 +14,9 @@ from cogs.utils.database import Database
 
 #initiate logger test
 logger.add(f"file_{str(time.strftime('%Y%m%d-%H%M%S'))}.log", rotation="500 MB")
+database = Database()
 
-auth = ConfigParser()
-auth.read('auth.ini')  # All my usernames and passwords for the api
-database = Database(path='cogs/peribot.db')
+
 def load_cogs(folder):
     os.chdir(folder)
     files = []
@@ -30,6 +30,7 @@ def config():
     with open('config.json', 'r') as f:
         config = json.load(f)
         return config
+
 
 async def get_prefix(bot, message):
     if not message.guild:
@@ -88,6 +89,12 @@ async def unload(ctx, extension):
 
 
 if __name__ == "__main__":
+    if "DISCORD_TOKEN" not in os.environ:
+        logger.error("No discord token set. Exiting.")
+        exit(1)
+    else:
+        token = os.environ.get('DISCORD_TOKEN')
+    bot.start_time = datetime.now()
     bot.remove_command('help')
     extensions = load_cogs('cogs')
     for extension in extensions:
@@ -97,4 +104,4 @@ if __name__ == "__main__":
         except Exception as error:
             logger.exception(f"Extension {extension} could not be loaded. [{error}]")
 
-    bot.run(auth.get('discord', 'TOKEN'))
+    bot.run(token)

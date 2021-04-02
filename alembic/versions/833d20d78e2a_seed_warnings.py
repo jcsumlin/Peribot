@@ -24,9 +24,9 @@ def upgrade():
         sa.Column('date', sa.DateTime(), nullable=False),
         sa.Column('user_name', sa.String(), nullable=False),
         sa.Column('user_id', sa.Integer(), nullable=False),
-        sa.Column('mod_name', sa.String(), nullable=False),
+        sa.Column('mod_name', sa.String(255), nullable=False),
         sa.Column('mod_id', sa.Integer(), nullable=False),
-        sa.Column('reason', sa.String(), nullable=False),
+        sa.Column('reason', sa.String(255), nullable=False),
     )
     op.bulk_insert(warnings,
         [

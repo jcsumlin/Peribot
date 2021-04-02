@@ -4,6 +4,7 @@ import random
 
 import discord
 from discord.ext import commands
+from loguru import logger
 
 from cogs.utils.dataIO import dataIO
 from .utils import checks
@@ -210,7 +211,7 @@ class Giveaways(commands.Cog):
     async def on_message(self, message):
         if not self.started:
             self.started = True
-            print("Giveaways loop started.")
+            logger.debug("Giveaways loop started.")
             while True:
                 if self.bot.get_cog("Giveaways") != None:
                     await asyncio.sleep(1)

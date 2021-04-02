@@ -1,24 +1,26 @@
-from configparser import ConfigParser
+import os
 
 from discord.ext import commands
 
 import statcord
-auth = ConfigParser()
-auth.read('auth.ini')  # All my usernames and passwords for the api
+
 
 class StatcordPost(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        auth = ConfigParser()
-        auth.read('../auth.ini')  # All my usernames and passwords for the api
-        self.key = "statcord.com-" + auth.get('discord', 'STATCORDKEY')
-        self.api = statcord.Client(self.bot,self.key)
-        self.api.start_loop()
-
+        if "STATCORD_KEY" not in os.environ or os.environ.get('STATCORD_KEY') is None:
+            return
+        else:
+            self.key = "statcord.com-" + os.environ.get('STATCORD_KEY')
+            self.api = statcord.Client(self.bot,self.key)
+            self.api.start_loop()
 
     @commands.Cog.listener()
     async def on_command(self,ctx):
-        self.api.command_run(ctx)
+        if "STATCORD_KEY" not in os.environ or os.environ.get('STATCORD_KEY') is None:
+            return
+        else:
+            self.api.command_run(ctx)
 
 
 def setup(bot):

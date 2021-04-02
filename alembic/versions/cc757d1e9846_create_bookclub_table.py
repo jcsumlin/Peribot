@@ -22,7 +22,7 @@ def upgrade():
         sa.Column('id', sa.Integer, primary_key=True, autoincrement=True),
         sa.Column('server_id', sa.Integer(), nullable=False),
         sa.Column('channel_id', sa.Integer(), nullable=False),
-        sa.Column('title', sa.String(), nullable=False),
+        sa.Column('title', sa.String(255), nullable=False),
         sa.Column('interval', sa.Integer(), nullable=True),
         sa.Column('start', sa.Integer(), nullable=True),
         sa.Column('end', sa.Integer(), nullable=True)
