@@ -8,13 +8,19 @@ import statcord
 class StatcordPost(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.key = "statcord.com-" + os.environ.get('STATCORD_KEY')
-        self.api = statcord.Client(self.bot,self.key)
-        self.api.start_loop()
+        if "STATCORD_KEY" not in os.environ or os.environ.get('STATCORD_KEY') is None:
+            return
+        else:
+            self.key = "statcord.com-" + os.environ.get('STATCORD_KEY')
+            self.api = statcord.Client(self.bot,self.key)
+            self.api.start_loop()
 
     @commands.Cog.listener()
     async def on_command(self,ctx):
-        self.api.command_run(ctx)
+        if "STATCORD_KEY" not in os.environ or os.environ.get('STATCORD_KEY') is None:
+            return
+        else:
+            self.api.command_run(ctx)
 
 
 def setup(bot):

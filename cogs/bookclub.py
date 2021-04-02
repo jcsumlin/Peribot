@@ -102,6 +102,13 @@ class BookClub(commands.Cog):
         await self.model.save()
         await ctx.send(f"Chapters updated! Chapters today are {bc.start} - {bc.end}")
 
+    @chapter.command()
+    async def subtract(self, ctx, number: int = 1):
+        bc = await self.model.get_by_channel_id(ctx.channel.id)
+        bc.end = bc.end - number
+        await self.model.save()
+        await ctx.send(f"Chapters updated! Chapters today are {bc.start} - {bc.end}")
+
     @commands.Cog.listener()
     async def on_command_error(self, ctx, exception):
         if isinstance(exception, commands.CommandOnCooldown):

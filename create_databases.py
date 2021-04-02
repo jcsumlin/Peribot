@@ -145,6 +145,7 @@ class BirthdaySettings(Base):
     __tablename__ = 'birthday_settings'
     id = Column(Integer, autoincrement=True, primary_key=True)
     server_id = Column(BIGINT, ForeignKey('server_settings.server_id'))
+    role_id = Column(BIGINT, nullable=True)
     enabled = Column(Boolean, default=False)
     channel_id = Column(BIGINT)
     message = Column(Text)
@@ -266,3 +267,4 @@ if __name__ == '__main__':
         exit(1)
     engine = create_engine(os.environ.get('DATABASE_URL'))
     Base.metadata.create_all(bind=engine)
+    print("Success!")

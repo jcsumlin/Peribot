@@ -12,9 +12,8 @@ from create_databases import AuditLog, ServerSettings, Base, CustomCommands, War
 
 
 class Database:
-    def __init__(self, path='peribot.db'):
-        path = os.path.abspath(path)
-        engine = create_engine("sqlite:///" + path)
+    def __init__(self):
+        engine = create_engine(os.getenv("DATABASE_URL"))
         Base.metadata.bind = engine
         DBSession = sessionmaker(bind=engine)
         self.session = DBSession()
@@ -174,9 +173,11 @@ class Database:
         return new_settings
 
     async def update_birthday_settings(self, guild_id: int, enabled: bool = None, channel_id: int = None,
-                                       message: str = None):
+                                       message: str = None, role_id: int = None):
         settings = self.session.query(BirthdaySettings).filter_by(server_id=guild_id).one_or_none()
         if settings is not None:
+            if role_id is not  None:
+                settings.role_id = role_id
             if enabled is not None:
                 settings.enabled = enabled
             if channel_id is not None:

@@ -80,15 +80,13 @@ class Help(commands.Cog):
             em.set_author(name='Server Info', icon_url='https://i.imgur.com/RHagTDg.png')
             em.set_footer(text='Server ID: %s' % server.id)
             await ctx.send(embed=em)
-            await ctx.message.delete()
 
     @serverinfo.command(pass_context=True)
-    async def emojis(self, ctx, msg: str = None):
+    async def emojis(self, ctx):
         """List all emojis in this server. Ex: [p]server emojis"""
         server = ctx.message.guild
         emojis = [str(x) for x in server.emojis]
         await ctx.send("".join(emojis))
-        await ctx.message.delete()
 
     @serverinfo.command(pass_context=True)
     async def avi(self, ctx, msg: str = None):
@@ -97,15 +95,14 @@ class Help(commands.Cog):
         em = discord.Embed()
         em.set_image(url=server.icon_url)
         await ctx.send(embed=em)
-        await ctx.message.delete()
 
     @serverinfo.command()
     async def role(self, ctx, *, msg):
         """Get more info about a specific role. Ex: [p]server role Admins"""
         guild = ctx.message.guild
-        guild_roles = ctx.message.guild.roles
+        guild_roles = guild.roles
         for role in guild_roles:
-            if msg.lower() == role.name.lower() or msg == role.id:
+            if msg.lower() == role.name.lower():
                 all_users = [str(x) for x in role.members]
                 all_users.sort()
                 all_users = ', '.join(all_users)
@@ -128,9 +125,7 @@ class Help(commands.Cog):
                     em.add_field(name='All users', value='There are no users in this role!', inline=False)
                 em.add_field(name='Created at', value=role.created_at.__format__('%x at %X'))
                 em.set_thumbnail(url='http://www.colorhexa.com/{}.png'.format(str(role.color).strip("#")))
-                await ctx.message.delete()
                 return await ctx.send(content=None, embed=em)
-        await ctx.message.delete()
         await ctx.send(self.bot.bot_prefix + 'Could not find role ``{}``'.format(msg))
 
     @commands.command(aliases=['channel', 'cinfo', 'ci'], no_pm=True)
@@ -241,7 +236,6 @@ class Help(commands.Cog):
             em.set_thumbnail(url=avi)
             em.set_author(name=user, icon_url='')
             await ctx.send(embed=em)
-            await ctx.message.delete()
 
 def setup(bot):
     bot.add_cog(Help(bot))

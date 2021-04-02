@@ -13,7 +13,6 @@ class CursedPearl(commands.Cog):
         self.quotes = fileIO("data/cp/quotes/quotes.json", "load")
         self.author = fileIO("data/cp/quotes/author.json", "load")
 
-
     def guildCheck(self, ctx):
         if ctx.guild.id == 515370084538253333:
             return True
