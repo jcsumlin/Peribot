@@ -22,3 +22,4 @@ youtube-dl
 pyjwt
 statcord.py
 APScheduler
+d20

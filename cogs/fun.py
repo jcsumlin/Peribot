@@ -6,7 +6,7 @@ import discord
 import requests
 from bs4 import BeautifulSoup
 from discord.ext import commands
-
+import d20
 
 class Fun(commands.Cog):
     def __init__(self, bot):
@@ -39,40 +39,20 @@ class Fun(commands.Cog):
         await ctx.send(topic)
 
     @commands.command(aliases=['r'])
-    async def roll(self, ctx, upper_bound: str = None, modifier: str = None, number: int = None):
-        if upper_bound is None and modifier is None and number is None:
-            upper_bound = 20
-            msg = random.randint(1, upper_bound)
-        else:
-            if 'd' in upper_bound.lower():
-                upper_bound = upper_bound.lower()
-                upper_bound = int(upper_bound.replace('d', ''))
-            else:
-                upper_bound = int(upper_bound)
-
-            if upper_bound is not None and modifier is None and number is None:
-                msg = random.randint(1, upper_bound)
-            else:
-                allowed_modifiers = ["+", "-", "*", "/"]
-                if modifier not in allowed_modifiers:
-                    await ctx.send("That is not a valid modifier! Allowed Modifiers include: " + str(allowed_modifiers))
-                    return
-                if upper_bound is not None and modifier is not None and number is None:
-                    await ctx.send(
-                        f"If you want to specify a modifier please make sure to give a number after it!\n\rExample: {ctx.prefix}roll 20 + 2")
-                    return
-                msg = random.randint(1, upper_bound)
-                math = f"{msg} {modifier} {number}"
-                msg = eval(math)
-
-        if upper_bound == 1:
+    async def roll(self, ctx, query):
+        """
+        !r 2d20+1
+        """
+        result = d20.roll(query)
+        if "d1" in query:
             msg = "***1! How did you even roll a one sided die?***"
-        elif msg == 20:
-            msg = "***Critical Hit!*** " + str(msg)
-        elif msg == 1:
-            msg = "***Critical Fail!*** " + str(msg)
-
-        await ctx.send(f":game_die: You rolled a {msg}")
+        elif result.crit:
+            msg = "***Critical Hit!*** " + str(result)
+        elif result.total == 1:
+            msg = "***Critical Fail!*** " + str(result)
+        else:
+            msg = str(result)
+        await ctx.send(f"{ctx.author.mention} :game_die:\n **Result** {msg}\n **Total**: {result.total}")
 
     @commands.command()
     @commands.is_owner()
