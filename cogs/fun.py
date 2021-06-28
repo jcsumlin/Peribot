@@ -44,9 +44,7 @@ class Fun(commands.Cog):
         !r 2d20+1
         """
         result = d20.roll(query)
-        if "d1" in query:
-            msg = "***1! How did you even roll a one sided die?***"
-        elif result.crit:
+        if result.crit:
             msg = "***Critical Hit!*** " + str(result)
         elif result.total == 1:
             msg = "***Critical Fail!*** " + str(result)
