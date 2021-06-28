@@ -39,7 +39,7 @@ class Fun(commands.Cog):
         await ctx.send(topic)
 
     @commands.command(aliases=['r'])
-    async def roll(self, ctx, query):
+    async def roll(self, ctx, query: str = "1d20"):
         """
         !r 2d20+1
         """
