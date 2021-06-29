@@ -25,8 +25,11 @@ class BookClub(commands.Cog):
             club.end = (club.start + club.interval) - 1
             try:
                 channel = self.bot.get_channel(club.channel_id)
-                await channel.edit(topic=f"{club.title} Chapters {club.start} - {club.end}",
-                                   reason="Daily job to update book club channels")
+                if channel is not None:
+                    await channel.edit(topic=f"{club.title} Chapters {club.start} - {club.end}",
+                                       reason="Daily job to update book club channels")
+                else:
+                    channel = self.bot.get_user(club.channel_id)
                 await channel.send(f"Chapters updated to {club.start} - {club.end}")
             except Exception as e:
                 logger.error(e)
@@ -50,8 +53,16 @@ class BookClub(commands.Cog):
     @bookclub.command()
     async def create(self, ctx, title: str, start: int = 1, interval: int = 1):
         try:
+            server_id = ctx.guild
+            if server_id is None:
+                server_id = ctx.author.id
+            else:
+                server_id = server_id.id
+            bc = await self.model.get_by_channel_id(ctx.channel.id)
+            if bc is not None:
+                return await ctx.send("Book club already exists in this channel. Please end it if you'd like to make a new one.")
             bookclub = await self.model.add(
-                server_id=ctx.guild.id,
+                server_id=server_id,
                 channel_id=ctx.channel.id,
                 title=title,
                 interval=interval,
