@@ -27,9 +27,10 @@ class Management(commands.Cog):
         if message.author.bot is True:
             return
         if message.type == discord.MessageType.default:
-            server = await self.database.get_server_settings(message.guild.id)
-            if server is None:
-                await self.database.add_server_settings(message.guild)
+            if message.guild is not None:
+                server = await self.database.get_server_settings(message.guild.id)
+                if server is None:
+                    await self.database.add_server_settings(message.guild)
 
     @commands.Cog.listener()
     async def on_error(self, ctx, error):
