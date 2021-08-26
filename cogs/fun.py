@@ -1,7 +1,8 @@
 import random
 from datetime import datetime
 from random import choice
-from moviepy.editor import *
+from moviepy.editor import AudioFileClip, ImageClip
+from moviepy.video.fx.resize import resize
 
 import discord
 import requests
@@ -167,6 +168,9 @@ class Fun(commands.Cog):
         att = ctx.message.attachments[0]
         if not att:
             await ctx.send("You must send an image with this command")
+        elif att.size >= 1000000:
+            #filter out the big files to avoid having to download them
+            await ctx.send("That file was too big :frowning:\nI can only accept files less than 1MB")
         else:
             tmp_name = f"data/memeify/temp_img_{datetime.now()}.png"
             final_name = f"data/memeify/final_vid_{datetime.now()}.webm"
@@ -181,6 +185,8 @@ class Fun(commands.Cog):
             await ctx.send(file=discord.File(final_name))
 
             # cleanup after sending the video
+            img.close()
+            audio.close()
             os.remove(tmp_name)
             os.remove(final_name)
 
