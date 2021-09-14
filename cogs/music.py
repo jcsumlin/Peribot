@@ -65,14 +65,16 @@ class Music(commands.Cog):
     async def join(self, ctx):
         if ctx.author.voice is None:
             msg = await ctx.send(":x: You must be in a voice channel to use this command")
-            return await msg.delete(delay=5)
+            await msg.delete(delay=5)
+            return False
 
         destination = ctx.author.voice.channel
         if ctx.peribot_voice_state.voice:
             await ctx.peribot_voice_state.voice.move_to(destination)
-            return
+            return True
 
         ctx.peribot_voice_state.voice = await destination.connect()
+        return True
 
     @commands.command()
     async def leave(self, ctx):
@@ -136,7 +138,10 @@ class Music(commands.Cog):
     @commands.command()
     async def play(self, ctx, *, url: str):
         if not ctx.peribot_voice_state.voice:
-            await ctx.invoke(self.join)
+            success = await ctx.invoke(self.join)
+            if not success:
+                return
+
 
         YDL_OPTIONS = {
             "format": "bestaudio",
