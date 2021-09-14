@@ -63,7 +63,7 @@ tinycss2==1.0.2
 tmdbv3api==1.6.1
 tzlocal==2.1
 update-checker==0.17
-urllib3==1.25.10
+urllib3==1.26.5
 webencodings==0.5.1
 websocket-client==0.57.0
 websockets==8.1
