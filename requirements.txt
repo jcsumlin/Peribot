@@ -23,3 +23,5 @@ pyjwt
 statcord.py
 APScheduler
 d20
+youtube-search-python
+
