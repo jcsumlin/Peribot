@@ -68,6 +68,10 @@ class VoiceState:
         if self.is_playing:
             self.voice.stop()
 
+    async def leave_due_to_inactivity(self):
+        await self.stop()
+        await self._ctx.send("Disconnected due to inactivity")
+
     async def stop(self):
         self.songs.clear()
 

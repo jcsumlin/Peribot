@@ -19,6 +19,18 @@ class Music(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.voice_states = {}
+        self.check_voice_state.start()
+
+    def cog_unload(self):
+        self.check_voice_state.cancel()
+
+    @tasks.loop(seconds=60)
+    async def check_voice_state(self):
+        for state in self.voice_states.values():
+            if state.is_playing and len(state.voice.channel.members) == 1:
+                await state.stop()
+                await state.leave_due_to_inactivity()
+
 
     async def cog_before_invoke(self, ctx: commands.Context):
         ctx.peribot_voice_state = self.get_voice_state(ctx)
