@@ -29,14 +29,6 @@ class Memes(commands.Cog):
         await ctx.send(file=img)
 
     @commands.command()
-    async def rogu(self, ctx, *, text):
-        try:
-            img = await self.make_meme_from_template("data/memes/rogu.jpg", text)
-        except ValueError as e:
-            return await commandError(ctx, str(e))
-        await ctx.send(file=img)
-
-    @commands.command()
     async def lapis(self, ctx, *, text):
         try:
             img = await self.make_meme_from_template("data/memes/lapis.png", text)
