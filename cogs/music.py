@@ -26,6 +26,7 @@ class Music(commands.Cog):
 
     @tasks.loop(seconds=60)
     async def check_voice_state(self):
+        await self.bot.wait_until_ready()
         for state in self.voice_states.values():
             if state.is_playing and len(state.voice.channel.members) == 1:
                 await state.stop()
@@ -52,14 +53,6 @@ class Music(commands.Cog):
     async def cog_command_error(self, ctx: commands.Context, error: commands.CommandError):
         await ctx.send('An error occurred: {}'.format(str(error)))
 
-    @tasks.loop(seconds=3.0)
-    async def vc_checker(self):
-        await self.bot.wait_until_ready()
-        vcs = self.bot.voice_clients
-        for vc in vcs:
-            member_count = len(vc.members)
-            if member_count == 1:
-                vc.disconnect()
 
     @commands.command()
     async def join(self, ctx):
@@ -106,6 +99,14 @@ class Music(commands.Cog):
         embed = (discord.Embed(description='**{} tracks:**\n\n{}'.format(len(ctx.peribot_voice_state.songs), queue))
                  .set_footer(text='Viewing page {}/{}'.format(page, pages)))
         await ctx.send(embed=embed)
+
+    @commands.command()
+    async def shuffle(self, ctx):
+        """Shuffles the queue."""
+        if len(ctx.peribot_voice_state.songs) == 0:
+            return await ctx.send('Empty queue.')
+        ctx.peribot_voice_state.songs.shuffle()
+        await ctx.message.add_reaction('✅')
 
     @commands.command()
     async def remove(self, ctx, index: int):
