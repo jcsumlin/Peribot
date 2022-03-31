@@ -85,7 +85,7 @@ class CustomCommands(commands.Cog):
             await ctx.send("That command doesn't exist. Use "
                                f"`{ctx.prefix}customcom add` to add it.")
 
-    @customcom.command(name="delete", )
+    @customcom.command(name="delete")
     async def cc_delete(self, ctx, command: str):
         """Deletes a custom command
 

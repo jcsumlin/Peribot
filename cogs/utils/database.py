@@ -94,7 +94,7 @@ class Database:
     async def delete_custom_command(self, server_id, command):
         cc = self.session.query(CustomCommands).filter_by(server_id=server_id).filter_by(command=command).first()
         if cc is not None:
-            cc.delete()
+            self.session.delete(cc)
             self.session.commit()
             return True
         return False
