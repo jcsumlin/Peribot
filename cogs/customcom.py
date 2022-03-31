@@ -86,21 +86,23 @@ class CustomCommands(commands.Cog):
                                f"`{ctx.prefix}customcom add` to add it.")
 
     @customcom.command(name="delete", )
-    async def cc_delete(self, ctx, command : str):
+    async def cc_delete(self, ctx, command: str):
         """Deletes a custom command
 
         Example:
         [p]customcom delete yourcommand"""
         guild = ctx.guild
         guild_id = guild.id
-        commands = await self.database.get_custom_command(guild_id, command)
-        if command is not None:
-            await self.database.delete_custom_command(guild_id, command)
-            await ctx.send("Custom command successfully deleted.")
-            await self.database.audit_record(ctx.guild.id,
-                                             ctx.guild.name,
-                                             ctx.message.content,
-                                             ctx.message.author.id)
+        cc = await self.database.get_custom_command(guild_id, command)
+        if cc is not None:
+            if await self.database.delete_custom_command(guild_id, command):
+                await ctx.send("Custom command successfully deleted.")
+                await self.database.audit_record(ctx.guild.id,
+                                                 ctx.guild.name,
+                                                 ctx.message.content,
+                                                 ctx.message.author.id)
+            else:
+                await ctx.send(f"Failed to delete custom command `${command}`.")
         else:
             await ctx.send("That command doesn't exist.")
 
