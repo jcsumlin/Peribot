@@ -208,7 +208,7 @@ class ReactionRoles(commands.Cog):
         if len(group['roles']) == 0:
             return await ctx.send(embed=command_error("No Roles in this Group!", f"Add Roles to this group by using **{ctx.prefix}reactionroles add @role :emoji: [group_name]**"))
         desc = ""
-        if len(group['group'].group_description) > 0:
+        if group['group'].group_description is not None and len(group['group'].group_description) > 0:
             desc += group['group'].group_description + '\n\n'
         for role in group['roles']:
             discord_role = ctx.guild.get_role(role.role_id)

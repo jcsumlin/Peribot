@@ -28,10 +28,9 @@ class Music(commands.Cog):
     async def check_voice_state(self):
         await self.bot.wait_until_ready()
         for state in self.voice_states.values():
-            if state.is_playing and len(state.voice.channel.members) == 1:
+            if state.is_playing and len(state.voice.channel.voice_states) == 1:
                 await state.stop()
                 await state.leave_due_to_inactivity()
-
 
     async def cog_before_invoke(self, ctx: commands.Context):
         ctx.peribot_voice_state = self.get_voice_state(ctx)
@@ -46,13 +45,13 @@ class Music(commands.Cog):
 
     def cog_check(self, ctx: commands.Context):
         if not ctx.guild:
-            raise commands.NoPrivateMessage('This command can\'t be used in DM channels.')
+            raise commands.NoPrivateMessage(
+                'This command can\'t be used in DM channels.')
 
         return True
 
     async def cog_command_error(self, ctx: commands.Context, error: commands.CommandError):
         await ctx.send('An error occurred: {}'.format(str(error)))
-
 
     @commands.command()
     async def join(self, ctx):
@@ -143,7 +142,6 @@ class Music(commands.Cog):
             if not success:
                 return
 
-
         YDL_OPTIONS = {
             "format": "bestaudio",
             'extractaudio': True,
@@ -157,12 +155,14 @@ class Music(commands.Cog):
             with youtube_dl.YoutubeDL(YDL_OPTIONS) as ydl:
                 if self.youtube_url_validation(url):
                     info = ydl.extract_info(url, download=False)
-                    video = YouTubeVideo(info["title"], info["formats"][0]["url"], info["thumbnail"], ctx.author)
+                    video = YouTubeVideo(
+                        info["title"], info["formats"][0]["url"], info["thumbnail"], ctx.author)
                 else:
                     videosSearch = VideosSearch(url, limit=1)
                     result = videosSearch.resultComponents[0]
                     info = ydl.extract_info(result["link"], download=False)
-                    video = YouTubeVideo(result["title"], info["formats"][0]["url"], result["thumbnails"][0]["url"], ctx.author)
+                    video = YouTubeVideo(
+                        result["title"], info["formats"][0]["url"], result["thumbnails"][0]["url"], ctx.author)
                 source = await self.get_source(video)
                 source.channel = ctx.channel
                 song = Song(video, source)
