@@ -385,8 +385,9 @@ class Database:
         self.session.commit()
 
     async def delete_reminder(self, id):
-        reminder = self.session.query(RemindMe).filter_by(id=id).delete()
-        if reminder == 1:
+        reminder = self.session.query(RemindMe).filter_by(id=id).one_or_none()
+        if reminder is not None:
+            self.session.delete(reminder)
             self.session.commit()
             return True
         else:
