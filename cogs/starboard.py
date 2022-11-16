@@ -281,10 +281,13 @@ class Star(commands.Cog):
         return None, None
 
     @commands.Cog.listener()
-    async def on_reaction_add(self, reaction, user):
-        guild = reaction.message.guild
-        msg = reaction.message
-        guid_id = guild.id
+    async def on_raw_reaction_add(self, payload):
+        guild = discord.utils.find(lambda g: g.id == payload.guild_id, self.bot.guilds)
+        channel = discord.utils.get(guild.channels, id=payload.channel_id)
+        msg = await channel.fetch_message(id=payload.message_id)
+        reaction = payload.emoji
+        user = await guild.fetch_member(payload.user_id)
+
         starboard_settings = await self.database.get_starboard_settings(guild.id)
         if starboard_settings is None or starboard_settings.enabled is False:
             return
@@ -294,15 +297,15 @@ class Star(commands.Cog):
         if not await self.check_roles(user, msg.author, guild):
             return
         react = starboard_settings.emoji
-        if react in str(reaction.emoji):
+        if react in str(reaction):
             threshold = starboard_settings.threshold
             count = await self.get_count(guild, msg) + 1 # add one here in case its not posted to starboard
             if await self.check_is_posted(guild, msg): # check if stared message is in starboard
-                channel = reaction.message.guild.get_channel(int(starboard_settings.channel_id))
+                channel = guild.get_channel(int(starboard_settings.channel_id))
                 msg_id, count = await self.get_posted_message(guild, msg) # Count has been incremented
                 if msg_id is not None:
                     msg_edit = await channel.fetch_message(id=int(msg_id))
-                    return await msg_edit.edit(content=f"{reaction.emoji} **#{count}**")
+                    return await msg_edit.edit(content=f"{reaction} **#{count}**")
 
             else:
                 if count < threshold:
@@ -316,11 +319,9 @@ class Star(commands.Cog):
                                                                    count=count)
                     return
 
-            author = reaction.message.author
-            channel = reaction.message.channel
             starboard_channel = self.bot.get_channel(starboard_settings.channel_id)
-            embeds, spoiler_images = await self.build_starboard_message(reaction.message, author, channel)
-            post_msg = await starboard_channel.send("{} **#{}**".format(reaction.emoji, count),
+            embeds, spoiler_images = await self.build_starboard_message(msg, user, channel)
+            post_msg = await starboard_channel.send("{} **#{}**".format(reaction, count),
                                                    embed=embeds.pop(0), files=spoiler_images)
             for embed in embeds:
                 await starboard_channel.send(embed=embed)
