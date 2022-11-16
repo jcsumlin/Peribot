@@ -302,8 +302,8 @@ class Star(commands.Cog):
                 msg_id, count = await self.get_posted_message(guild, msg) # Count has been incremented
                 if msg_id is not None:
                     msg_edit = await channel.fetch_message(id=int(msg_id))
-                    await msg_edit.edit(content=f"{reaction.emoji} **#{count}**")
-                    return
+                    return await msg_edit.edit(content=f"{reaction.emoji} **#{count}**")
+
             else:
                 if count < threshold:
                     message = await self.database.get_one_starboard_message(guild.id, msg.id)
@@ -319,9 +319,11 @@ class Star(commands.Cog):
             author = reaction.message.author
             channel = reaction.message.channel
             starboard_channel = self.bot.get_channel(starboard_settings.channel_id)
-            em = await self.build_starboard_message(reaction.message, author, channel)
+            embeds, spoiler_images = await self.build_starboard_message(reaction.message, author, channel)
             post_msg = await starboard_channel.send("{} **#{}**".format(reaction.emoji, count),
-                                                   embed=em)
+                                                   embed=embeds.pop(0), files=spoiler_images)
+            for embed in embeds:
+                await starboard_channel.send(embed=embed)
             await self.database.post_starboard_message(guild_id=guild.id, original_message_id=msg.id,
                                                        starboard_message_id=post_msg.id, count=count)
         else:
@@ -329,6 +331,8 @@ class Star(commands.Cog):
 
     async def build_starboard_message(self, message: discord.Message, author: discord.Member, channel: discord.TextChannel):
         msg = message.content
+        spoiler_images = []
+        embeds = []
         if message.embeds != []:
             embed = message.embeds[0].to_dict()
             # print(embed)
@@ -393,10 +397,19 @@ class Star(commands.Cog):
             else:
                 em.set_author(name=author.name, icon_url=author.avatar_url)
             if message.attachments != []:
-                em.set_image(url=message.attachments[0].url)
+                for image in message.attachments:
+                    if "SPOILER" in image.filename:
+                        spoiler_images.append(await image.to_file())
+                    else:
+                        if em.image:
+                            new_image = discord.Embed().set_image(url=image.url)
+                            embeds.append(new_image)
+                        else:
+                            em.set_image(url=image.url)
         em.add_field(name="jump to Message", value=f"[Click Here]({message.jump_url})")
         em.set_footer(text='{} | {}'.format(channel.guild.name, channel.name))
-        return em
+        embeds.insert(0, em)
+        return embeds, spoiler_images
 
 
     # TODO: Update this with database rewrite
