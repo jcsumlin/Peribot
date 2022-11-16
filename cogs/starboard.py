@@ -320,7 +320,7 @@ class Star(commands.Cog):
                     return
 
             starboard_channel = self.bot.get_channel(starboard_settings.channel_id)
-            embeds, spoiler_images = await self.build_starboard_message(msg, user, channel)
+            embeds, spoiler_images = await self.build_starboard_message(msg, msg.author, channel)
             post_msg = await starboard_channel.send("{} **#{}**".format(reaction, count),
                                                    embed=embeds.pop(0), files=spoiler_images)
             for embed in embeds:
