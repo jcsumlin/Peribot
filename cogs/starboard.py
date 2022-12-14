@@ -330,7 +330,7 @@ class Star(commands.Cog):
         else:
             return
 
-    async def build_starboard_message(self, message: discord.Message, author: discord.Member, channel: discord.TextChannel):
+    async def build_starboard_message(self, message: discord.Message, author: discord.User, channel: discord.TextChannel):
         msg = message.content
         spoiler_images = []
         embeds = []
@@ -356,20 +356,20 @@ class Star(commands.Cog):
             if "author" in embed:
                 postauthor = embed["author"]
                 if "icon_url" in postauthor:
-                    if author.nick is not None:
-                        em.set_author(name=author.nick, icon_url=author.avatar_url)
+                    if author.display_name is not None:
+                        em.set_author(name=author.display_name, icon_url=author.avatar.url)
                     else:
-                        em.set_author(name=author.name, icon_url=author.avatar_url)
+                        em.set_author(name=author.name, icon_url=author.avatar.url)
                 else:
-                    if author.nick is not None:
-                        em.set_author(name=author.nick)
+                    if author.display_name is not None:
+                        em.set_author(name=author.display_name)
                     else:
                         em.set_author(name=author.name)
             if "author" not in embed:
-                if author.nick is not None:
-                    em.set_author(name=author.nick, icon_url=author.avatar_url)
+                if author.display_name is not None:
+                    em.set_author(name=author.display_name, icon_url=author.avatar.url)
                 else:
-                    em.set_author(name=author.name, icon_url=author.avatar_url)
+                    em.set_author(name=author.name, icon_url=author.avatar.url)
             if "color" in embed:
                 em.color = embed["color"]
             if "color" not in embed:
@@ -393,10 +393,10 @@ class Star(commands.Cog):
             em = discord.Embed(timestamp=message.created_at)
             em.color = author.color
             em.description = msg
-            if author.nick is not None:
-                em.set_author(name=author.nick, icon_url=author.avatar_url)
+            if author.display_name is not None:
+                em.set_author(name=author.display_name, icon_url=author.avatar.url)
             else:
-                em.set_author(name=author.name, icon_url=author.avatar_url)
+                em.set_author(name=author.name, icon_url=author.avatar.url)
             if message.attachments != []:
                 for image in message.attachments:
                     if "SPOILER" in image.filename:
