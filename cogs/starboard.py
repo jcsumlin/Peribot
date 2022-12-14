@@ -373,7 +373,7 @@ class Star(commands.Cog):
             if "color" in embed:
                 em.color = embed["color"]
             if "color" not in embed:
-                em.color = author.top_role.color
+                em.color = author.color
             if "image" in embed:
                 em.set_image(url=embed["image"]["url"])
             if embed["type"] == "image":
@@ -391,7 +391,7 @@ class Star(commands.Cog):
                 em.set_image(url=embed["url"] + ".gif")
         else:
             em = discord.Embed(timestamp=message.created_at)
-            em.color = author.top_role.color
+            em.color = author.color
             em.description = msg
             if author.nick is not None:
                 em.set_author(name=author.nick, icon_url=author.avatar_url)
