@@ -197,7 +197,7 @@ class Management(commands.Cog):
         member_count = 0
         for server in servers:
             serverNames.append(server.name)
-            member_count += len(server.members)
+            member_count += server.member_count
         e = discord.Embed(title="Servers Peribot is apart of", description=", ".join(serverNames))
         e.add_field(name="Number of Servers", value=str(len(serverNames)))
         e.add_field(name="Number of Users", value=str(member_count))
