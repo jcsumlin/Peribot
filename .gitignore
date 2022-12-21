@@ -106,3 +106,6 @@ config.json
 
 # i wanna sleep
 *.ini
+
+.vscode/
+.idea/

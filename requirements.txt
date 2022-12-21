@@ -63,5 +63,5 @@ webencodings==0.5.1
 websocket-client==1.2.1
 win32-setctime==1.0.3
 yarl==1.6.3
-youtube-dl==2021.6.6
+youtube-dl==2021.12.17
 youtube-search-python==1.4.7

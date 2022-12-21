@@ -1,6 +1,4 @@
 import unicodedata
-
-import aiohttp
 import discord
 from discord.ext import commands
 from loguru import logger
@@ -18,7 +16,6 @@ class Bigmoji(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.session = aiohttp.ClientSession()
 
     @commands.command(name="bigmoji")
     async def bigmoji(self, ctx, emoji):
@@ -48,10 +45,6 @@ class Bigmoji(commands.Cog):
                 url = 'https://twemoji.maxcdn.com/2/72x72/' + '-'.join(chars) + '.png'
         e = discord.Embed().set_image(url=url)
         await ctx.send(embed=e)
-
-    def __unload(self):
-        self.session.close()
-
 
 def setup(bot):
     n = Bigmoji(bot)
