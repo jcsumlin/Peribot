@@ -36,7 +36,7 @@ class BookClub(commands.Cog):
 
         await self.model.save()
 
-    async def cog_unload(self):
+    def cog_unload(self):
         self.scheduler.remove_job('update_chapters_id')
         self.scheduler.shutdown()
 
