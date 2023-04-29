@@ -59,12 +59,15 @@ class Music(commands.Cog):
             msg = await ctx.send(":x: You must be in a voice channel to use this command")
             await msg.delete(delay=5)
             return False
-
         destination = ctx.author.voice.channel
         if ctx.peribot_voice_state.voice:
             await ctx.peribot_voice_state.voice.move_to(destination)
             return True
-
+        voice_client = discord.utils.get(ctx.bot.voice_clients, guild=ctx.guild)
+        if voice_client != None:
+            ctx.peribot_voice_state.voice = voice_client
+            return True
+        
         ctx.peribot_voice_state.voice = await destination.connect()
         return True
 
