@@ -1,7 +1,7 @@
 import datetime
 import os
 
-from sqlalchemy import Column, String, DateTime, Integer, ForeignKey, Boolean, Text
+from sqlalchemy import Column, String, DateTime, Integer, ForeignKey, Boolean, Text, UniqueConstraint
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -254,6 +254,32 @@ class BookClub(Base):
     interval = Column(Integer)
     start = Column(Integer)
     end = Column(Integer)
+
+
+class DailyGameChannels(Base):
+    __tablename__ = 'daily_game_channels'
+    id = Column(Integer, autoincrement=True, primary_key=True)
+    server_id = Column(Integer, ForeignKey('server_settings.server_id'), nullable=False)
+    channel_id = Column(Integer, nullable=False, unique=True)
+    added_by_user_id = Column(Integer)
+
+
+class DailyGameResults(Base):
+    __tablename__ = 'daily_game_results'
+    __table_args__ = (UniqueConstraint('server_id', 'user_id', 'game_key', 'mode', 'game_number'),)
+    id = Column(Integer, autoincrement=True, primary_key=True)
+    server_id = Column(Integer, ForeignKey('server_settings.server_id'), nullable=False)
+    channel_id = Column(Integer, nullable=False)
+    user_id = Column(Integer, nullable=False)
+    game = Column(String, nullable=False)
+    game_key = Column(String, nullable=False)
+    game_number = Column(Integer, nullable=False)
+    mode = Column(String, nullable=False, default='')
+    attempts = Column(Integer, nullable=False)
+    max_attempts = Column(Integer)
+    solved = Column(Boolean, nullable=False)
+    difficulty = Column(String)
+    posted_at = Column(DateTime, nullable=False)
 
 
 if __name__ == '__main__':
